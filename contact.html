@@ -33,7 +33,38 @@
 
         <!-- Favicon -->
         <link rel="shortcut icon" href="favicon.ico"/>
-        <script src="matomoLuxi.js"></script>
+        <script>
+            var matomoLuxiSiteId = "5";
+            var matomoLuxiSampleSize = "100";
+            var matomoLuxiStatsCode = "C0000";
+            (function () {
+              var script = document.createElement("script");
+              script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.0.09/oneTrust.min.js";
+              script.integrity = "sha384-paicJmk/r4uPH5aZGBL92HgbLcYMoJ4Vln2wVpdTY/swxOVqEVNFxWC3rMLdcENA";
+              script.crossOrigin = "anonymous";
+              script.async = true;
+              document.head.appendChild(script);
+            })();
+          </script>
+              <script>
+                function fakeOneTrustInit() {
+                    window.OnetrustActiveGroups = [matomoLuxiStatsCode];
+                }
+        
+                function fakeOneTrustUpdate() {
+                    var event = new CustomEvent("OneTrustGroupsUpdated", {
+                        detail: {
+                            updatedGroups: OnetrustActiveGroups,
+                        },
+                    });
+                    window.dispatchEvent(event);
+                }
+        
+                function handleConsentButtonClick() {
+                    fakeOneTrustInit();
+                    fakeOneTrustUpdate();
+                }
+            </script>
     </head>
     <!-- END HEAD -->
 
@@ -85,8 +116,10 @@
         <!--========== PARALLAX ==========-->
         <div class="parallax-window" data-parallax="scroll" data-image-src="img/1920x1080/01.jpg">
             <div class="parallax-content container">
-                <h1 class="carousel-title">Contact</h1>
+                <h1 class="carousel-title">Manual consent testing</h1>
                 <p>Lorem ipsum dolor amet consectetur adipiscing dolore magna aliqua <br/> enim minim estudiat veniam siad venumus dolore</p>
+                <button onclick="handleConsentButtonClick()">Enable consent</button>
+                <button onclick='_paq.push(["trackEvent", "TestEvent", "Greeting", "Hello"])'>Track event</button>
             </div>
         </div>
         <!--========== PARALLAX ==========-->
