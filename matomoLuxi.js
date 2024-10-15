@@ -65,7 +65,8 @@ var _paq = window._paq = window._paq || [];
       })();
     }
 
-    function startTracking(){
+    function startTracking() {
+      console.log ("Tracking started")
       _paq.push(['trackPageView']);
       _paq.push(['enableLinkTracking']);
       startMTM();
