@@ -36,6 +36,26 @@
         <link rel="shortcut icon" href="favicon.ico"/>
 
         <script src="matomoLuxi.js"></script>
+        <script>
+            function fakeOneTrustInit() {
+                window.OnetrustActiveGroups = [matomoLuxiStatsCode];
+            }
+
+            function fakeOneTrustUpdate() {
+                var event = new CustomEvent("OneTrustGroupsUpdated", {
+                    detail: {
+                        updatedGroups: OnetrustActiveGroups,
+                    },
+                });
+                window.dispatchEvent(event);
+            }
+
+            function handleConsentButtonClick() {
+                console.log ("init");
+                fakeOneTrustInit();
+                setTimeout(fakeOneTrustUpdate, 500);
+            }
+        </script>
     </head>
     <!-- END HEAD -->
 
@@ -90,7 +110,6 @@
                 <!-- Indicators -->
                 <ol class="carousel-indicators">
                     <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
-                    <li data-target="#carousel-example-generic" data-slide-to="1"></li>
                 </ol>
             </div>
 
@@ -101,11 +120,15 @@
                     <div class="container">
                         <div class="carousel-centered">
                             <div class="margin-b-40">
-                                <h1 class="carousel-title">Analytics are being tested.</h1>
-                                <p>Your data is automatically recorded by matomo.</p>
-                                <p>There is no consent management platform. If you are an EU user please exit.</p>
+                                <h1 class="carousel-title">Analytics are being tested</h1>
+                                <p>Click below to consent to cookies & tracking</p>
                             </div>
-                            <button class="btn-theme btn-theme-sm btn-white-brd text-uppercase" onclick='_paq.push(["trackEvent", "TestEvent", "Greeting", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam nisl libero, viverra vitae blandit sit amet, commodo vitae libero. Curabitur in porta arcu. Nulla facilisi. Aenean molestie metus rhoncus, rutrum felis ac, mollis nulla. Etiam quis tortor tincidunt ante viverra sollicitudin ut sit amet nisl. Aenean aliquet semper sem, quis volutpat ipsum congue id. Donec nec leo nibh.Aliquam in consectetur tortor. Sed ut lectus non turpis vulputate condimentum. Praesent rhoncus purus ut sagittis ultricies. Ut gravida velit dui, eget luctus felis scelerisque a. Fusce faucibus volutpat odio, at sollicitudin ipsum lacinia in. Nunc orci arcu, sagittis ut libero at, vestibulum vehicula nisi. Integer semper tempor orci, vel scelerisque mauris accumsan a.Maecenas volutpat molestie aliquam. Sed gravida mauris eget dictum cursus. Aenean placerat magna id orci mollis consequat vel vitae elit. Cras congue, quam id cursus viverra, ex lacus faucibus arcu, in faucibus dui lacus nec lorem. Praesent sodales dolor nec ante molestie tempor. Aliquam quis efficitur neque. Morbi placerat ligula libero, vitae cursus mi accumsan eu. Nunc non nibh ut nulla fringilla congue.Maecenas in velit nec diam efficitur suscipit vitae non quam. Sed elementum sed arcu eget egestas. Integer consectetur odio ut nunc aliquam sollicitudin. Vestibulum tempor posuere eros sit amet maximus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Morbi consequat turpis non ante luctus tincidunt. Sed lobortis ligula ligula, non rhoncus nunc elementum sit amet. Nulla facilisi. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam venenatis sed lorem id fermentum. Praesent ut venenatis diam. Duis auctor non nunc vel molestie. Aliquam faucibus ornare arcu, vitae cursus purus elementum quis. Fusce eget ex eu dolor ullamcorper mattis. Suspendisse et libero sed justo maximus congue. Vestibulum suscipit purus non mattis fringilla.Aenean tortor mi, ullamcorper ut dui at, dignissim ultrices turpis. Sed malesuada sem nec ligula sollicitudin, id laoreet nisi eleifend. Aenean congue nunc quis libero condimentum mollis. In at congue libero, accumsan luctus elit. Maecenas mollis risus vitae nibh mattis, a interdum leo rhoncus. Pellentesque ultrices purus felis, eget pretium velit pellentesque nec. Quisque hendrerit massa sed libero rhoncus, id consequat nisi ultrices. Quisque laoreet euismod ex, ac dictum nibh dictum ut. Vestibulum vestibulum tincidunt cursus. In hac habitasse platea dictumst. Pellentesque tellus eros, iaculis ac pellentesque vitae, pharetra porta urna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras mattis lorem ac condimentum mollis.Suspendisse sit amet odio dapibus, porta lorem sed, bibendum nisi. Suspendisse dignissim lobortis lorem, sed facilisis lacus. Sed nec lacinia eros, et faucibus nibh. Vestibulum imperdiet, erat a lobortis ultrices, purus elit sodales nunc, a congue purus nunc at turpis. Fusce imperdiet auctor rutrum. Nam mattis urna eu metus vulputate accumsan. Duis rutrum odio lacinia ipsum fringilla, eget sollicitudin ex pellentesque. Duis id lacus ac nibh varius varius. Cras bibendum purus quis finibus vulputate. Nullam et neque justo. Sed posuere est nunc, quis interdum lectus rhoncus eu. In hac habitasse platea dictumst. Mauris id dictum leo. Etiam rhoncus ac magna a tempor. In sagittis hendrerit pulvinar.Curabitur vitae finibus ligula. Nunc sollicitudin sapien velit, id tincidunt magna sollicitudin sed. In volutpat fringilla erat, et venenatis quam elementum at. Integer tincidunt dignissim urna ac scelerisque. Integer ac augue ipsum. Phasellus id sagittis felis, ac mattis massa. Donec eget iaculis sem, et tincidunt ipsum. Maecenas sem nibh, faucibus nec lobortis vel, condimentum dictum arcu. Sed hendrerit mi aliquet, porta mi at, tristique nunc. Fusce congue ullamcorper tristique. Nam non viverra enim, non condimentum nibh. Ut egestas mattis lorem et dapibus. Duis commodo venenatis vulputate. Maecenas aliquam est ut turpis finibus semper. Nam consequat nibh egestas scelerisque imperdiet.Nunc elit arcu, consequat vel est nec, facilisis malesuada velit. Vivamus ultrices leo non ipsum vulputate placerat. Sed quis velit quis augue interdum tincidunt sit amet sed nibh. Nunc dignissim at magna quis tincidunt. Mauris id efficitur libero. Suspendisse eu facilisis purus, non pharetra lorem. Morbi at congue augue, vel ultrices nibh."]);'>Explore</button>
+                            <button 
+                                onclick="handleConsentButtonClick()"
+                                class="btn-theme btn-theme-sm btn-white-brd text-uppercase">
+                                I Consent
+                            </button>
+                            <button onclick='_paq.push(["trackEvent", "TestEvent", "Greeting", "Hello"])'>Track test event</button>
                         </div>
                     </div>
                 </div>
