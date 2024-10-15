@@ -37,23 +37,30 @@
 
         <script src="matomoLuxi.js"></script>
         <script>
-            function fakeOneTrustInit() {
-                window.OnetrustActiveGroups = [matomoLuxiStatsCode];
+
+            function setCookie(name, value, days) {
+                var expires = "";
+                if (days) {
+                    var date = new Date();
+                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                    expires = "; expires=" + date.toUTCString();
+                }
+                document.cookie = name + "=" + (value || "") + expires + "; path=/";
             }
 
-            function fakeOneTrustUpdate() {
-                var event = new CustomEvent("OneTrustGroupsUpdated", {
-                    detail: {
-                        updatedGroups: OnetrustActiveGroups,
-                    },
-                });
-                window.dispatchEvent(event);
+            function deleteCookie(name) {
+                document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             }
 
             function handleConsentButtonClick() {
-                console.log ("init");
+                console.log("init");
                 fakeOneTrustInit();
-                setTimeout(fakeOneTrustUpdate, 500);
+                setCookie("statsCode", "C0000", 7); 
+            }
+            function handleDenyButtonClick() {
+                console.log("deny");
+                fakeOneTrustRemove();
+                deleteCookie("statsCode");
             }
         </script>
     </head>
@@ -125,10 +132,19 @@
                             </div>
                             <button 
                                 onclick="handleConsentButtonClick()"
-                                class="btn-theme btn-theme-sm btn-white-brd text-uppercase">
+                                class="btn-theme btn-theme-sm btn-white-brd text-uppercase mr-3">
                                 I Consent
                             </button>
-                            <button onclick='_paq.push(["trackEvent", "TestEvent", "Greeting", "Hello"])'>Track test event</button>
+                            <button 
+                                onclick="handleDenyButtonClick()"
+                                class="btn-theme btn-theme-sm btn-white-brd text-uppercase mr-3">
+                                Remove my consent
+                            </button>
+                            <button 
+                                class="btn-theme btn-theme-sm btn-white-brd text-uppercase"
+                                onclick='_paq.push(["trackEvent", "TestEvent", "Greeting", "Hello"])'>
+                                Track test event
+                            </button>
                         </div>
                     </div>
                 </div>
