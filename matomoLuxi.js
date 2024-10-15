@@ -6,7 +6,7 @@ var _paq = window._paq = window._paq || [];
 (function () {
   var script = document.createElement("script");
   script.src =
-    "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.0.11/oneTrust.min.js";
+    "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.0.12/oneTrust.min.js";
   script.crossOrigin = "anonymous";
   script.async = true;
   document.head.appendChild(script);
