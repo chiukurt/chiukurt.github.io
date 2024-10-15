@@ -13,27 +13,8 @@ var _paq = window._paq = window._paq || [];
 })();
 
 
-//Below is script to simulate a fake OneTrust implementation
+//Below is script to simulate a fake OneTrust implementation (automatic)
 (function () { 
-  function fakeOneTrustInit() {
-    window.OnetrustActiveGroups = ["C0000"];
-    setTimeout(fakeOneTrustUpdate, 500);
-  }
-
-  function fakeOneTrustRemove() {
-    window.OnetrustActiveGroups = [];
-    setTimeout(fakeOneTrustUpdate, 500);
-  }
-
-  function fakeOneTrustUpdate() {
-    var event = new CustomEvent("OneTrustGroupsUpdated", {
-        detail: {
-            updatedGroups: OnetrustActiveGroups,
-        },
-    });
-    window.dispatchEvent(event);
-  }
-  
   var name = "statsCode=";
   var decodedCookie = decodeURIComponent(document.cookie);
   var ca = decodedCookie.split(';');
@@ -48,3 +29,23 @@ var _paq = window._paq = window._paq || [];
       }
   }
 })();
+
+//Below is script to simulate a fake OneTrust implementation (user inputs)
+function fakeOneTrustInit() {
+  window.OnetrustActiveGroups = ["C0000"];
+  setTimeout(fakeOneTrustUpdate, 500);
+}
+
+function fakeOneTrustRemove() {
+  window.OnetrustActiveGroups = [];
+  setTimeout(fakeOneTrustUpdate, 500);
+}
+
+function fakeOneTrustUpdate() {
+  var event = new CustomEvent("OneTrustGroupsUpdated", {
+      detail: {
+          updatedGroups: OnetrustActiveGroups,
+      },
+  });
+  window.dispatchEvent(event);
+}
