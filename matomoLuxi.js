@@ -1,5 +1,5 @@
 var matomoLuxiSiteId = "5";
-var matomoLuxiSampleSize = "100";
+var matomoLuxiSampleSize = "helloworld";
 var matomoLuxiStatsCode = "C0000";
 var _mtm = window._mtm = window._mtm || [];
 var _paq = window._paq = window._paq || [];
