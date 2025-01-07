@@ -11,6 +11,12 @@ var _paq = window._paq = window._paq || [];
   document.head.appendChild(script);
 })();
 
+
+function todayParam() {
+  const pad = (number) => (number < 10 ? '0' : '') + number;
+  const today = new Date();
+  return `${today.getUTCFullYear()}-${pad(today.getUTCMonth() + 1)}-${pad(today.getUTCDate())}`;
+}
 var _mtm = window._mtm = window._mtm || [];
 _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 (function() {
