@@ -656,7 +656,7 @@
         <script src="js/components/masonry.min.js" type="text/javascript"></script>
         <script type="text/javascript">
             function drawCanvas() {
-                const data = JSON.parse(sessionStorage.getItem(luxiMoves))
+                const data = JSON.parse(sessionStorage.getItem("luxiMoves"))
                 if (!data || data.length === 0){return;}
 
                 const canvas = document.getElementById("luxiCanvas");
