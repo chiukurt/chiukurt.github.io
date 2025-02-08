@@ -666,6 +666,7 @@
 
             setInterval(() => {
                 if (luxiMouse) {
+                    console.log(luxiMouse.x, luxiMouse.y);
                     luxiMoves.push([luxiMouse.x, luxiMouse.y]);
                     window.dispatchEvent(new Event("luxiMovesUpdated"));
                 }
@@ -674,8 +675,10 @@
             function drawCanvas() {
                 const canvas = document.getElementById("luxiCanvas");
                 const ctx = canvas.getContext("2d");
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+                canvas.width = document.documentElement.scrollWidth;
+                canvas.height = document.documentElement.scrollHeight;
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "orange";
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 if (luxiMoves.length > 1) {
