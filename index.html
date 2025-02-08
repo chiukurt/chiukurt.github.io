@@ -664,6 +664,11 @@
                 luxiMouse.y = event.clientY + window.scrollY;
             });
 
+            document.addEventListener("scroll", () => {
+                luxiMouse.x += window.scrollX;
+                luxiMouse.y += window.scrollY;
+            });
+
             setInterval(() => {
                 if (luxiMouse) {
                     console.log(luxiMouse.x, luxiMouse.y);
