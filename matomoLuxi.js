@@ -22,8 +22,7 @@
 //   var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
 //   g.async=true; g.src='https://analytics.luxifer.app/js/container_1jnfkkvV.js?d=' + todayParam(); s.parentNode.insertBefore(g, s);
 // })();
-
-let luxiMoves = [];
+let luxiMoves = JSON.parse(sessionStorage.getItem("luxiMoves")) || [];
 var luxiLastCaptureTime = 0;
 var scrollDebounceTimeout;
 
