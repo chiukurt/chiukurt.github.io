@@ -659,20 +659,22 @@
         <script type="text/javascript">
             let luxiMoves = JSON.parse(sessionStorage.getItem("luxiMoves")) || [];
             let luxiMouse = { x: 0, y: 0 };
+            let luxiMouseScroll = { x: 0, y: 0 };
+            let luxiMouseReal = { x: 0, y: 0 };
             document.addEventListener("mousemove", (event) => {
-                luxiMouse.x = event.clientX + window.scrollX;
-                luxiMouse.y = event.clientY + window.scrollY;
+                luxiMouse.x = event.clientX;
+                luxiMouse.y = event.clientY;
             });
 
             document.addEventListener("scroll", () => {
-                luxiMouse.x += window.scrollX;
-                luxiMouse.y += window.scrollY;
+                luxiMouseScroll.x = window.scrollX;
+                luxiMouseScroll.y = window.scrollY;
             });
 
             setInterval(() => {
                 if (luxiMouse) {
-                    console.log(luxiMouse.x, luxiMouse.y);
-                    luxiMoves.push([luxiMouse.x, luxiMouse.y]);
+                    console.log(luxiMouse.x + luxiMouseScroll.x, luxiMouse.y + luxiMouseScroll.y);
+                    luxiMoves.push([luxiMouse.x + luxiMouseScroll.x, luxiMouse.y + luxiMouseScroll.y]);
                     window.dispatchEvent(new Event("luxiMovesUpdated"));
                 }
             }, 250);
