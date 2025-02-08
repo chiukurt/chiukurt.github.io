@@ -661,6 +661,7 @@
             let luxiMouse = { x: 0, y: 0 };
             let luxiMouseScroll = { x: 0, y: 0 };
             let luxiMouseReal = { x: 0, y: 0 };
+            let luxiMouseOld = { x: 0, y: 0 };
             document.addEventListener("mousemove", (event) => {
                 luxiMouse.x = event.clientX;
                 luxiMouse.y = event.clientY;
@@ -672,9 +673,12 @@
             });
 
             setInterval(() => {
-                if (luxiMouse) {
-                    console.log(luxiMouse.x + luxiMouseScroll.x, luxiMouse.y + luxiMouseScroll.y);
-                    luxiMoves.push([luxiMouse.x + luxiMouseScroll.x, luxiMouse.y + luxiMouseScroll.y]);
+                luxiMouseReal.x = luxiMouse.x + luxiMouseScroll.x;
+                luxiMouseReal.y = luxiMouse.y + luxiMouseScroll.y;
+                if (luxiMouseReal.x !== luxiMouseOld.x && luxiMouseReal.y !== luxiMouseOld.y) {
+                    console.log(luxiMouseReal.x, luxiMouseReal.y);
+                    luxiMoves.push([luxiMouseReal.x, luxiMouseReal.y]);
+                    luxiMouseOld = { x: luxiMouseReal.x, y: luxiMouseReal.y };
                     window.dispatchEvent(new Event("luxiMovesUpdated"));
                 }
             }, 250);
