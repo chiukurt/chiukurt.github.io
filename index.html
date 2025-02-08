@@ -656,7 +656,8 @@
         <script src="js/components/masonry.min.js" type="text/javascript"></script>
         <script type="text/javascript">
             function drawCanvas() {
-                if (!luxiMoves || luxiMoves.length === 0){return;}
+                const data = JSON.parse(sessionStorage.getItem(luxiMoves))
+                if (!data || data.length === 0){return;}
 
                 const canvas = document.getElementById("luxiCanvas");
                 const ctx = canvas.getContext("2d");
@@ -666,12 +667,12 @@
                 ctx.strokeStyle = "orange";
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                if (luxiMoves.length > 1) {
+                if (data.length > 1) {
                 ctx.beginPath();
-                ctx.moveTo(luxiMoves[0][0], luxiMoves[0][1]);
+                ctx.moveTo(data[0][0], data[0][1]);
 
-                for (let i = 1; i < luxiMoves.length; i++) {
-                    ctx.lineTo(luxiMoves[i][0], luxiMoves[i][1]);
+                for (let i = 1; i < data.length; i++) {
+                    ctx.lineTo(data[i][0], data[i][1]);
                 }
 
                 ctx.stroke();
