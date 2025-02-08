@@ -50,20 +50,24 @@ function debounceScrollCapture() {
 document.addEventListener("scroll", debounceScrollCapture);
 
 function drawCanvas() {
-  const canvas = document.getElementById("luxiCanvas");
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const canvas = document.getElementById("luxiCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  if (luxiMoves.length > 1) {
-    ctx.beginPath();
-    ctx.moveTo(luxiMoves[0][1], luxiMoves[0][2]);
+    if (luxiMoves.length > 1) {
+      ctx.beginPath();
+      ctx.moveTo(luxiMoves[0][1], luxiMoves[0][2]);
 
-    for (let i = 1; i < luxiMoves.length; i++) {
-      ctx.lineTo(luxiMoves[i][1], luxiMoves[i][2]);
+      for (let i = 1; i < luxiMoves.length; i++) {
+        if (luxiMoves[i][0] === "mousemove") {
+          ctx.lineTo(luxiMoves[i][1], luxiMoves[i][2]);
+        }
+      }
+
+      ctx.stroke();
     }
-
-    ctx.stroke();
-  }
 }
 // Listen for custom event to update the canvas
 window.addEventListener("luxiMovesUpdated", drawCanvas);
