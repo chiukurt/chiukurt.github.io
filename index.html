@@ -683,9 +683,7 @@
                 ctx.moveTo(luxiMoves[0][1], luxiMoves[0][2]);
 
                 for (let i = 1; i < luxiMoves.length; i++) {
-                    if (luxiMoves[i][0] === "mousemove") {
                     ctx.lineTo(luxiMoves[i][1], luxiMoves[i][2]);
-                    }
                 }
 
                 ctx.stroke();
