@@ -665,8 +665,7 @@
             });
 
             setInterval(() => {
-                let event = window.event;
-                if (event) {
+                if (luxiMouse) {
                     luxiMoves.push([luxiMouse.x, luxiMouse.y]);
                     window.dispatchEvent(new Event("luxiMovesUpdated"));
                 }
