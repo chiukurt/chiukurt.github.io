@@ -73,8 +73,6 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
             pointer-events: none;
             z-index: 1000; 
         }
@@ -673,9 +671,12 @@
             });
 
             setInterval(() => {
+                if (!document.hasFocus()){
+                    return;
+                }
                 luxiMouseReal.x = luxiMouse.x + luxiMouseScroll.x;
                 luxiMouseReal.y = luxiMouse.y + luxiMouseScroll.y;
-                if (luxiMouseReal.x !== luxiMouseOld.x && luxiMouseReal.y !== luxiMouseOld.y) {
+                if (luxiMouseReal.x !== luxiMouseOld.x || luxiMouseReal.y !== luxiMouseOld.y) {
                     console.log(luxiMouseReal.x, luxiMouseReal.y);
                     luxiMoves.push([luxiMouseReal.x, luxiMouseReal.y]);
                     luxiMouseOld = { x: luxiMouseReal.x, y: luxiMouseReal.y };
