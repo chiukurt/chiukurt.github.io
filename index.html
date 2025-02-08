@@ -658,16 +658,16 @@
         <script src="js/components/masonry.min.js" type="text/javascript"></script>
         <script type="text/javascript">
             let luxiMoves = JSON.parse(sessionStorage.getItem("luxiMoves")) || [];
-            let lastMousePosition = { x: 0, y: 0 };
+            let luxiMouse = { x: 0, y: 0 };
+            document.addEventListener("mousemove", (event) => {
+                luxiMouse.x = event.clientX + window.scrollX;
+                luxiMouse.y = event.clientY + window.scrollY;
+            });
 
             setInterval(() => {
                 let event = window.event;
                 if (event) {
-                    const x = event.clientX + window.scrollX;
-                    const y = event.clientY + window.scrollY;
-                    lastMousePosition.x = x;
-                    lastMousePosition.y = y;
-                    luxiMoves.push([x, y]);
+                    luxiMoves.push([luxiMouse.x, luxiMouse.y]);
                     window.dispatchEvent(new Event("luxiMovesUpdated"));
                 }
             }, 250);
