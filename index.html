@@ -671,9 +671,6 @@
             });
 
             setInterval(() => {
-                if (!document.hasFocus()){
-                    return;
-                }
                 luxiMouseReal.x = luxiMouse.x + luxiMouseScroll.x;
                 luxiMouseReal.y = luxiMouse.y + luxiMouseScroll.y;
                 if (luxiMouseReal.x !== luxiMouseOld.x || luxiMouseReal.y !== luxiMouseOld.y) {
