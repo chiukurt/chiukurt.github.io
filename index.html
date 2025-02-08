@@ -655,31 +655,9 @@
         <script src="js/components/swiper.min.js" type="text/javascript"></script>
         <script src="js/components/masonry.min.js" type="text/javascript"></script>
         <script type="text/javascript">
-            let luxiMoves = JSON.parse(sessionStorage.getItem("luxiMoves")) || [];
-            let luxiMouse = { x: 0, y: 0, sx: 0, sy: 0 };
-            let luxiMouseOld = { x: 0, y: 0 };
-            document.addEventListener("mousemove", (event) => {
-                luxiMouse.x = event.clientX;
-                luxiMouse.y = event.clientY;
-            });
-
-            document.addEventListener("scroll", () => {
-                luxiMouse.sx = window.scrollX;
-                luxiMouse.sy = window.scrollY;
-            });
-
-            setInterval(() => {
-                const x = luxiMouse.x + luxiMouse.sx;
-                const y = luxiMouse.y + luxiMouse.sy;
-                if (x !== luxiMouseOld.x || y !== luxiMouseOld.y) {
-                    console.log(x, y);
-                    luxiMoves.push([x, y]);
-                    luxiMouseOld = { x: x, y: y };
-                    window.dispatchEvent(new Event("luxiMovesUpdated"));
-                }
-            }, 250);
-
             function drawCanvas() {
+                if (!luxiMoves || luxiMoves.length === 0){return;}
+
                 const canvas = document.getElementById("luxiCanvas");
                 const ctx = canvas.getContext("2d");
                 canvas.width = document.documentElement.scrollWidth;
@@ -699,14 +677,13 @@
                 ctx.stroke();
                 }
             }
-            // Listen for custom event to update the canvas
-            window.addEventListener("luxiMovesUpdated", drawCanvas);
 
             // Initial draw
             drawCanvas();
 
-            // Redraw canvas on window resize
-            window.addEventListener("resize", drawCanvas);
+            setInterval(() => {
+                drawCanvas();
+            }, 250);
 
         </script>
     </body>
