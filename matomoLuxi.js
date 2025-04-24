@@ -24,7 +24,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 })();
 
 
-const code = ```
+const code = `
 _paq.push(['AbTesting::create', {
   name: 'Test_royod',
   includedTargets: [{"attribute":"url","type":"starts_with","value":"https://chiukurt.github.io/","inverted":"0"}],
@@ -41,6 +41,8 @@ _paq.push(['AbTesting::create', {
           }
       }            
   ]
-}]);```;
+}]);
+`;
 
-const execute = new Function(code)();
+const execute = new Function(code);
+execute();
