@@ -22,3 +22,22 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
   var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
   g.async=true; g.src='https://analytics.luxifer.app/js/container_1jnfkkvV.js?d=' + todayParam(); s.parentNode.insertBefore(g, s);
 })();
+
+
+_paq.push(['AbTesting::create', {
+  name: 'Test_royod',
+  includedTargets: [{"attribute":"url","type":"starts_with","value":"https://chiukurt.github.io/","inverted":"0"}],
+  excludedTargets: [],
+  variations: [
+      {
+          name: 'original',
+          activate: function (event) { }
+      },
+      {
+          name: 'test',
+          activate: function(event) {
+            document.getElementById("ab-element").innerText = "AB Test alternate";
+          }
+      }            
+  ]
+}]);
