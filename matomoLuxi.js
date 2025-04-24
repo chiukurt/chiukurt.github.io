@@ -24,25 +24,37 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 })();
 
 
-const code = `
-_paq.push(['AbTesting::create', {
-  name: 'Test_royod',
-  includedTargets: [{"attribute":"url","type":"starts_with","value":"https://chiukurt.github.io/","inverted":"0"}],
-  excludedTargets: [],
-  variations: [
-      {
-          name: 'original',
-          activate: function (event) { }
-      },
-      {
-          name: 'test',
-          activate: function(event) {
-            document.getElementById("ab-element").innerText = "AB Test alternate";
-          }
-      }            
-  ]
-}]);
-`;
+// bare minimum data to execute an A/B test
+(function () {
+    const tests = [
+        {
+            name: 'Test_royod',
+            url: "https://chiukurt.github.io/",
+            type: "simple_text",
+            data: "AB Test alternate",
+        }
+    ];
 
-const execute = new Function(code);
-execute();
+    tests.forEach(test => {
+        const { name, url, type, data } = test;
+        _paq.push(['AbTesting::create', {
+            name: name,
+            includedTargets: [{"attribute":"url","type":"starts_with","value":url,"inverted":"0"}],
+            excludedTargets: [],
+            variations: [
+                {
+                    name: 'original',
+                    activate: function (event) { }
+                },
+                {
+                    name: 'test',
+                    activate: function (event) {
+                        if (type === "simple_text") { 
+                            document.getElementById("ab-element").innerText = data;
+                        }
+                    }
+                }            
+            ]
+          }]);
+    });
+})();
