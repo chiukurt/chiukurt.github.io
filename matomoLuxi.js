@@ -1,3 +1,47 @@
+
+// =======================================================================================================================================================================================================
+
+var matomoLuxiSiteId = "5";
+var matomoLuxiSampleSize = "100";
+var _mtm = window._mtm = window._mtm || [];
+var _paq = window._paq = window._paq || [];
+// (function() {
+//   var script = document.createElement('script');
+//   script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.02/default.min.js";
+//   script.integrity = "sha384-aIRAMkKxsFX6tOA6PFhqe85yPRXNadvhxK+X5tGYVLHHrwXdvTU9ma0mio9T+3jZ";
+//   script.crossOrigin = "anonymous";
+//   script.async = true;
+//   setTimeout(() => {
+//     document.head.appendChild(script);
+//   }, 10000);
+// })();
+
+// Special test file =======================================================================================================================================================================================================
+
+(function() {
+  var script = document.createElement('script');
+  script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@latest/dev.js";
+  script.crossOrigin = "anonymous";
+  script.async = true;
+  document.head.appendChild(script);
+})();
+
+// Special MTM test container. ==========================================================================================================================================================================
+
+function todayParam() {
+  const pad = (number) => (number < 10 ? '0' : '') + number;
+  const today = new Date();
+  return `${today.getUTCFullYear()}-${pad(today.getUTCMonth() + 1)}-${pad(today.getUTCDate())}`;
+}
+var _mtm = window._mtm = window._mtm || [];
+_mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
+(function() {
+  var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+  g.async=true; g.src='https://analytics.luxifer.app/js/container_1jnfkkvV.js?d=' + todayParam(); s.parentNode.insertBefore(g, s);
+})();
+
+// bare minimum data to execute an A/B test ===============================================================================================================================================================
+
 // Things to replace before live version
 // tookTooLong name
 // 3000 delay
@@ -14,36 +58,6 @@ setTimeout(() => {
   tookTooLong = true;
 }, 3000);
 
-var matomoLuxiSiteId = "5";
-var matomoLuxiSampleSize = "100";
-var _mtm = window._mtm = window._mtm || [];
-var _paq = window._paq = window._paq || [];
-(function() {
-  var script = document.createElement('script');
-  script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.02/default.min.js";
-  script.integrity = "sha384-aIRAMkKxsFX6tOA6PFhqe85yPRXNadvhxK+X5tGYVLHHrwXdvTU9ma0mio9T+3jZ";
-  script.crossOrigin = "anonymous";
-  script.async = true;
-  setTimeout(() => { 
-    document.head.appendChild(script);
-  }, 10000);
-
-})();
-
-// Special MTM test container.
-function todayParam() {
-  const pad = (number) => (number < 10 ? '0' : '') + number;
-  const today = new Date();
-  return `${today.getUTCFullYear()}-${pad(today.getUTCMonth() + 1)}-${pad(today.getUTCDate())}`;
-}
-var _mtm = window._mtm = window._mtm || [];
-_mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
-(function() {
-  var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-  g.async=true; g.src='https://analytics.luxifer.app/js/container_1jnfkkvV.js?d=' + todayParam(); s.parentNode.insertBefore(g, s);
-})();
-
-// bare minimum data to execute an A/B test
 (function () {
     const tests = [
         {
@@ -54,8 +68,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
         }
     ];
     
-  if (tookTooLong) return; 
-
     tests.forEach(test => {
         const { name, url, type, data } = test;
         _paq.push(['AbTesting::create', {
@@ -65,7 +77,9 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
             variations: [
                 {
                   name: 'original',
-                    activate: function (event) { }
+                    activate: function (event) { 
+                      document.documentElement.classList.remove('ab-test-loading');
+                    }
                 },
                 {
                   name: 'test',
