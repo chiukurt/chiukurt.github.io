@@ -36,6 +36,15 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
   if (typeof matomoLuxiSiteId === 'undefined' || typeof matomoLuxiSampleSize === 'undefined') {
     return;
   }
+  const dnsPrefetch = document.createElement('link');
+  dnsPrefetch.rel = 'dns-prefetch';
+  dnsPrefetch.href = 'https://analytics.luxifer.app';
+  document.head.appendChild(dnsPrefetch);
+  const preconnect = document.createElement('link');
+  preconnect.rel = 'preconnect';
+  preconnect.href = 'https://analytics.luxifer.app';
+  preconnect.crossOrigin = 'anonymous';
+  document.head.appendChild(preconnect);
 
   const start = performance.now();
 
