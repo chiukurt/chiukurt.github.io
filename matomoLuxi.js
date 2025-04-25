@@ -32,7 +32,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
 // Special test file =======================================================================================================================================================================================================
 
-(function(){
+(function () {
+  const luxiferAnalytics = "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net";
   if (typeof matomoLuxiSiteId === 'undefined' || typeof matomoLuxiSampleSize === 'undefined') {
     return;
   }
@@ -49,10 +50,10 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
   (function () {
     const removeLoadingClass = () => document.documentElement.classList.remove("luxifer-ab-test-loading");
 
-    _paq.push(["setTrackerUrl", "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net/matomo.php"]);
+    _paq.push(["setTrackerUrl", `${luxiferAnalytics}/matomo.php`]);
     _paq.push(['setSiteId', matomoLuxiSiteId]);
     var d = document, g = d.createElement("script"), s = d.getElementsByTagName("script")[0];
-    g.async = true; g.src = "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net/matomo.js";
+    g.async = true; g.src = `${luxiferAnalytics}/matomo.js`;
 
     let shouldLoad = true;
 
@@ -120,7 +121,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     (function() {
       var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
-      g.async = true; g.src = 'https://analytics.luxifer.app/js/container_orKRLPJg.js?d=' + todayParam(); s.parentNode.insertBefore(g, s);
+      g.async = true; g.src = `${luxiferAnalytics}/js/container_orKRLPJg.js?d=` + todayParam(); s.parentNode.insertBefore(g, s);
     })();
   }
 
