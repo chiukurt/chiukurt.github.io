@@ -8,7 +8,9 @@ document.documentElement.classList.add('ab-test-loading');
 
 setTimeout(() => {
   document.documentElement.classList.remove('ab-test-loading');
-  tookTooLong = tookTooLong === false;
+  if (!tookTooLong) { 
+    tookTooLong = true;
+  }
 }, 3000);
 
 var matomoLuxiSiteId = "5";
@@ -19,9 +21,15 @@ var _paq = window._paq = window._paq || [];
   var script = document.createElement('script');
   script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.02/default.min.js";
   script.integrity = "sha384-aIRAMkKxsFX6tOA6PFhqe85yPRXNadvhxK+X5tGYVLHHrwXdvTU9ma0mio9T+3jZ";
-  script.onload = () => document.documentElement.classList.remove('ab-test-loading');
   script.crossOrigin = "anonymous";
   script.async = true;
+  script.onload = () => {
+    setTimeout(() => {
+      document.documentElement.classList.remove('ab-test-loading');
+      tookTooLong = false;
+    }, 100);
+  };
+
   document.head.appendChild(script);
 })();
 
@@ -57,17 +65,20 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
             excludedTargets: [],
             variations: [
                 {
-                    name: 'original',
+                  name: 'original',
                     activate: function (event) { }
                 },
                 {
-                    name: 'test',
-                    activate: function (event) {
-                        if (type === "simple_text") { 
-                            document.getElementById("ab-element").innerText = data;
-                        }
+                  name: 'test',
+                  activate: function (event) {
+                    if (type === "simple_text") { 
+                      document.getElementById("ab-element").innerText = data;
+                      if (tookTooLong) { 
+                        console.log("Took too long");
+                      }
                     }
-                }            
+                  }
+                }
             ]
           }]);
     });
