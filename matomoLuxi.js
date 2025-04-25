@@ -37,6 +37,14 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     return;
   }
 
+  const preloadLink = document.createElement('link');
+  preloadLink.rel = 'preload';
+  preloadLink.href = 'https://analytics.luxifer.app/matomo.js';
+  preloadLink.as = 'script';
+  preloadLink.crossOrigin = 'anonymous';
+  document.head.appendChild(preloadLink);
+  const start = performance.now();
+
   const style = document.createElement('style');
   style.textContent = `html.luxifer-ab-test-loading { opacity: 0; }`;
   document.head.appendChild(style);
@@ -55,6 +63,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     let shouldLoad = true;
 
     g.onload = () => {
+        const end = performance.now();
+        console.log(`Took ${end - start} milliseconds`);
         clearTimeout(timeout);
         if (!shouldLoad) return;
         const tests = [
