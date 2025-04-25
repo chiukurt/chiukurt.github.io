@@ -100,7 +100,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
       shouldLoad = false;
       removeLoadingClass();
       console.log("Loading timeout");
-    }, 400); 
+    }, 1000); 
 
     s.parentNode.insertBefore(g, s);
   })();
