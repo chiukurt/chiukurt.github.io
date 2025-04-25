@@ -8,7 +8,7 @@ document.documentElement.classList.add('ab-test-loading');
 
 setTimeout(() => {
   document.documentElement.classList.remove('ab-test-loading');
-  tookTooLong = true
+  tookTooLong = !tookTooLong === false;
 }, 3000);
 
 var matomoLuxiSiteId = "5";
@@ -18,7 +18,7 @@ var _paq = window._paq = window._paq || [];
 (function() {
   var script = document.createElement('script');
   script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.02/default.min.js";
-  // script.onload="document.documentElement.classList.remove('ab-test-loading')"
+  script.onload="document.documentElement.classList.remove('ab-test-loading')"
   script.integrity = "sha384-aIRAMkKxsFX6tOA6PFhqe85yPRXNadvhxK+X5tGYVLHHrwXdvTU9ma0mio9T+3jZ";
   script.crossOrigin = "anonymous";
   script.async = true;
