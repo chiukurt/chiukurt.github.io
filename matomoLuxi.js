@@ -43,6 +43,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
   document.documentElement.classList.add('luxifer-ab-test-loading');
 
   _paq.push(['requireConsent']);
+
   (function () {
     const removeLoadingClass = () => document.documentElement.classList.remove("luxifer-ab-test-loading");
 
@@ -56,16 +57,16 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     g.onload = () => {
         clearTimeout(timeout);
         if (!shouldLoad) return;
-        loaded = true;
         const tests = [
           {
             name: "Test_royod",
             url: "https://chiukurt.github.io/",
             type: "simple_text",
-            data: "AB Test alternate",
+            data: "B VERSION",
           },
         ];
-        if (tests.length === 0) removeLoadingClass();
+      if (tests.length === 0) removeLoadingClass();
+        console.log("Loading success"); 
         tests.forEach((test) => {
           const { name, url, type, data } = test;
           _paq.push(["AbTesting::create", {
@@ -76,7 +77,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                 {
                   name: "original",
                   activate: function (event) {
-                    document.getElementById("ab-element").innerText = "test original";
+                    document.getElementById("ab-element").innerText = "A VERSION";
                     removeLoadingClass();
                   },
                 },
@@ -96,8 +97,9 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     };
 
     const timeout = setTimeout(() => {
-      removeLoadingClass();
       shouldLoad = false;
+      removeLoadingClass();
+      console.log("Loading timeout");
     }, 300); 
 
     s.parentNode.insertBefore(g, s);
