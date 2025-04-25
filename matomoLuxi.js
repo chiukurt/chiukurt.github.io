@@ -1,3 +1,16 @@
+
+const style = document.createElement('style');
+style.textContent = `html.ab-test-loading { opacity: 0; }`;
+document.head.appendChild(style);
+
+const tookTooLong = false;
+document.documentElement.classList.add('ab-test-loading');
+
+setTimeout(() => {
+  document.documentElement.classList.remove('ab-test-loading');
+  tookTooLong = true
+}, 1000);
+
 var matomoLuxiSiteId = "5";
 var matomoLuxiSampleSize = "100";
 var _mtm = window._mtm = window._mtm || [];
@@ -5,6 +18,7 @@ var _paq = window._paq = window._paq || [];
 (function() {
   var script = document.createElement('script');
   script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.02/default.min.js";
+  // script.onload="document.documentElement.classList.remove('ab-test-loading')"
   script.integrity = "sha384-aIRAMkKxsFX6tOA6PFhqe85yPRXNadvhxK+X5tGYVLHHrwXdvTU9ma0mio9T+3jZ";
   script.crossOrigin = "anonymous";
   script.async = true;
