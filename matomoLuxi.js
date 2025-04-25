@@ -76,6 +76,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
           },
         ];
       if (tests.length === 0) removeLoadingClass();
+      if (tests.some(test => window.location.href.split('?')[0].startsWith(test.url))) removeLoadingClass();
         console.log("Loading success"); 
         tests.forEach((test) => {
           const { name, url, type, data } = test;
