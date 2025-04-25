@@ -20,7 +20,7 @@ var _paq = window._paq = window._paq || [];
 
 (function() {
   var script = document.createElement('script');
-  script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.03b/dev.js";
+  script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.03b0/dev.js";
   script.crossOrigin = "anonymous";
   script.async = true;
   document.head.appendChild(script);
@@ -49,48 +49,4 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 const style = document.createElement('style');
 style.textContent = `html.ab-test-loading { opacity: 0; }`;
 document.head.appendChild(style);
-
-let tookTooLong = false;
 document.documentElement.classList.add('ab-test-loading');
-
-setTimeout(() => {
-  document.documentElement.classList.remove('ab-test-loading');
-  tookTooLong = true;
-}, 3000);
-
-(function () {
-    const tests = [
-        {
-            name: 'Test_royod',
-            url: "https://chiukurt.github.io/",
-            type: "simple_text",
-            data: "AB Test alternate",
-        }
-    ];
-    
-    tests.forEach(test => {
-        const { name, url, type, data } = test;
-        _paq.push(['AbTesting::create', {
-            name: name,
-            includedTargets: [{"attribute":"url","type":"starts_with","value":url,"inverted":"0"}],
-            excludedTargets: [],
-            variations: [
-                {
-                  name: 'original',
-                    activate: function (event) { 
-                      document.documentElement.classList.remove('ab-test-loading');
-                    }
-                },
-                {
-                  name: 'test',
-                  activate: function (event) {
-                    if (type === "simple_text") { 
-                      document.getElementById("ab-element").innerText = data;
-                      document.documentElement.classList.remove('ab-test-loading');
-                    }
-                  }
-                }
-            ]
-          }]);
-    });
-})();
