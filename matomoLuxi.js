@@ -20,7 +20,7 @@ var _paq = window._paq = window._paq || [];
 
 (function() {
   var script = document.createElement('script');
-  script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@latest/dev.js";
+  script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.03b/dev.js";
   script.crossOrigin = "anonymous";
   script.async = true;
   document.head.appendChild(script);
