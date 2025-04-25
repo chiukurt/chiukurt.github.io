@@ -21,13 +21,6 @@ var _paq = window._paq = window._paq || [];
   script.integrity = "sha384-aIRAMkKxsFX6tOA6PFhqe85yPRXNadvhxK+X5tGYVLHHrwXdvTU9ma0mio9T+3jZ";
   script.crossOrigin = "anonymous";
   script.async = true;
-  script.onload = () => {
-    setTimeout(() => {
-      document.documentElement.classList.remove('ab-test-loading');
-      tookTooLong = false;
-    }, 100);
-  };
-
   document.head.appendChild(script);
 })();
 
