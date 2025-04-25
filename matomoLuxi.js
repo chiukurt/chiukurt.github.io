@@ -97,7 +97,7 @@ document.documentElement.classList.add('ab-test-loading');
           ]);
         });
 
-      }, 8000); 
+      }, 3000); 
       
     };
     
