@@ -1,3 +1,6 @@
+// Things to replace before live version
+// tookTooLong name
+// 3000 delay
 
 const style = document.createElement('style');
 style.textContent = `html.ab-test-loading { opacity: 0; }`;
@@ -21,9 +24,10 @@ var _paq = window._paq = window._paq || [];
   script.integrity = "sha384-aIRAMkKxsFX6tOA6PFhqe85yPRXNadvhxK+X5tGYVLHHrwXdvTU9ma0mio9T+3jZ";
   script.crossOrigin = "anonymous";
   script.async = true;
-  setTimeout(() => {
+  setTimeout(() => { 
+    document.head.appendChild(script);
   }, 10000);
-  document.head.appendChild(script);
+
 })();
 
 // Special MTM test container.
