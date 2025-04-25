@@ -76,6 +76,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                 {
                   name: "original",
                   activate: function (event) {
+                    document.getElementById("ab-element").innerText = "test original";
                     removeLoadingClass();
                   },
                 },
