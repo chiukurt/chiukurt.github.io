@@ -55,13 +55,12 @@ document.documentElement.classList.add('ab-test-loading');
     var d = document, g = d.createElement("script"), s = d.getElementsByTagName("script")[0];
     g.async = true; g.src = "https://analytics.luxifer.app/matomo.js";
 
-    let loaded = false;
+    let shouldLoad = true;
 
     g.onload = () => {
       setTimeout(() => { 
-
-
         clearTimeout(timeout);
+        if (!shouldLoad) return;
         loaded = true;
         const tests = [
           {
@@ -98,7 +97,6 @@ document.documentElement.classList.add('ab-test-loading');
           ]);
         });
 
-
       }, 8000); 
       
     };
@@ -106,14 +104,12 @@ document.documentElement.classList.add('ab-test-loading');
     g.onerror = () => {
       clearTimeout(timeout);
       document.documentElement.classList.remove('ab-test-loading');
+      shouldLoad = false;
     };
 
     const timeout = setTimeout(() => {
-      if (!loaded) {
-        document.documentElement.classList.remove('ab-test-loading');
-        g.remove(); 
-        console.log("Loading took 5, A/B test not loaded.");
-      }
+      document.documentElement.classList.remove('ab-test-loading');
+      shouldLoad = false;
     }, 5000); 
 
     s.parentNode.insertBefore(g, s);
