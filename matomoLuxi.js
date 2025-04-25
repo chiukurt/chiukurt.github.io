@@ -110,7 +110,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     const timeout = setTimeout(() => {
       shouldLoad = false;
       removeLoadingClass();
-      console.log("Loading timeout");
+      const end = performance.now();
+      console.log(`Loading timeout -- Took ${end - start} milliseconds`);
     }, 1000); 
 
     s.parentNode.insertBefore(g, s);
