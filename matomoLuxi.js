@@ -3,13 +3,13 @@ const style = document.createElement('style');
 style.textContent = `html.ab-test-loading { opacity: 0; }`;
 document.head.appendChild(style);
 
-const tookTooLong = false;
+let tookTooLong = false;
 document.documentElement.classList.add('ab-test-loading');
 
 setTimeout(() => {
   document.documentElement.classList.remove('ab-test-loading');
   tookTooLong = true
-}, 1000);
+}, 3000);
 
 var matomoLuxiSiteId = "5";
 var matomoLuxiSampleSize = "100";
