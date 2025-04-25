@@ -8,9 +8,7 @@ document.documentElement.classList.add('ab-test-loading');
 
 setTimeout(() => {
   document.documentElement.classList.remove('ab-test-loading');
-  if (!tookTooLong) { 
-    tookTooLong = true;
-  }
+  tookTooLong = true;
 }, 3000);
 
 var matomoLuxiSiteId = "5";
@@ -73,6 +71,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                   activate: function (event) {
                     if (type === "simple_text") { 
                       document.getElementById("ab-element").innerText = data;
+                      document.documentElement.classList.remove('ab-test-loading');
                       if (tookTooLong) { 
                         console.log("Took too long");
                       }
