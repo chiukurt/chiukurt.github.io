@@ -37,12 +37,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     return;
   }
 
-  const preloadLink = document.createElement('link');
-  preloadLink.rel = 'preload';
-  preloadLink.href = 'https://analytics.luxifer.app/matomo.js';
-  preloadLink.as = 'script';
-  preloadLink.crossOrigin = 'anonymous';
-  document.head.appendChild(preloadLink);
   const start = performance.now();
 
   const style = document.createElement('style');
