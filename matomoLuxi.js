@@ -106,7 +106,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
       removeLoadingClass();
       const end = performance.now();
       console.log(`Loading timeout -- Took ${end - start} milliseconds`);
-    }, 1000); 
+    }, 300); 
 
     s.parentNode.insertBefore(g, s);
   })();
