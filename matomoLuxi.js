@@ -21,9 +21,12 @@ var _paq = window._paq = window._paq || [];
   script.integrity = "sha384-aIRAMkKxsFX6tOA6PFhqe85yPRXNadvhxK+X5tGYVLHHrwXdvTU9ma0mio9T+3jZ";
   script.crossOrigin = "anonymous";
   script.async = true;
+  setTimeout(() => {
+  }, 10000);
   document.head.appendChild(script);
 })();
 
+// Special MTM test container.
 function todayParam() {
   const pad = (number) => (number < 10 ? '0' : '') + number;
   const today = new Date();
@@ -36,7 +39,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
   g.async=true; g.src='https://analytics.luxifer.app/js/container_1jnfkkvV.js?d=' + todayParam(); s.parentNode.insertBefore(g, s);
 })();
 
-
 // bare minimum data to execute an A/B test
 (function () {
     const tests = [
@@ -47,6 +49,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
             data: "AB Test alternate",
         }
     ];
+    
+  if (tookTooLong) return; 
 
     tests.forEach(test => {
         const { name, url, type, data } = test;
@@ -65,9 +69,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                     if (type === "simple_text") { 
                       document.getElementById("ab-element").innerText = data;
                       document.documentElement.classList.remove('ab-test-loading');
-                      if (tookTooLong) { 
-                        console.log("Took too long");
-                      }
                     }
                   }
                 }
