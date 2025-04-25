@@ -30,17 +30,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
   g.async=true; g.src='https://analytics.luxifer.app/js/container_1jnfkkvV.js?d=' + todayParam(); s.parentNode.insertBefore(g, s);
 })();
 
-// bare minimum data to execute an A/B test ===============================================================================================================================================================
-
-// Things to replace before live version
-// tookTooLong name
-// 3000 delay
-
-const style = document.createElement('style');
-style.textContent = `html.ab-test-loading { opacity: 0; }`;
-document.head.appendChild(style);
-document.documentElement.classList.add('ab-test-loading');
-
 // Special test file =======================================================================================================================================================================================================
 
 (function(){
@@ -48,8 +37,15 @@ document.documentElement.classList.add('ab-test-loading');
     return;
   }
 
+  const style = document.createElement('style');
+  style.textContent = `html.luxifer-ab-test-loading { opacity: 0; }`;
+  document.head.appendChild(style);
+  document.documentElement.classList.add('luxifer-ab-test-loading');
+
   _paq.push(['requireConsent']);
   (function () {
+    const removeLoadingClass = () => document.documentElement.classList.remove("luxifer-ab-test-loading");
+
     _paq.push(["setTrackerUrl", "https://analytics.luxifer.app/matomo.php"]);
     _paq.push(['setSiteId', matomoLuxiSiteId]);
     var d = document, g = d.createElement("script"), s = d.getElementsByTagName("script")[0];
@@ -58,7 +54,6 @@ document.documentElement.classList.add('ab-test-loading');
     let shouldLoad = true;
 
     g.onload = () => {
-      setTimeout(() => { 
         clearTimeout(timeout);
         if (!shouldLoad) return;
         loaded = true;
@@ -70,6 +65,7 @@ document.documentElement.classList.add('ab-test-loading');
             data: "AB Test alternate",
           },
         ];
+        if (tests.length === 0) removeLoadingClass();
         tests.forEach((test) => {
           const { name, url, type, data } = test;
           _paq.push(["AbTesting::create", {
@@ -80,7 +76,7 @@ document.documentElement.classList.add('ab-test-loading');
                 {
                   name: "original",
                   activate: function (event) {
-                    document.documentElement.classList.remove("ab-test-loading");
+                    removeLoadingClass();
                   },
                 },
                 {
@@ -88,7 +84,7 @@ document.documentElement.classList.add('ab-test-loading');
                   activate: function (event) {
                     if (type === "simple_text") {
                       document.getElementById("ab-element").innerText = data;
-                      document.documentElement.classList.remove("ab-test-loading");
+                      removeLoadingClass();
                     }
                   },
                 },
@@ -96,21 +92,12 @@ document.documentElement.classList.add('ab-test-loading');
             },
           ]);
         });
-
-      }, 3000); 
-      
-    };
-    
-    g.onerror = () => {
-      clearTimeout(timeout);
-      document.documentElement.classList.remove('ab-test-loading');
-      shouldLoad = false;
     };
 
     const timeout = setTimeout(() => {
-      document.documentElement.classList.remove('ab-test-loading');
+      removeLoadingClass();
       shouldLoad = false;
-    }, 5000); 
+    }, 300); 
 
     s.parentNode.insertBefore(g, s);
   })();
