@@ -76,7 +76,9 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
               {
                 name: "original",
                 activate: function (event) {
-                  if (type === "simple_text") document.querySelector(selector).innerText = "A VERSION";
+                  var abElement = document.querySelector(selector);
+                  if (!abElement) return;
+                  if (type === "simple_text") abElement.innerText = "A VERSION";
                 },
               },
               {
