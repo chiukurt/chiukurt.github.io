@@ -49,7 +49,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
   _paq.push(['requireConsent']);
 
   (function () {
-    const tests = null;
+    const tests = [];
     let testsLoaded = false;
     let matomoLoaded = false;
     const removeLoadingClass = () => document.documentElement.classList.remove("luxifer-ab-test-loading");
