@@ -35,10 +35,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 async function getTests() { 
   const start = performance.now();
   const url = "https://getabtestseu-573194387152.europe-west1.run.app";
-  const response = await fetch(`${url}?idSite=${matomoLuxiSiteId}`, {method: 'POST', mode: 'no-cors'});
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
+  const response = await fetch(`${url}?idSite=${matomoLuxiSiteId}`, { method: 'POST', mode: 'no-cors' });
+  console.log(response);
   const end = performance.now();
   console.log(`ABTEST Took ${end - start} milliseconds`);
   return await response.json();
