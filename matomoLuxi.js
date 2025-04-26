@@ -82,10 +82,10 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
               {
                 name: "test",
                 activate: function (event) {
-                  if (type === "simple_text") {
-                    const abElement = document.getElementById("ab-element");
-                    if (abElement) { abElement.innerHTML = data; }
-                  }
+                  const abElement = document.getElementById("ab-element");
+                  if (!abElement) return;
+                  if (type === "simple_text") abElement.innerHTML = data;
+                  if (type === "simple_img") abElement.src = data;
                 },
               },
             ],
