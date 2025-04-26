@@ -55,12 +55,12 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     const removeLoadingClass = () => document.documentElement.classList.remove("luxifer-ab-test-loading");
 
     function startABTest() { 
-      console.log(tests, testsLoaded, matomoLoaded);
+      console.log(tests, testsLoaded, matomoLoaded, tests.length, !tests.some(test => window.location.href.startsWith(test.url)) );
       if (!testsLoaded || !matomoLoaded) return;
       
       if (!shouldLoad
         || tests.length === 0
-        || tests.some(test => window.location.href.split('?')[0].startsWith(test.url)))
+        || !tests.some(test => window.location.href.startsWith(test.url)))
       {
         removeLoadingClass();
         return;
