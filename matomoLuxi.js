@@ -37,6 +37,7 @@ async function getTests() {
   const url = "https://getabtestseu-573194387152.europe-west1.run.app";
   const response = await fetch(`${url}?idSite=${matomoLuxiSiteId}`, { method: 'POST' });
   console.log(response);
+  console.log(response.body);
   const end = performance.now();
   console.log(`ABTEST Took ${end - start} milliseconds`);
   return await response.json();
