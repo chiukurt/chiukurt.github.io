@@ -55,13 +55,10 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     const removeLoadingClass = () => document.documentElement.classList.remove("luxifer-ab-test-loading");
 
     function startABTest() { 
-      console.log(tests, testsLoaded, matomoLoaded, tests.length, !tests.some(test => window.location.href.startsWith(test.url)) );
+      console.log(tests, testsLoaded, matomoLoaded, tests.length);
       if (!testsLoaded || !matomoLoaded) return;
       
-      if (!shouldLoad
-        || tests.length === 0
-        || !tests.some(test => window.location.href.startsWith(test.url)))
-      {
+      if (!shouldTest || tests.length === 0) {
         removeLoadingClass();
         return;
       }
@@ -80,7 +77,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                 name: "original",
                 activate: function (event) {
                   document.getElementById("ab-element").innerText = "A VERSION";
-                  removeLoadingClass();
                 },
               },
               {
@@ -89,7 +85,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                   if (type === "simple_text") {
                     const abElement = document.getElementById("ab-element");
                     if (abElement) { abElement.innerHTML = data; }
-                    removeLoadingClass();
                   }
                 },
               },
@@ -97,6 +92,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
           },
         ]);
       });
+      removeLoadingClass();
     }
 
     async function getTests() { 
@@ -113,7 +109,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     var d = document, g = d.createElement("script"), s = d.getElementsByTagName("script")[0];
     g.async = true; g.src = `${luxiferAnalytics}/matomo.js`;
 
-    let shouldLoad = true;
+    let shouldTest = true;
 
     g.onload = () => {
       console.log(`Matomo took ${performance.now() - start} milliseconds`);
@@ -129,7 +125,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     });
 
     const timeout = setTimeout(() => {
-      shouldLoad = false;
+      shouldTest = false;
       removeLoadingClass();
       const end = performance.now();
       console.log(`Loading timeout -- Took ${end - start} milliseconds`);
