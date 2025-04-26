@@ -32,25 +32,9 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
 // Special test file =======================================================================================================================================================================================================
 
-async function getTests() { 
-  const start = performance.now();
-  const url = "https://getabtestseu-573194387152.europe-west1.run.app";
-  const response = await fetch(`${url}?idSite=${matomoLuxiSiteId}`, { method: 'POST' });
-  console.log(response);
-  console.log(response.json());
-  console.log(response.body.json());
-  const end = performance.now();
-  console.log(`ABTEST Took ${end - start} milliseconds`);
-  return await response.json();
-}
-
-console.log(getTests());
-
-
-// Special test file =======================================================================================================================================================================================================
-
 (function () {
   const luxiferAnalytics = "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net";
+  const luxiferABDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
   if (typeof matomoLuxiSiteId === 'undefined' || typeof matomoLuxiSampleSize === 'undefined') {
     return;
   }
@@ -65,7 +49,59 @@ console.log(getTests());
   _paq.push(['requireConsent']);
 
   (function () {
+    const tests = null;
+    let testsLoaded = false;
+    let matomoLoaded = false;
     const removeLoadingClass = () => document.documentElement.classList.remove("luxifer-ab-test-loading");
+
+    function startABTest() { 
+      if (!testsLoaded || !matomoLoaded) return;
+      
+      if (!shouldLoad
+        || tests.length === 0
+        || tests.some(test => window.location.href.split('?')[0].startsWith(test.url)))
+      {
+        removeLoadingClass();
+        return;
+      }
+
+      clearTimeout(timeout);
+
+      console.log("Both loaded. Starting AB test..."); 
+      tests.forEach((test) => {
+        const { name, url, type, data } = test;
+        _paq.push(["AbTesting::create", {
+            name: name,
+            includedTargets: [{ attribute: "url", type: "starts_with", value: url, inverted: "0" }],
+            excludedTargets: [],
+            variations: [
+              {
+                name: "original",
+                activate: function (event) {
+                  document.getElementById("ab-element").innerText = "A VERSION";
+                  removeLoadingClass();
+                },
+              },
+              {
+                name: "test",
+                activate: function (event) {
+                  if (type === "simple_text") {
+                    const abElement = document.getElementById("ab-element");
+                    if (abElement) { abElement.innerHTML = data; }
+                    removeLoadingClass();
+                  }
+                },
+              },
+            ],
+          },
+        ]);
+      });
+    }
+
+    async function getTests() { 
+      const response = await fetch(`${luxiferABDataSource}?idSite=${matomoLuxiSiteId}`, { method: 'POST' });
+      return response.json();
+    }
 
     _paq.push(["setTrackerUrl", `${luxiferAnalytics}/matomo.php`]);
     _paq.push(['setSiteId', matomoLuxiSiteId]);
@@ -75,50 +111,17 @@ console.log(getTests());
     let shouldLoad = true;
 
     g.onload = () => {
-        const end = performance.now();
-        console.log(`Took ${end - start} milliseconds`);
-        clearTimeout(timeout);
-        if (!shouldLoad) return;
-        const tests = [
-          {
-            name: "Test_royod",
-            url: "https://chiukurt.github.io/",
-            type: "simple_text",
-            data: "B VERSION",
-          },
-        ];
-      if (tests.length === 0) removeLoadingClass();
-      if (tests.some(test => window.location.href.split('?')[0].startsWith(test.url))) removeLoadingClass();
-        console.log("Loading success"); 
-        tests.forEach((test) => {
-          const { name, url, type, data } = test;
-          _paq.push(["AbTesting::create", {
-              name: name,
-              includedTargets: [{ attribute: "url", type: "starts_with", value: url, inverted: "0" }],
-              excludedTargets: [],
-              variations: [
-                {
-                  name: "original",
-                  activate: function (event) {
-                    document.getElementById("ab-element").innerText = "A VERSION";
-                    removeLoadingClass();
-                  },
-                },
-                {
-                  name: "test",
-                  activate: function (event) {
-                    if (type === "simple_text") {
-                      const abElement = document.getElementById("ab-element");
-                      if (abElement) { abElement.innerHTML = data; }
-                      removeLoadingClass();
-                    }
-                  },
-                },
-              ],
-            },
-          ]);
-        });
+      console.log(`Matomo took ${performance.now() - start} milliseconds`);
+      matomoLoaded = true;
+      startABTest();
     };
+
+    getTests().then((data) => {
+      if (Array.isArray(data)) { tests.push(...data); }
+      console.log(`ABTEST Took ${performance.now() - start} milliseconds`);
+      testsLoaded = true;
+      startABTest();
+    });
 
     const timeout = setTimeout(() => {
       shouldLoad = false;
