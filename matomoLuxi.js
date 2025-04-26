@@ -67,7 +67,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
       console.log("Both loaded. Starting AB test..."); 
       tests.forEach((test) => {
-        var { name, url, type, data } = test;
+        var { name, url, type, data, selector } = test;
         _paq.push(["AbTesting::create", {
             name: name,
             includedTargets: [{ attribute: "url", type: "starts_with", value: url, inverted: "0" }],
@@ -76,13 +76,13 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
               {
                 name: "original",
                 activate: function (event) {
-                  document.getElementById("ab-element").innerText = "A VERSION";
+                  if (type === "simple_text") document.querySelector(selector).innerText = "A VERSION";
                 },
               },
               {
                 name: name,
                 activate: function (event) {
-                  var abElement = document.getElementById("ab-element");
+                  var abElement = document.querySelector(selector);
                   if (!abElement) return;
                   if (type === "simple_text") abElement.innerHTML = data;
                   if (type === "simple_img") abElement.src = data;
