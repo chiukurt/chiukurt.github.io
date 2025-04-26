@@ -55,6 +55,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     const removeLoadingClass = () => document.documentElement.classList.remove("luxifer-ab-test-loading");
 
     function startABTest() { 
+      console.log(tests, testsLoaded, matomoLoaded);
       if (!testsLoaded || !matomoLoaded) return;
       
       if (!shouldLoad
@@ -121,7 +122,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     };
 
     getTests().then((data) => {
-      console.log(data);
       if (Array.isArray(data)) { tests.push(...data); }
       console.log(`ABTEST Took ${performance.now() - start} milliseconds`);
       testsLoaded = true;
