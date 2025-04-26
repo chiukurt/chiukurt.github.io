@@ -80,7 +80,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                 },
               },
               {
-                name: "test",
+                name: name,
                 activate: function (event) {
                   var abElement = document.getElementById("ab-element");
                   if (!abElement) return;
