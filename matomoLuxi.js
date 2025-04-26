@@ -99,8 +99,12 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     }
 
     async function getTests() { 
-      const response = await fetch(`${luxiferABDataSource}?idSite=${matomoLuxiSiteId}`, { method: 'POST' });
-      return response.json();
+      const response = await fetch(luxiferABDataSource, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ siteId: matomoLuxiSiteId }),
+      });
+      return await response.json();
     }
 
     _paq.push(["setTrackerUrl", `${luxiferAnalytics}/matomo.php`]);
