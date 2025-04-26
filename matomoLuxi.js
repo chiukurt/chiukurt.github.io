@@ -35,7 +35,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 async function getTests() { 
   const start = performance.now();
   const url = "https://getabtestseu-573194387152.europe-west1.run.app";
-  const response = await fetch(`${url}?idSite=${matomoLuxiSiteId}`, { method: 'POST', mode: 'no-cors' });
+  const response = await fetch(`${url}?idSite=${matomoLuxiSiteId}`, { method: 'POST' });
   console.log(response);
   const end = performance.now();
   console.log(`ABTEST Took ${end - start} milliseconds`);
