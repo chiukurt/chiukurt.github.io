@@ -102,7 +102,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
       const response = await fetch(luxiferABDataSource, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ siteId: matomoLuxiSiteId }),
+        body: JSON.stringify({ idSite: matomoLuxiSiteId }),
       });
       return await response.json();
     }
