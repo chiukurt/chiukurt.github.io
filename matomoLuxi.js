@@ -86,6 +86,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                 activate: function (event) {
                   var abElement = document.querySelector(selector);
                   if (!abElement) return;
+                  console.log("applying.. ", name);
                   if (type === "simple_text") abElement.innerHTML = data;
                   if (type === "simple_img") abElement.src = data;
                 },
