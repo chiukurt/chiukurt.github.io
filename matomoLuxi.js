@@ -32,6 +32,23 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
 // Special test file =======================================================================================================================================================================================================
 
+async function getTests() { 
+  const start = performance.now();
+  const url = "https://getabtestseu-573194387152.europe-west1.run.app";
+  const response = await fetch(`${url}?idSite=${matomoLuxiSiteId}`);
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+  const end = performance.now();
+  console.log(`ABTEST Took ${end - start} milliseconds`);
+  return await response.json();
+}
+
+console.log(getTests());
+
+
+// Special test file =======================================================================================================================================================================================================
+
 (function () {
   const luxiferAnalytics = "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net";
   if (typeof matomoLuxiSiteId === 'undefined' || typeof matomoLuxiSampleSize === 'undefined') {
