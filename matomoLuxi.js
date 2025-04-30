@@ -90,6 +90,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                     if (type === "simple_img") node.src = data;
                   }
 
+                  console.log("Attempting test variation: ", name);
+
                   const node = document.querySelector(selector);
                   if (node) {
                     applyBVersion(node);
@@ -107,7 +109,9 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                   const observer = new MutationObserver((mutationsList, observer) => {
                     for (const mutation of mutationsList) {
                       for (const node of mutation.addedNodes) {
-                        if (checkNodeAndChildren(node, selector)) {
+                        const out = checkNodeAndChildren(node, selector);
+                        console.log("OUT -- ", out, node);
+                        if (out) {
                           observer.disconnect();
                           return;
                         }
