@@ -91,6 +91,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                       if (type === "simple_text") abElement.innerHTML = data;
                       if (type === "simple_img") abElement.src = data;
                       observer.disconnect();
+                    } else { 
+                      console.log("not found");
                     }
                   });
                   
