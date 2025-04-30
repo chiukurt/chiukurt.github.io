@@ -98,18 +98,10 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
                   function checkNodeAndChildren(node, selector) {
                     if (node.nodeType === 1 && node.matches?.(selector)) {
-                      console.log("Found node:", node);
                       applyBVersion(node);
-                      return true; 
+                      return true;
                     }
-                  
-                    for (const child of node.children) {
-                      if (checkNodeAndChildren(child, selector)) {
-                        return true;
-                      }
-                    }
-                  
-                    return false;
+                    return Array.from(node.children || []).some((child) => checkNodeAndChildren(child, selector));
                   }
                   
                   const observer = new MutationObserver((mutationsList, observer) => {
