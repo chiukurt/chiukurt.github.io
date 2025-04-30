@@ -107,6 +107,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                   }
                   
                   const observer = new MutationObserver((mutationsList, observer) => {
+                    console.log(mutationList);
                     for (const mutation of mutationsList) {
                       for (const node of mutation.addedNodes) {
                         const out = checkNodeAndChildren(node, selector);
