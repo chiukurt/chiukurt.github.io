@@ -84,21 +84,36 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
               {
                 name: "test",
                 activate: function (event) {
+                  function applyBVersion(node) { 
+                    console.log("Applying test variation for: ", name);
+                    if (type === "simple_text") node.innerHTML = data;
+                    if (type === "simple_img") node.src = data;
+                  }
+
+                  const node = document.querySelector(selector);
+                  if (node) {
+                    applyBVersion(node);
+                    return;
+                  }
+
                   const observer = new MutationObserver((mutationsList, observer) => {
-                    var abElement = document.querySelector(selector);
-                    if (abElement) {
-                      console.log("Applying test variation for: ", name);
-                      if (type === "simple_text") abElement.innerHTML = data;
-                      if (type === "simple_img") abElement.src = data;
-                      observer.disconnect();
-                    } else { 
-                      console.log("not found");
+                    for (const mutation of mutationsList) {
+                      for (const node of mutation.addedNodes) {
+                        console.log ("Mutation");
+                        if (node.nodeType === 1 && node.matches?.(selector)) {
+                          applyBVersion(node);
+                          observer.disconnect();
+                          return;
+                        }
+                      }
                     }
                   });
-                  
-                  observer.observe(document.body, {
-                    childList: true,
-                    subtree: true, 
+
+                  observer.observe(parent, {
+                    childList: true,    
+                    subtree: true,       
+                    attributes: false,   
+                    characterData: false 
                   });
                 },
               },
