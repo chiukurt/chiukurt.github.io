@@ -109,11 +109,9 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                     }
                   });
 
-                  observer.observe(parent, {
+                  observer.observe(document.body, {
                     childList: true,    
-                    subtree: true,       
-                    attributes: false,   
-                    characterData: false 
+                    subtree: true,
                   });
                 },
               },
