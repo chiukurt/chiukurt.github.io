@@ -101,6 +101,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                       for (const node of mutation.addedNodes) {
                         console.log ("Mutation");
                         if (node.nodeType === 1 && node.matches?.(selector)) {
+                          console.log ("Found node: ", node);
                           applyBVersion(node);
                           observer.disconnect();
                           return;
