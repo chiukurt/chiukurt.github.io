@@ -77,7 +77,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                 name: "original",
                 activate: function (event) {
                   var abElement = document.querySelector(selector);
-                  if (!abElement) return;
+                  if (!abElement) { return; }
                   if (type === "simple_text") abElement.innerText = "A VERSION";
                 },
               },
@@ -85,7 +85,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                 name: "test",
                 activate: function (event) {
                   var abElement = document.querySelector(selector);
-                  if (!abElement) return;
+                  if (!abElement) { console.log("Element not found"); return };
                   console.log("applying.. ", name);
                   if (type === "simple_text") abElement.innerHTML = data;
                   if (type === "simple_img") abElement.src = data;
