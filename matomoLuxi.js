@@ -83,7 +83,27 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
               },
               {
                 name: "test",
-                activate: function (event) {
+                activate: async function (event) {
+                  async function waitForElm(selector) {
+                    return new Promise(resolve => {
+                        if (document.querySelector(selector)) {
+                            return resolve(document.querySelector(selector));
+                        }
+                
+                        const observer = new MutationObserver(mutations => {
+                            if (document.querySelector(selector)) {
+                                observer.disconnect();
+                                resolve(document.querySelector(selector));
+                            }
+                        });
+                
+                        observer.observe(document.body, {
+                            childList: true,
+                            subtree: true
+                        });
+                    });
+                  }
+
                   function applyBVersion(node) { 
                     console.log("Applying test variation for: ", name);
                     if (type === "simple_text") node.innerHTML = data;
@@ -91,38 +111,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                   }
 
                   console.log("Attempting test variation: ", name);
-
-                  const node = document.querySelector(selector);
-                  if (node) {
+                  waitForElm(selector).then((node) => { 
                     applyBVersion(node);
-                    return;
-                  }
-
-                  function checkNodeAndChildren(node, selector) {
-                    if (node.nodeType === 1 && node.matches?.(selector)) {
-                      applyBVersion(node);
-                      return true;
-                    }
-                    return Array.from(node.children || []).some((child) => checkNodeAndChildren(child, selector));
-                  }
-                  
-                  const observer = new MutationObserver((mutationsList, observer) => {
-                    console.log(mutationsList);
-                    for (const mutation of mutationsList) {
-                      for (const node of mutation.addedNodes) {
-                        const out = checkNodeAndChildren(node, selector);
-                        console.log("OUT -- ", out, node);
-                        if (out) {
-                          observer.disconnect();
-                          return;
-                        }
-                      }
-                    }
-                  });
-
-                  observer.observe(document.body, {
-                    childList: true,    
-                    subtree: true,
                   });
                 },
               },
