@@ -152,8 +152,9 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     });
 
     var timeout = setTimeout(() => {
-      shouldTest = false;
       removeLoadingClass();
+      if (new URLSearchParams(window.location.search).has('pk_ab_test')) return;
+      shouldTest = false;
       var end = performance.now();
       console.log(`Loading timeout -- Took ${end - start} milliseconds`);
     }, 500); 
