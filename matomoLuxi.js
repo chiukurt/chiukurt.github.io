@@ -86,25 +86,29 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                 activate: async function (event) {
                   async function waitForElm(selector) {
                     return new Promise(resolve => {
+                      if (document.querySelector(selector)) {
+                        return resolve(document.querySelector(selector));
+                      }
+                
+                      const observer = new MutationObserver(mutations => {
                         if (document.querySelector(selector)) {
-                            return resolve(document.querySelector(selector));
+                          observer.disconnect();
+                          resolve(document.querySelector(selector));
                         }
-                
-                        const observer = new MutationObserver(mutations => {
-                            if (document.querySelector(selector)) {
-                                observer.disconnect();
-                                resolve(document.querySelector(selector));
-                            }
-                        });
-                
-                        observer.observe(document.body, {
-                            childList: true,
-                            subtree: true
-                        });
+                      });
+                      
+                      const topNode = document.body instanceof Node ? document.body : (document.documentElement instanceof Node ? document.documentElement : null);
+                      if (!topNode) return resolve(null);
+                      
+                      observer.observe(topNode, {
+                          childList: true,
+                          subtree: true
+                      });
                     });
                   }
 
                   function applyBVersion(node) { 
+                    if (!node) return; 
                     console.log("Applying test variation for: ", name);
                     if (type === "simple_text") node.innerHTML = data;
                     if (type === "simple_img") node.src = data;
