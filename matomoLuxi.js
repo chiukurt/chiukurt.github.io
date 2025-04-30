@@ -75,11 +75,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
             variations: [
               {
                 name: "original",
-                activate: function (event) {
-                  var abElement = document.querySelector(selector);
-                  if (!abElement) { return; }
-                  if (type === "simple_text") abElement.innerText = "A VERSION";
-                },
+                activate: function (event) { },
               },
               {
                 name: "test",
@@ -108,7 +104,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                   }
 
                   function applyBVersion(node) { 
-                    if (!node) return; 
                     console.log("Applying test variation for: ", name);
                     if (type === "simple_text") node.innerHTML = data;
                     if (type === "simple_img") node.src = data;
@@ -116,7 +111,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
                   console.log("Attempting test variation: ", name);
                   waitForElm(selector).then((node) => { 
-                    applyBVersion(node);
+                    if (node) applyBVersion(node);
                   });
                 },
               },
