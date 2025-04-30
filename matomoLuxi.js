@@ -96,13 +96,26 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                     return;
                   }
 
+                  function checkNodeAndChildren(node, selector) {
+                    if (node.nodeType === 1 && node.matches?.(selector)) {
+                      console.log("Found node:", node);
+                      applyBVersion(node);
+                      return true; 
+                    }
+                  
+                    for (const child of node.children) {
+                      if (checkNodeAndChildren(child, selector)) {
+                        return true;
+                      }
+                    }
+                  
+                    return false;
+                  }
+                  
                   const observer = new MutationObserver((mutationsList, observer) => {
                     for (const mutation of mutationsList) {
                       for (const node of mutation.addedNodes) {
-                        console.log ("Mutation -- ", node);
-                        if (node.nodeType === 1 && node.matches?.(selector)) {
-                          console.log ("Found node: ", node);
-                          applyBVersion(node);
+                        if (checkNodeAndChildren(node, selector)) {
                           observer.disconnect();
                           return;
                         }
