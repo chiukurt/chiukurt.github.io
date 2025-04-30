@@ -84,11 +84,20 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
               {
                 name: "test",
                 activate: function (event) {
-                  var abElement = document.querySelector(selector);
-                  if (!abElement) { console.log("Element not found"); return };
-                  console.log("applying.. ", name);
-                  if (type === "simple_text") abElement.innerHTML = data;
-                  if (type === "simple_img") abElement.src = data;
+                  const observer = new MutationObserver((mutationsList, observer) => {
+                    var abElement = document.querySelector(selector);
+                    if (abElement) {
+                      console.log("Applying test variation for: ", name);
+                      if (type === "simple_text") abElement.innerHTML = data;
+                      if (type === "simple_img") abElement.src = data;
+                      observer.disconnect();
+                    }
+                  });
+                  
+                  observer.observe(document.body, {
+                    childList: true,
+                    subtree: true, 
+                  });
                 },
               },
             ],
