@@ -30,11 +30,11 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
   g.async=true; g.src='https://analytics.luxifer.app/js/container_1jnfkkvV.js?d=' + todayParam(); s.parentNode.insertBefore(g, s);
 })();
 
-// Special test file =======================================================================================================================================================================================================
+// Special test file (Load from JsDelivr)=======================================================================================================================================================================================================
 
 (function () {
   var luxiferAnalytics = "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net";
-  var luxiferABDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
+  var luxiferAbDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
   if (typeof matomoLuxiSiteId === 'undefined' || typeof matomoLuxiSampleSize === 'undefined') {
     return;
   }
@@ -123,7 +123,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     }
 
     async function getTests() { 
-      var response = await fetch(luxiferABDataSource, {
+      var response = await fetch(luxiferAbDataSource, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ idSite: matomoLuxiSiteId }),
