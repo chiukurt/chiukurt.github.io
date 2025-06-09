@@ -147,6 +147,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
     getTests().then((data) => {
       if (Array.isArray(data)) { tests.push(...data); }
+      console.log(tests);
       console.log(`ABTEST Took ${performance.now() - start} milliseconds`);
       testsLoaded = true;
       startABTest();
