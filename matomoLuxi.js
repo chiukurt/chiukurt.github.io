@@ -42,7 +42,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 (async function () {
   // simulate a delay of 100 ms
   await new Promise(res => setTimeout(res, 100));
-  throw new Error("Error test");
   var luxiferAnalytics = "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net";
   var luxiferAbDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
   if (typeof matomoLuxiSiteId === 'undefined' || typeof matomoLuxiSampleSize === 'undefined') {
@@ -53,10 +52,11 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
   _paq.push(['requireConsent']);
 
   (function () {
+
     var tests = [];
     var testsLoaded = false;
     var matomoLoaded = false;
-
+      throw new Error("Error test");
     function startABTest() { 
       console.log(tests, testsLoaded, matomoLoaded, tests.length);
       if (!testsLoaded || !matomoLoaded) return;
