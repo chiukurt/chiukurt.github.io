@@ -56,7 +56,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     var tests = [];
     var testsLoaded = false;
     var matomoLoaded = false;
-      throw new Error("Error test");
     function startABTest() { 
       console.log(tests, testsLoaded, matomoLoaded, tests.length);
       if (!testsLoaded || !matomoLoaded) return;
