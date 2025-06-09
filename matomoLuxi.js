@@ -1,6 +1,5 @@
 
-// =======================================================================================================================================================================================================
-
+// =====================================================================================================================
 var matomoLuxiSiteId = "5";
 var matomoLuxiSampleSize = "100";
 var _mtm = window._mtm = window._mtm || [];
@@ -16,7 +15,7 @@ var _paq = window._paq = window._paq || [];
 //   }, 10000);
 // })();
 
-// Special MTM test container. ==========================================================================================================================================================================
+// Special MTM test container. Exclude this from client code ===========================================================
 
 function todayParam() {
   var pad = (number) => (number < 10 ? '0' : '') + number;
@@ -30,7 +29,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
   g.async=true; g.src='https://analytics.luxifer.app/js/container_1jnfkkvV.js?d=' + todayParam(); s.parentNode.insertBefore(g, s);
 })();
 
-// Special test file (Load from JsDelivr)=======================================================================================================================================================================================================
+// Special test file (Load from JsDelivr)==============================================================================
 
 (function () {
   var luxiferAnalytics = "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net";
