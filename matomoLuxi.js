@@ -4,6 +4,9 @@ var matomoLuxiSiteId = "5";
 var matomoLuxiSampleSize = "100";
 var _mtm = window._mtm = window._mtm || [];
 var _paq = window._paq = window._paq || [];
+document.documentElement.classList.add('luxi-ab-test-loading');
+document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0}</style>';
+
 // (function() {
 //   var script = document.createElement('script');
 //   script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.02/default.min.js";
@@ -51,7 +54,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     var tests = [];
     var testsLoaded = false;
     var matomoLoaded = false;
-    var removeLoadingClass = () => document.documentElement.classList.remove("luxifer-ab-test-loading");
+    var removeLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
 
     function startABTest() { 
       console.log(tests, testsLoaded, matomoLoaded, tests.length);
@@ -92,7 +95,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                         }
                       });
                       
-                      const topNode = document.body instanceof Node ? document.body : (document.documentElement instanceof Node ? document.documentElement : null);
+                      const topNode = document.body instanceof Node ? document.body
+                        : (document.documentElement instanceof Node ? document.documentElement : null);
                       if (!topNode) return resolve(null);
                       
                       observer.observe(topNode, {
@@ -192,8 +196,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
   }
 
-  var inSample = (inputNum) =>
-    parseInt(inputNum, 10) <= parseInt(matomoLuxiSampleSize, 10);
+  var inSample = (inputNum) => parseInt(inputNum, 10) <= parseInt(matomoLuxiSampleSize, 10);
 
   var luxiSample = getLuxiCookie("luxiSample");
   if (!luxiSample) {
