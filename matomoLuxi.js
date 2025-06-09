@@ -11,7 +11,7 @@ var removeLuxiLoadingClass = () => document.documentElement.classList.remove("lu
 var luxiAutoTimeout = setTimeout(() => {
   removeLuxiLoadingClass();
   if (!new URLSearchParams(window.location.search).has('pk_ab_test')) shouldLuxiAbTest = false;
-}, 300); 
+}, 500); 
 // (function() {
 //   var script = document.createElement('script');
 //   script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.02/default.min.js";
