@@ -4,9 +4,14 @@ var matomoLuxiSiteId = "5";
 var matomoLuxiSampleSize = "100";
 var _mtm = window._mtm = window._mtm || [];
 var _paq = window._paq = window._paq || [];
+var shouldLuxiAbTest = true;
 document.documentElement.classList.add('luxi-ab-test-loading');
 document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0}</style>';
-
+var removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
+var luxiAutoTimeout = setTimeout(() => {
+  removeLuxiLoadingClass();
+  if (!new URLSearchParams(window.location.search).has('pk_ab_test')) shouldLuxiAbTest = false;
+}, 300); 
 // (function() {
 //   var script = document.createElement('script');
 //   script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.02/default.min.js";
@@ -34,7 +39,9 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
 // Special test file (Load from JsDelivr)==============================================================================
 
-(function () {
+(async function () {
+  // simulate a delay of 100 ms
+  await new Promise(res => setTimeout(res, 100));
   var luxiferAnalytics = "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net";
   var luxiferAbDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
   if (typeof matomoLuxiSiteId === 'undefined' || typeof matomoLuxiSampleSize === 'undefined') {
@@ -42,37 +49,30 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
   }
   
   var start = performance.now();
-
-  var style = document.createElement('style');
-  style.textContent = `html.luxifer-ab-test-loading { opacity: 0; }`;
-  document.head.appendChild(style);
-  document.documentElement.classList.add('luxifer-ab-test-loading');
-
   _paq.push(['requireConsent']);
 
   (function () {
     var tests = [];
     var testsLoaded = false;
     var matomoLoaded = false;
-    var removeLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
 
     function startABTest() { 
       console.log(tests, testsLoaded, matomoLoaded, tests.length);
       if (!testsLoaded || !matomoLoaded) return;
       
-      if (!shouldTest || tests.length === 0) {
-        removeLoadingClass();
+      if (!shouldLuxiAbTest || tests.length === 0) {
+        removeLuxiLoadingClass();
         return;
       }
 
-      clearTimeout(timeout);
+      clearTimeout(luxiAutoTimeout);
 
       console.log("Both loaded. Starting AB test..."); 
       tests.forEach((test) => {
         var { name, url, type, data, selector } = test;
         _paq.push(["AbTesting::create", {
             name: name,
-            includedTargets: [{ attribute: "url", type: "equals_simple", value: url, inverted: "0" }],
+            includedTargets: [{ attribute: "url", type: "equals_exact", value: url, inverted: "0" }],
             excludedTargets: [],
             variations: [
               {
@@ -122,7 +122,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
           },
         ]);
       });
-      removeLoadingClass();
+      removeLuxiLoadingClass();
     }
 
     async function getTests() { 
@@ -139,8 +139,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     var d = document, g = d.createElement("script"), s = d.getElementsByTagName("script")[0];
     g.async = true; g.src = `${luxiferAnalytics}/matomo.js`;
 
-    var shouldTest = true;
-
     g.onload = () => {
       console.log(`Matomo took ${performance.now() - start} milliseconds`);
       matomoLoaded = true;
@@ -153,14 +151,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
       testsLoaded = true;
       startABTest();
     });
-
-    var timeout = setTimeout(() => {
-      removeLoadingClass();
-      if (new URLSearchParams(window.location.search).has('pk_ab_test')) return;
-      shouldTest = false;
-      var end = performance.now();
-      console.log(`Loading timeout -- Took ${end - start} milliseconds`);
-    }, 500); 
 
     s.parentNode.insertBefore(g, s);
   })();
