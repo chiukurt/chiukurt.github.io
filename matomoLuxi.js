@@ -146,7 +146,9 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     g.onload = () => {
       console.log(`Matomo took ${performance.now() - start} milliseconds`);
       matomoLoaded = true;
-      startABTest();
+      try {
+        startABTest();
+      } catch (e) { }
     };
 
     getTests().then((data) => {
@@ -154,7 +156,9 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
       console.log(tests);
       console.log(`ABTEST Took ${performance.now() - start} milliseconds`);
       testsLoaded = true;
-      startABTest();
+      try {
+        startABTest();
+      } catch (e) { }
     });
 
     s.parentNode.insertBefore(g, s);
