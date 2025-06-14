@@ -40,15 +40,12 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 // Special test file (Load from JsDelivr)==============================================================================
 
 (async function () {
-  // simulate a delay of 100 ms
-  await new Promise(res => setTimeout(res, 100));
   var luxiferAnalytics = "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net";
   var luxiferAbDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
   if (typeof matomoLuxiSiteId === 'undefined' || typeof matomoLuxiSampleSize === 'undefined') {
     return;
   }
   
-  var start = performance.now();
   _paq.push(['requireConsent']);
 
   (function () {
@@ -57,7 +54,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     var testsLoaded = false;
     var matomoLoaded = false;
     function startABTest() { 
-      console.log(tests, testsLoaded, matomoLoaded, tests.length);
       if (!testsLoaded || !matomoLoaded) return;
       
       if (!shouldLuxiAbTest || tests.length === 0) {
@@ -67,7 +63,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
       clearTimeout(luxiAutoTimeout);
 
-      console.log("Both loaded. Starting AB test..."); 
       tests.forEach((test) => {
         var { name, url, type, data, selector, device } = test;
         _paq.push(["AbTesting::create", {
@@ -117,12 +112,10 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                   }
 
                   function applyBVersion(node) { 
-                    console.log("Applying test variation for: ", name);
                     if (type === "simple_text") node.innerHTML = data;
                     if (type === "simple_img") node.src = data;
                   }
-
-                  console.log("Attempting test variation: ", name);
+                  
                   waitForElm(selector).then((node) => { 
                     if (node) applyBVersion(node);
                   });
@@ -150,26 +143,21 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     g.async = true; g.src = `${luxiferAnalytics}/matomo.js`;
 
     g.onload = () => {
-      console.log(`Matomo took ${performance.now() - start} milliseconds`);
       matomoLoaded = true;
       try {
         startABTest();
       } catch (e) {
         removeLuxiLoadingClass();
-        console.log(e);
       }
     };
 
     getTests().then((data) => {
       if (Array.isArray(data)) { tests.push(...data); }
-      console.log(tests);
-      console.log(`ABTEST Took ${performance.now() - start} milliseconds`);
       testsLoaded = true;
       try {
         startABTest();
       } catch (e) {
         removeLuxiLoadingClass();
-        console.log(e);
       }
     });
 
