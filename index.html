@@ -48,7 +48,7 @@
               const isTablet = /iPad|Tablet|PlayBook|Silk/.test(ua);
               const isMobile = !isTablet && /Mobile|iPhone|iPod|Android/.test(ua);
               const d = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
-              document.getElementById("device-type").innerText = `Device type: ${d}`;
+              document.getElementById("device-type").innerText = `Device type: ${d}\nUser agent: ${ua}`;
             }
 
             function deleteCookie(name) {
