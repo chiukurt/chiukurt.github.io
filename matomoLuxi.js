@@ -72,11 +72,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
         var { name, url, type, data, selector } = test;
         _paq.push(["AbTesting::create", {
             name: name,
-            includedTargets: [
-                { attribute: "url", type: "equals_exactly", value: url, inverted: "0" },
-                { attribute: "device", type: "equals", value: "mobile", inverted: "0" }
-            ],
-            
+            includedTargets: [{ attribute: "url", type: "equals_exactly", value: url, inverted: "0" }],
             excludedTargets: [],
             variations: [
               {
@@ -126,7 +122,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
           },
         ]);
       });
-      removeLuxiLoadingClass();
+      // removeLuxiLoadingClass();
     }
 
     async function getTests() { 
