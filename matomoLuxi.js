@@ -57,6 +57,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
       
       if (!shouldLuxiAbTest || tests.length === 0) {
         removeLuxiLoadingClass();
+        console.log("early removal, no tests");
         return;
       }
 
@@ -121,6 +122,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
         ]);
       });
       removeLuxiLoadingClass();
+      console.log("Clean removal");
     }
 
     async function getTests() {
@@ -147,6 +149,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
         startABTest();
       } catch (e) {
         removeLuxiLoadingClass();
+        console.log("Error starting AB test:", e);
       }
     };
 
@@ -157,6 +160,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
         startABTest();
       } catch (e) {
         removeLuxiLoadingClass();
+        console.log ("Error starting AB test:", e);
       }
     });
 
