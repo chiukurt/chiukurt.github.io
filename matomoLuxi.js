@@ -5,8 +5,7 @@ var matomoLuxiSampleSize = "100";
 var _mtm = window._mtm = window._mtm || [];
 var _paq = window._paq = window._paq || [];
 var shouldLuxiAbTest = true;
-document.documentElement.classList.add('luxi-ab-test-loading');
-document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0}</style>';
+document.head.appendChild(Object.assign(document.createElement('style'), {textContent: 'html.luxi-ab-test-loading{opacity:0}'}));
 var removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
 var luxiAutoTimeout = setTimeout(() => {
   removeLuxiLoadingClass();
@@ -89,25 +88,21 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                 activate: async function (event) {
                   async function waitForElm(selector) {
                     return new Promise(resolve => {
-                      if (document.querySelector(selector)) {
-                        return resolve(document.querySelector(selector));
-                      }
-                
-                      var observer = new MutationObserver(mutations => {
-                        if (document.querySelector(selector)) {
+                      var node = document.querySelector(selector);
+                      if (node) return resolve(node);
+
+                      var observer = new MutationObserver(() => {
+                        node = document.querySelector(selector);
+                        if (node) {
                           observer.disconnect();
-                          resolve(document.querySelector(selector));
+                          resolve(node);
                         }
                       });
-                      
-                      var topNode = document.body instanceof Node ? document.body
-                        : (document.documentElement instanceof Node ? document.documentElement : null);
-                      if (!topNode) return resolve(null);
-                      
-                      observer.observe(topNode, {
-                          childList: true,
-                          subtree: true
-                      });
+
+                      var topNode = document.body || document.documentElement;
+                      if (!(topNode instanceof Node)) return resolve(null);
+
+                      observer.observe(topNode, { childList: true, subtree: true });
                     });
                   }
 
@@ -128,13 +123,17 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
       removeLuxiLoadingClass();
     }
 
-    async function getTests() { 
-      var response = await fetch(luxiferAbDataSource, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ idSite: matomoLuxiSiteId }),
-      });
-      return await response.json();
+    async function getTests() {
+      try {
+        const response = await fetch(luxiferAbDataSource, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ idSite: matomoLuxiSiteId }),
+        });
+        return await response.json();
+      } catch (e) {
+        return [];
+      }
     }
 
     _paq.push(["setTrackerUrl", `${luxiferAnalytics}/matomo.php`]);
