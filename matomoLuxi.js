@@ -5,7 +5,8 @@ var matomoLuxiSampleSize = "100";
 var _mtm = window._mtm = window._mtm || [];
 var _paq = window._paq = window._paq || [];
 var shouldLuxiAbTest = true;
-document.head.appendChild(Object.assign(document.createElement('style'), {textContent: 'html.luxi-ab-test-loading{opacity:0}'}));
+document.documentElement.classList.add('luxi-ab-test-loading');
+document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0}</style>';
 var removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
 var luxiAutoTimeout = setTimeout(() => {
   removeLuxiLoadingClass();
