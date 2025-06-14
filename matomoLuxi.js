@@ -74,11 +74,9 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
             name: name,
             trigger: () => {
               const ua = navigator.userAgent;
-              const d = /Mobile|iPhone|iPod|Android/.test(ua) && !/iPad|Tablet|PlayBook|Silk/.test(ua)
-                ? "mobile"
-                : /iPad|Tablet|PlayBook|Silk/.test(ua)
-                ? "tablet"
-                  : "desktop";
+              const isTablet = /iPad|Tablet|PlayBook|Silk/.test(ua);
+              const isMobile = !isTablet && /Mobile|iPhone|iPod|Android/.test(ua);
+              const d = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
               return d === device;
             },
             includedTargets: [{ attribute: "url", type: "equals_exactly", value: url, inverted: "0" }],
