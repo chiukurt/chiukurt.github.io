@@ -72,6 +72,15 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
         var { name, url, type, data, selector } = test;
         _paq.push(["AbTesting::create", {
             name: name,
+            trigger: () => {
+              const ua = navigator.userAgent;
+              const d = /Mobile|iPhone|iPod|Android/.test(ua) && !/iPad|Tablet|PlayBook|Silk/.test(ua)
+                ? "mobile"
+                : /iPad|Tablet|PlayBook|Silk/.test(ua)
+                ? "tablet"
+                : "desktop";
+              return d === "mobile";
+            },
             includedTargets: [{ attribute: "url", type: "equals_exactly", value: url, inverted: "0" }],
             excludedTargets: [],
             variations: [
