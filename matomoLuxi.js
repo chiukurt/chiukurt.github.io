@@ -73,12 +73,11 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
         _paq.push(["AbTesting::create", {
             name: name,
             trigger: () => {
-              const ua = navigator.userAgent, w = window.innerWidth;
+              const ua = navigator.userAgent;
               const isiPad = /\biPad\b/.test(ua) || (navigator.platform === 'MacIntel' && 'ontouchend' in document);
               const isAndroidTablet = /\bAndroid\b/.test(ua) && !/\bMobile\b/.test(ua);
               const isOtherTablet = /Tablet|PlayBook|Silk|Kindle|Nexus 7|Nexus 10|SM-T/.test(ua);
-              const isHeuristicTablet = /\bAndroid\b/.test(ua) && w >= 768;
-              const isTablet = isiPad || isAndroidTablet || isOtherTablet || isHeuristicTablet;
+              const isTablet = isiPad || isAndroidTablet || isOtherTablet;
               const isMobile = !isTablet && /Mobile|iPhone|iPod/.test(ua);
               const d = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
               return d === device;
