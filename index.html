@@ -33,14 +33,6 @@
 
         <script src="matomoLuxi.js"></script>
         <script>
-            const ua = navigator.userAgent;
-            const d = /Mobile|iPhone|iPod|Android/.test(ua) && !/iPad|Tablet|PlayBook|Silk/.test(ua)
-              ? "mobile"
-              : /iPad|Tablet|PlayBook|Silk/.test(ua)
-              ? "tablet"
-                : "desktop";
-            document.getElementById("device-type").innerText = `Device type: ${d}`;
-
             function setCookie(name, value, days) {
                 var expires = "";
                 if (days) {
@@ -49,6 +41,16 @@
                     expires = "; expires=" + date.toUTCString();
                 }
                 document.cookie = name + "=" + (value || "") + expires + "; path=/";
+            }
+
+            function setDeviceType(){
+              const ua = navigator.userAgent;
+              const d = /Mobile|iPhone|iPod|Android/.test(ua) && !/iPad|Tablet|PlayBook|Silk/.test(ua)
+                ? "mobile"
+                : /iPad|Tablet|PlayBook|Silk/.test(ua)
+                ? "tablet"
+                  : "desktop";
+              document.getElementById("device-type").innerText = `Device type: ${d}`;
             }
 
             function deleteCookie(name) {
@@ -163,6 +165,11 @@
                                 class="btn-theme btn-theme-sm btn-white-brd text-uppercase"
                                 onclick='_paq.push(["trackEvent", "TestEvent", "Greeting", "Hello"])'>
                                 Track test event
+                            </button>
+                            <button 
+                                class="btn-theme btn-theme-sm btn-white-brd text-uppercase"
+                                onclick='setDeviceType()'>
+                                Get device type
                             </button>
                         </div>
                     </div>
