@@ -68,13 +68,13 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
         _paq.push(["AbTesting::create", {
             name: name,
             trigger: () => {
-              const ua = navigator.userAgent;
-              const isiPad = /\biPad\b/.test(ua) || (navigator.platform === 'MacIntel' && 'ontouchend' in document);
-              const isAndroidTablet = /\bAndroid\b/.test(ua) && !/\bMobile\b/.test(ua);
-              const isOtherTablet = /Tablet|PlayBook|Silk|Kindle|Nexus 7|Nexus 10|SM-T/.test(ua);
-              const isTablet = isiPad || isAndroidTablet || isOtherTablet;
-              const isMobile = !isTablet && /Mobile|iPhone|iPod/.test(ua);
-              const d = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
+              var ua = navigator.userAgent;
+              var isiPad = /\biPad\b/.test(ua) || (navigator.platform === 'MacIntel' && 'ontouchend' in document);
+              var isAndroidTablet = /\bAndroid\b/.test(ua) && !/\bMobile\b/.test(ua);
+              var isOtherTablet = /Tablet|PlayBook|Silk|Kindle|Nexus 7|Nexus 10|SM-T/.test(ua);
+              var isTablet = isiPad || isAndroidTablet || isOtherTablet;
+              var isMobile = !isTablet && /Mobile|iPhone|iPod/.test(ua);
+              var d = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
               return d === device;
             },
             includedTargets: [{ attribute: "url", type: "equals_exactly", value: url, inverted: "0" }],
@@ -93,14 +93,14 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                         return resolve(document.querySelector(selector));
                       }
                 
-                      const observer = new MutationObserver(mutations => {
+                      var observer = new MutationObserver(mutations => {
                         if (document.querySelector(selector)) {
                           observer.disconnect();
                           resolve(document.querySelector(selector));
                         }
                       });
                       
-                      const topNode = document.body instanceof Node ? document.body
+                      var topNode = document.body instanceof Node ? document.body
                         : (document.documentElement instanceof Node ? document.documentElement : null);
                       if (!topNode) return resolve(null);
                       
@@ -115,7 +115,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                     if (type === "simple_text") node.innerHTML = data;
                     if (type === "simple_img") node.src = data;
                   }
-                  
+
                   waitForElm(selector).then((node) => { 
                     if (node) applyBVersion(node);
                   });
