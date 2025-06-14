@@ -78,7 +78,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                 ? "mobile"
                 : /iPad|Tablet|PlayBook|Silk/.test(ua)
                 ? "tablet"
-                : "desktop";
+                  : "desktop";
+              document.getElementById("device-type").innerText = `Device type: ${d}`;
               return d === device;
             },
             includedTargets: [{ attribute: "url", type: "equals_exactly", value: url, inverted: "0" }],
