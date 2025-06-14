@@ -65,6 +65,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
         return;
       }
 
+      clearTimeout(luxiAutoTimeout);
+
       console.log("Both loaded. Starting AB test..."); 
       tests.forEach((test) => {
         var { name, url, type, data, selector } = test;
@@ -121,7 +123,6 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
         ]);
       });
       removeLuxiLoadingClass();
-      clearTimeout(luxiAutoTimeout);
     }
 
     async function getTests() { 
