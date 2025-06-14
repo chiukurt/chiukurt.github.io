@@ -69,7 +69,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
       console.log("Both loaded. Starting AB test..."); 
       tests.forEach((test) => {
-        var { name, url, type, data, selector } = test;
+        var { name, url, type, data, selector, device } = test;
         _paq.push(["AbTesting::create", {
             name: name,
             trigger: () => {
@@ -79,7 +79,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
                 : /iPad|Tablet|PlayBook|Silk/.test(ua)
                 ? "tablet"
                 : "desktop";
-              return d === "mobile";
+              return d === device;
             },
             includedTargets: [{ attribute: "url", type: "equals_exactly", value: url, inverted: "0" }],
             excludedTargets: [],
