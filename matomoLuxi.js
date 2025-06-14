@@ -41,7 +41,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
 (async function () {
   // simulate a delay of 100 ms
-  await new Promise(res => setTimeout(res, 600));
+  await new Promise(res => setTimeout(res, 100));
   var luxiferAnalytics = "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net";
   var luxiferAbDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
   if (typeof matomoLuxiSiteId === 'undefined' || typeof matomoLuxiSampleSize === 'undefined') {
