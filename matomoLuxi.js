@@ -120,7 +120,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
           },
         ]);
       });
-      // removeLuxiLoadingClass();
+      removeLuxiLoadingClass();
+      clearTimeout(luxiAutoTimeout);
     }
 
     async function getTests() { 
@@ -142,8 +143,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
       matomoLoaded = true;
       try {
         startABTest();
-        clearTimeout(luxiAutoTimeout);
-      } catch (e) { }
+      } catch (e) { console.log(e); }
     };
 
     getTests().then((data) => {
@@ -153,8 +153,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
       testsLoaded = true;
       try {
         startABTest();
-        clearTimeout(luxiAutoTimeout);
-      } catch (e) { }
+      } catch (e) { console.log(e); }
     });
 
     s.parentNode.insertBefore(g, s);
