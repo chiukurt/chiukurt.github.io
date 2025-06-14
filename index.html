@@ -33,6 +33,14 @@
 
         <script src="matomoLuxi.js"></script>
         <script>
+            const ua = navigator.userAgent;
+            const d = /Mobile|iPhone|iPod|Android/.test(ua) && !/iPad|Tablet|PlayBook|Silk/.test(ua)
+              ? "mobile"
+              : /iPad|Tablet|PlayBook|Silk/.test(ua)
+              ? "tablet"
+                : "desktop";
+            document.getElementById("device-type").innerText = `Device type: ${d}`;
+
             function setCookie(name, value, days) {
                 var expires = "";
                 if (days) {
