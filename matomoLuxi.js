@@ -125,7 +125,7 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
     async function getTests() {
       try {
-        const response = await fetch(luxiferAbDataSource, {
+        var response = await fetch(luxiferAbDataSource, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ idSite: matomoLuxiSiteId }),
