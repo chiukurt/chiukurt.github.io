@@ -144,7 +144,10 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
       matomoLoaded = true;
       try {
         startABTest();
-      } catch (e) { console.log(e); }
+      } catch (e) {
+        removeLuxiLoadingClass();
+        console.log(e);
+      }
     };
 
     getTests().then((data) => {
@@ -154,7 +157,10 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
       testsLoaded = true;
       try {
         startABTest();
-      } catch (e) { console.log(e); }
+      } catch (e) {
+        removeLuxiLoadingClass();
+        console.log(e);
+      }
     });
 
     s.parentNode.insertBefore(g, s);
