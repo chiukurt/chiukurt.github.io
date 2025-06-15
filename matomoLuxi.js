@@ -14,7 +14,7 @@ var luxiAutoTimeout = setTimeout(() => {
 }, 500); 
 (function() {
   var script = document.createElement('script');
-  script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.02/abtest.min.js";
+  script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.3.00/abtest.min.js";
   script.integrity = "sha384-RW/qr+lWnGM5PLQTWwaXKezL6KuiQtHIrHTtIKrdzJXRGBfxr9TQ/Ufye8rYaMfi";
   script.crossOrigin = "anonymous";
   script.async = true;
