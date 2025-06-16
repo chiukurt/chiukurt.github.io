@@ -48,13 +48,13 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
     var tests = [];
     var testsLoaded = false;
     var matomoLoaded = false;
-    
+
     function normalizeUrl(u) {
       try {
-        const parsed = new URL(u, window.location.origin);
-        const params = new URLSearchParams(parsed.search);
+        var parsed = new URL(u, window.location.origin);
+        var params = new URLSearchParams(parsed.search);
         params.delete('pk_ab_test');
-        const sortedParams = new URLSearchParams();
+        var sortedParams = new URLSearchParams();
         Array.from(params.keys()).sort().forEach(key => {
           sortedParams.set(key, params.get(key));
         });
@@ -76,8 +76,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
       tests.forEach((test) => {
         var { name, url, type, data, selector, device } = test;
-        const currentUrl = normalizeUrl(window.location.pathname + window.location.search);
-        const testUrl = normalizeUrl(url);
+        var currentUrl = normalizeUrl(window.location.pathname + window.location.search);
+        var testUrl = normalizeUrl(url);
         if (currentUrl !== testUrl) return;
         _paq.push(["AbTesting::create", {
             name: name,
