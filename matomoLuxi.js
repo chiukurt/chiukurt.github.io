@@ -60,6 +60,8 @@ _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
 
       tests.forEach((test) => {
         var { name, url, type, data, selector, device } = test;
+        console.log(url, window.location.pathname);
+        if (window.location.pathname !== url) return;
         _paq.push(["AbTesting::create", {
             name: name,
             trigger: () => {
