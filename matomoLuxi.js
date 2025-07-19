@@ -70,7 +70,6 @@ function sendLuxiferCtData(event) {
       const tagName = el.tagName?.toLowerCase();
       const role = el.getAttribute?.("role");
       const hasTabIndex = el.hasAttribute?.("tabindex") && parseInt(el.getAttribute("tabindex")) >= 0;
-      const style = getComputedStyle(el);
       
       if (
         interactiveTags.has(tagName) || interactiveRoles.has(role) ||
@@ -78,7 +77,7 @@ function sendLuxiferCtData(event) {
         typeof el.onclick === 'function' || hasTabIndex
       ) {
           return el;
-      } else if (style.cursor === "pointer") {
+      } else if (getComputedStyle(el).cursor === "pointer") {
           return checkElement(el.parentElement);
       }
 
@@ -116,12 +115,13 @@ function sendLuxiferCtData(event) {
   const el = getLuxiInteractiveElement(event.target);
   const now = Date.now();
   const eventType = event.type === "mouseout" ? "hesitation" : "click";
+  const prevHoverTime = luxiCtLatestHoverTime || 0;
+  luxiCtLatestHoverTime = now;
   if (typeof matomoLuxiSiteId === 'undefined') return;
   if (event.type === "click") {
     luxiCtLatestClickElement = el;
   } else if (event.type === "mouseout") {
-    if ((luxiCtLatestClickElement === el) || (luxiCtLatestHoverTime && (now - luxiCtLatestHoverTime < 500))) {
-      luxiCtLatestHoverTime = now;
+    if ((luxiCtLatestClickElement === el) || (!prevHoverTime || (now - prevHoverTime < 500))) {
       return;
     }
   } else return;
@@ -152,10 +152,8 @@ function sendLuxiferCtData(event) {
   }]);
 }
 
-
-var luxiCtLatestClickTime;
 var luxiCtLatestClickElement;
-var luxiCtLatestHoverTime = Date.now();
+var luxiCtLatestHoverTime;
 document.addEventListener("click", sendLuxiferCtData);
 document.addEventListener("mouseout", sendLuxiferCtData);
   
