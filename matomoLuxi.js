@@ -115,11 +115,11 @@ function sendLuxiferCtData(event) {
   const LUXI_URL = "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
   const el = getLuxiInteractiveElement(event.target);
   const now = Date.now();
-  const eventType = event.type === "mouseover" ? "hesitation" : "click";
+  const eventType = event.type === "mouseout" ? "hesitation" : "click";
   if (typeof matomoLuxiSiteId === 'undefined') return;
   if (event.type === "click") {
     luxiCtLatestClickElement = el;
-  } else if (event.type === "mouseover") {
+  } else if (event.type === "mouseout") {
     if ((luxiCtLatestClickElement === el) || (luxiCtLatestHoverTime && (now - luxiCtLatestHoverTime < 500))) {
       luxiCtLatestHoverTime = now;
       return;
@@ -157,5 +157,5 @@ var luxiCtLatestClickTime;
 var luxiCtLatestClickElement;
 var luxiCtLatestHoverTime;
 document.addEventListener("click", sendLuxiferCtData);
-document.addEventListener("mouseover", sendLuxiferCtData);
+document.addEventListener("mouseout", sendLuxiferCtData);
   
