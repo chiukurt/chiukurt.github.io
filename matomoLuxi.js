@@ -106,7 +106,7 @@ function sendLuxiferCtData(event) {
       setLuxiCookie("luxiCtId", luxiCtId);
       window._paq = window._paq || [];
       var _paq = window._paq;
-      _paq.push(["trackEvent", "dataBridge", "registerCtId", luxiCtId]); 
+      // _paq.push(["trackEvent", "dataBridge", "registerCtId", luxiCtId]); 
     }
 
     return luxiCtId;
