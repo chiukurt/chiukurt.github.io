@@ -134,20 +134,21 @@ function sendLuxiferCtData(event) {
     const url = this.getCurrentUrl();
     if (!visitorId || !url || !el) return;
 
+    console.log(eventType, " on ", getLuxiElementDetails(el).textContent || el.tagName);
     try {
       // navigator.sendBeacon(
-      console.log(
-        LUXI_URL,
-        JSON.stringify({
-          visitorId: visitorId,
-          timestamp: now,
-          url: url, 
-          element: getLuxiElementDetails(el),
-          siteId: matomoLuxiSiteId,
-          ctId: luxiCtId,
-          type: eventType,
-        }),
-      );
+      // console.log(
+      //   LUXI_URL,
+      //   JSON.stringify({
+      //     visitorId: visitorId,
+      //     timestamp: now,
+      //     url: url, 
+      //     element: getLuxiElementDetails(el),
+      //     siteId: matomoLuxiSiteId,
+      //     ctId: luxiCtId,
+      //     type: eventType,
+      //   }),
+      // );
     } catch (e) {}
   }]);
 }
