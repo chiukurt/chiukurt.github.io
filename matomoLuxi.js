@@ -155,7 +155,7 @@ function sendLuxiferCtData(event) {
 
 var luxiCtLatestClickTime;
 var luxiCtLatestClickElement;
-var luxiCtLatestHoverTime;
+var luxiCtLatestHoverTime = Date.now();
 document.addEventListener("click", sendLuxiferCtData);
 document.addEventListener("mouseout", sendLuxiferCtData);
   
