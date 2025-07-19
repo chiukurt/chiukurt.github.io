@@ -115,18 +115,16 @@ function sendLuxiferCtData(event) {
   const LUXI_URL = "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
   const el = getLuxiInteractiveElement(event.target);
   const now = Date.now();
+  const eventType = event.type === "mouseover" ? "hesitation" : "click";
   if (typeof matomoLuxiSiteId === 'undefined') return;
-  
   if (event.type === "click") {
     luxiCtLatestClickElement = el;
-  } else if (event.type === "mouseover") { 
-    const alreadyClicked = luxiCtLatestClickElement && luxiCtLatestClickElement === el;
-    const shortHover = luxiCtLatestHoverTime && (now - luxiCtLatestHoverTime < 500);
-    if (alreadyClicked || shortHover) {
+  } else if (event.type === "mouseover") {
+    if ((luxiCtLatestClickElement === el) || (luxiCtLatestHoverTime && (now - luxiCtLatestHoverTime < 500))) {
       luxiCtLatestHoverTime = now;
       return;
     }
-  }
+  } else return;
   
   window._paq = window._paq || [];
   var _paq = window._paq;
@@ -147,6 +145,7 @@ function sendLuxiferCtData(event) {
           element: getLuxiElementDetails(el),
           siteId: matomoLuxiSiteId,
           ctId: luxiCtId,
+          type: eventType,
         }),
       );
     } catch (e) {}
@@ -158,5 +157,5 @@ var luxiCtLatestClickTime;
 var luxiCtLatestClickElement;
 var luxiCtLatestHoverTime;
 document.addEventListener("click", sendLuxiferCtData);
-document.addEventListener("mouseenter", sendLuxiferCtData);
+document.addEventListener("mouseover", sendLuxiferCtData);
   
