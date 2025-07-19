@@ -112,17 +112,26 @@ function sendLuxiferCtData(event) {
     return luxiCtId;
   }
 
-  console.log(event);
-
-  const LUXIFER_URL =
-    "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
-
+  const LUXI_URL = "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
+  const el = getLuxiInteractiveElement(event.target);
+  const now = Date.now();
   if (typeof matomoLuxiSiteId === 'undefined') return;
+  
+  if (event.type === "click") {
+    luxiCtLatestClickElement = el;
+  } else if (event.type === "mouseover") { 
+    const alreadyClicked = luxiCtLatestClickElement && luxiCtLatestClickElement === el;
+    const shortHover = luxiCtLatestHoverTime && (now - luxiCtLatestHoverTime < 500);
+    if (alreadyClicked || shortHover) {
+      luxiCtLatestHoverTime = now;
+      return;
+    }
+  }
+  
   window._paq = window._paq || [];
   var _paq = window._paq;
   _paq.push([function() {
     const luxiCtId = getOrSetLuxiCtId();
-    const el = getLuxiInteractiveElement(event.target); 
     const visitorId = this.getVisitorId();
     const url = this.getCurrentUrl();
     if (!visitorId || !url || !el) return;
@@ -130,20 +139,24 @@ function sendLuxiferCtData(event) {
     try {
       // navigator.sendBeacon(
       console.log(
-        LUXIFER_URL,
+        LUXI_URL,
         JSON.stringify({
-            visitorId: visitorId,
-            timestamp: Date.now(),
-            url: url, 
-            element: getLuxiElementDetails(el),
-            siteId: matomoLuxiSiteId,
-            ctId: luxiCtId,
-          }),
+          visitorId: visitorId,
+          timestamp: now,
+          url: url, 
+          element: getLuxiElementDetails(el),
+          siteId: matomoLuxiSiteId,
+          ctId: luxiCtId,
+        }),
       );
     } catch (e) {}
   }]);
 }
 
+
+var luxiCtLatestClickTime;
+var luxiCtLatestClickElement;
+var luxiCtLatestHoverTime;
 document.addEventListener("click", sendLuxiferCtData);
 document.addEventListener("mouseenter", sendLuxiferCtData);
   
