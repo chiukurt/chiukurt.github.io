@@ -134,7 +134,7 @@ function sendLuxiferCtData(event) {
     const url = this.getCurrentUrl();
     if (!visitorId || !url || !el) return;
 
-    console.log(eventType, " on ", getLuxiElementDetails(el).textContent || el.tagName);
+    console.log(eventType, " on ", getLuxiElementDetails(el));
     try {
       // navigator.sendBeacon(
       // console.log(
