@@ -119,15 +119,16 @@ function sendLuxiferCtData(event) {
   const prevClickTime = luxiCtLatestClickTime || 0;
   const didClickElement = luxiCtLatestClickElement === el
   var activity;
-  
+
+
   if (event.type === "click") {
-    if (didClickElement && (prevClickTime & (now - prevClickTime < 3000))) activity = "frustration";
     luxiCtLatestClickTime = now;
     luxiCtLatestClickElement = el;
+    if (didClickElement && (prevClickTime & (now - prevClickTime < 3000))) activity = "frustration";
   } else if (event.type === "mouseout") {
-    if (didClickElement || (!prevHoverTime || (now - prevHoverTime < 500))) return;
-    activity = "hesitation";
     luxiCtLatestHoverTime = now;
+    activity = "hesitation";
+    if (didClickElement || (!prevHoverTime || (now - prevHoverTime < 500))) return;
   } else return;
   
   window._paq = window._paq || [];
