@@ -111,19 +111,23 @@ function sendLuxiferCtData(event) {
     return luxiCtId;
   }
 
+  if (typeof matomoLuxiSiteId === 'undefined') return;
   const LUXI_URL = "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
   const el = getLuxiInteractiveElement(event.target);
   const now = Date.now();
-  const eventType = event.type === "mouseout" ? "hesitation" : "click";
   const prevHoverTime = luxiCtLatestHoverTime || 0;
-  luxiCtLatestHoverTime = now;
-  if (typeof matomoLuxiSiteId === 'undefined') return;
+  const prevClickTime = luxiCtLatestClickTime || 0;
+  const didClickElement = luxiCtLatestClickElement === el
+  var activity;
+  
   if (event.type === "click") {
+    if (didClickElement && (prevClickTime & (now - prevClickTime < 3000))) activity = "frustration";
+    luxiCtLatestClickTime = now;
     luxiCtLatestClickElement = el;
   } else if (event.type === "mouseout") {
-    if ((luxiCtLatestClickElement === el) || (!prevHoverTime || (now - prevHoverTime < 500))) {
-      return;
-    }
+    if (didClickElement || (!prevHoverTime || (now - prevHoverTime < 500))) return;
+    activity = "hesitation";
+    luxiCtLatestHoverTime = now;
   } else return;
   
   window._paq = window._paq || [];
@@ -134,10 +138,9 @@ function sendLuxiferCtData(event) {
     const url = this.getCurrentUrl();
     if (!visitorId || !url || !el) return;
 
-    console.log(eventType, " on ", getLuxiElementDetails(el));
     try {
+      console.log(activity);
       // navigator.sendBeacon(
-      // console.log(
       //   LUXI_URL,
       //   JSON.stringify({
       //     visitorId: visitorId,
@@ -146,7 +149,7 @@ function sendLuxiferCtData(event) {
       //     element: getLuxiElementDetails(el),
       //     siteId: matomoLuxiSiteId,
       //     ctId: luxiCtId,
-      //     type: eventType,
+      //     type: activity ?? "click",
       //   }),
       // );
     } catch (e) {}
@@ -154,6 +157,8 @@ function sendLuxiferCtData(event) {
 }
 
 var luxiCtLatestClickElement;
+var luxiCtLatestClickTime;
+var luxiCtLatestClickLocation;
 var luxiCtLatestHoverTime;
 document.addEventListener("click", sendLuxiferCtData);
 document.addEventListener("mouseout", sendLuxiferCtData);
