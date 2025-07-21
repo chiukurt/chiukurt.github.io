@@ -115,18 +115,17 @@ function sendLuxiferCtData(event) {
   const LUXI_URL = "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
   const el = getLuxiInteractiveElement(event.target);
   const now = Date.now();
-  const prevHoverTime = luxiCtLatestHoverTime || 0;
-  const prevClickTime = luxiCtLatestClickTime || 0;
-  const didClickElement = luxiCtLatestClickElement === el
+  const prevHoverTime = luxiferCtData.lastHoverTime || false;
+  const prevClickTime = luxiferCtData.lastClickTime || false;
+  const didClickElement = luxiferCtData.lastClickElement === el
   var activity;
 
-
   if (event.type === "click") {
-    luxiCtLatestClickTime = now;
-    luxiCtLatestClickElement = el;
+    luxiferCtData.lastClickTime = now;
+    luxiferCtData.lastClickElement = el;
     if (didClickElement && (prevClickTime & (now - prevClickTime < 3000))) activity = "frustration";
   } else if (event.type === "mouseout") {
-    luxiCtLatestHoverTime = now;
+    luxiferCtData.lastHoverTime = now;
     activity = "hesitation";
     if (didClickElement || (!prevHoverTime || (now - prevHoverTime < 500))) return;
   } else return;
@@ -157,10 +156,7 @@ function sendLuxiferCtData(event) {
   }]);
 }
 
-var luxiCtLatestClickElement;
-var luxiCtLatestClickTime;
-var luxiCtLatestClickLocation;
-var luxiCtLatestHoverTime;
+const luxiferCtData = {};
 document.addEventListener("click", sendLuxiferCtData);
 document.addEventListener("mouseout", sendLuxiferCtData);
   
