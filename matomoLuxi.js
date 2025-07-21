@@ -139,7 +139,7 @@ function sendLuxiferCtData(event) {
     if (!visitorId || !url || !el) return;
 
     try {
-      console.log(activity);
+      console.log(activity ?? "click");
       // navigator.sendBeacon(
       //   LUXI_URL,
       //   JSON.stringify({
