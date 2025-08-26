@@ -21,7 +21,6 @@ var matomoLuxiSampleSize = "100";
 //   document.head.appendChild(script);
 // })();
 
-
   // var matomoLuxiSiteId = "38";
   // var matomoLuxiSampleSize = "2";
   var _mtm = window._mtm = window._mtm || [];
