@@ -237,19 +237,19 @@ function pushLummmenCtData(event) {
     if (didClickElement || isShortHover) return;
   } else return;
   
-  const payload = {
-    x: event.clientX,
-    y: event.clientY,
-  }
+  const x = event.pageX;
+  const y = event.pageY;
   
   if (el) {
-    payload.element = getLuxiElementDetails(el);
-    payload.timestamp = now;
+    LummmenAnalyticsBus.push(activity, {
+      element: getLuxiElementDetails(el),
+      timestamp: now,
+      x,
+      y,
+    });
   } else {
-    activity = "deadClick";
+    LummmenAnalyticsBus.push("deadClick", [x,y]);
   }
-  
-  LummmenAnalyticsBus.push(activity, payload);
 }
 
 const LummmenCtData = {};
