@@ -70,21 +70,26 @@ const LummmenAnalyticsBus = (() => {
   }
 
   function serializeOnce(maxBytes = MAX_BEACON_BYTES) {
-    let bytes = 0;
-    const out = [];
+    let bytes = 2;
+    const out = {};
     for (const [stream, q] of buffers) {
+      if (!out[stream]) out[stream] = [];
       while (q.length) {
-        const line = JSON.stringify({ s: stream, d: q[0] }) + "\n";
-        const sz = encoder.encode(line).byteLength;
-        if (bytes && bytes + sz > maxBytes) return out.join("");
-        out.push(line);
+        const event = q[0];
+        const eventStr = JSON.stringify(event);
+        const sz = encoder.encode(eventStr).byteLength + 3;
+        if (bytes && bytes + sz > maxBytes) {
+          return JSON.stringify(out);
+        }
+        out[stream].push(event);
         bytes += sz;
         q.shift();
       }
       if (q.length === 0) buffers.delete(stream);
     }
-    return out.join("");
+    return JSON.stringify(out);
   }
+
 
   function flush() {
     if (flushing) return;
