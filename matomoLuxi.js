@@ -58,7 +58,7 @@ const LummmenAnalyticsBus = (() => {
 
   const MAX_BEACON_BYTES = 32 * 1024;
   const FLUSH_INTERVAL_MS = 60000;
-  const LUXI_URL = "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
+  const PAYLOAD_ENDPOINT = "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
 
   const encoder = new TextEncoder();
 
@@ -98,44 +98,38 @@ const LummmenAnalyticsBus = (() => {
     window._paq = window._paq || [];
     var _paq = window._paq;
 
-    try {
-      _paq.push([function () {
+    _paq.push([function () {
+      try {
         if (flushing) return;
         flushing = true;
         const pageViewId = this.getPageViewId();
         const visitorId = this.getVisitorId();
         const url = this.getCurrentUrl();
         if (!visitorId || !url) return;
-        
+
         const screen = {
           w: document.documentElement.scrollWidth,
-          h: document.documentElement.scrollHeight
+          h: document.documentElement.scrollHeight,
         };
-        
+
         const header = {
-          siteId: matomoLuxiSiteId,         
+          siteId: matomoLuxiSiteId,
           visitorId,
           pageViewId,
-          url,    
+          url,
           screen,
           timestamp: Date.now(),
         };
-        
+
         const payload = serializeOnce(header);
         if (!payload) return;
 
-        try {
-          // navigator.sendBeacon("/endpoint", data);
-          console.log(payload);
-        } catch (e) {}
-        },
-      ]);
-    } catch (e) {
-      const lines = payload.trimEnd().split("\n").map((l) => JSON.parse(l));
-      for (const { s, d } of lines) push(s, d);
-    } finally {
-      flushing = false;
-    }
+        // navigator.sendBeacon("/endpoint", data);
+        console.log(payload);
+      } catch (_) { } finally {
+        flushing = false;
+      }
+    }]);
   }
 
   function schedule() {
