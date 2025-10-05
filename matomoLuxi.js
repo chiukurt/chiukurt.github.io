@@ -56,8 +56,8 @@ const LummmenAnalyticsBus = (() => {
   let flushing = false;
   let timer = null;
 
-  const MAX_BEACON_BYTES = 60 * 1024;
-  const FLUSH_INTERVAL_MS = 10000;
+  const MAX_BEACON_BYTES = 32 * 1024;
+  const FLUSH_INTERVAL_MS = 60000;
   const LUXI_URL = "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
 
   const encoder = new TextEncoder();
@@ -69,17 +69,20 @@ const LummmenAnalyticsBus = (() => {
     schedule();
   }
 
-  function serializeOnce(maxBytes = MAX_BEACON_BYTES) {
-    let bytes = 2;
-    const out = {};
+  function serializeOnce(header = {}) {
+    const headerStr = JSON.stringify(header);
+    let bytes = encoder.encode(headerStr).byteLength + 9;
+
+    const out = {}; 
+
     for (const [stream, q] of buffers) {
       if (!out[stream]) out[stream] = [];
       while (q.length) {
         const event = q[0];
         const eventStr = JSON.stringify(event);
         const sz = encoder.encode(eventStr).byteLength + 3;
-        if (bytes && bytes + sz > maxBytes) {
-          return JSON.stringify(out);
+        if (bytes + sz > MAX_BEACON_BYTES) {
+          return JSON.stringify({ h: header, d: out });
         }
         out[stream].push(event);
         bytes += sz;
@@ -87,39 +90,43 @@ const LummmenAnalyticsBus = (() => {
       }
       if (q.length === 0) buffers.delete(stream);
     }
-    return JSON.stringify(out);
+
+    return JSON.stringify({ ...header, ...out });
   }
 
-
   function flush() {
-    if (flushing) return;
-    const payload = serializeOnce();
-    if (!payload) return;
-    flushing = true;
-
     window._paq = window._paq || [];
     var _paq = window._paq;
 
     try {
       _paq.push([function () {
+        if (flushing) return;
+        flushing = true;
         const pageViewId = this.getPageViewId();
         const visitorId = this.getVisitorId();
         const url = this.getCurrentUrl();
         if (!visitorId || !url) return;
+        
+        const screen = {
+          w: document.documentElement.scrollWidth,
+          h: document.documentElement.scrollHeight
+        };
+        
+        const header = {
+          siteId: matomoLuxiSiteId,         
+          visitorId,
+          pageViewId,
+          url,    
+          screen,
+          timestamp: Date.now(),
+        };
+        
+        const payload = serializeOnce(header);
+        if (!payload) return;
 
         try {
           // navigator.sendBeacon("/endpoint", data);
-          console.log(
-            JSON.stringify({
-              pageViewId,
-              visitorId,
-              url,
-              screen: {w: document.documentElement.scrollWidth, h: document.documentElement.scrollHeight},
-              timestamp: Date.now(),
-              payload,
-              siteId: matomoLuxiSiteId,
-            }),
-          );
+          console.log(payload);
         } catch (e) {}
         },
       ]);
