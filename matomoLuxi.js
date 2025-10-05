@@ -159,8 +159,6 @@ const LummmenAnalyticsBus = (() => {
   return { push, flush, size };
 })();
 
-// TESTING =============================================================================================================
-
 function pushLummmenCtData(event) {
   function getLuxiElementDetails(element) {
     const identifier = {};
