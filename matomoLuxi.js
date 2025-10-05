@@ -208,19 +208,19 @@ function pushLummmenCtData(event) {
   const el = getLuxiInteractiveElement(event.target);
   if (!LummmenAnalyticsBus) return;
   const now = Date.now();
-  const prevHoverTime = luxiferCtData.lastHoverTime || false;
-  const prevClickTime = luxiferCtData.lastClickTime || false;
-  const didClickElement = luxiferCtData.lastClickElement === el
+  const prevHoverTime = LummmenCtData.lastHoverTime || false;
+  const prevClickTime = LummmenCtData.lastClickTime || false;
+  const didClickElement = LummmenCtData.lastClickElement === el
   const isRapidClick = (prevClickTime & (now - prevClickTime < 3000));
   const isShortHover = (!prevHoverTime || (now - prevHoverTime < 500));
   var activity = "click";
 
   if (event.type === "click") {
-    luxiferCtData.lastClickTime = now;
-    luxiferCtData.lastClickElement = el;
+    LummmenCtData.lastClickTime = now;
+    LummmenCtData.lastClickElement = el;
     if (didClickElement && isRapidClick) activity = "frustration";
   } else if (event.type === "mouseout") {
-    luxiferCtData.lastHoverTime = now;
+    LummmenCtData.lastHoverTime = now;
     activity = "hesitation";
     if (didClickElement || isShortHover) return;
   } else return;
@@ -240,7 +240,7 @@ function pushLummmenCtData(event) {
   LummmenAnalyticsBus.push(activity, payload);
 }
 
-const luxiferCtData = {};
+const LummmenCtData = {};
 document.addEventListener("click", pushLummmenCtData);
 document.addEventListener("mouseout", pushLummmenCtData);
 
