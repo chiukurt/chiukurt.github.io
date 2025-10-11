@@ -124,8 +124,7 @@ const LummmenAnalyticsBus = (() => {
         const payload = serializeOnce(header);
         if (!payload) return;
 
-        // navigator.sendBeacon("/endpoint", data);
-        console.log(payload);
+        navigator.sendBeacon(PAYLOAD_ENDPOINT, payload);
       } catch (_) { } finally {
         flushing = false;
       }
@@ -274,7 +273,7 @@ setInterval(() => {
   const rx = Math.round(latestLummmenMove.x);
   const ry = Math.round(latestLummmenMove.y);
   if (!lastLummmenMove || rx !== lastLummmenMove[0] || ry !== lastLummmenMove[1]) {
-    LummmenAnalyticsBus.push("moves", [rx, ry]);
+    LummmenAnalyticsBus.push("move", [rx, ry]);
     lastLummmenMove = [rx, ry];
   }
 }, 250);
