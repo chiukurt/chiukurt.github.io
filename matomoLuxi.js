@@ -125,6 +125,7 @@ const LummmenAnalyticsBus = (() => {
         if (!payload) return;
 
         navigator.sendBeacon(PAYLOAD_ENDPOINT, payload);
+        console.log(payload);
       } catch (_) { } finally {
         flushing = false;
       }
