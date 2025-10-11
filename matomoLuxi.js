@@ -91,7 +91,7 @@ const LummmenAnalyticsBus = (() => {
       if (q.length === 0) buffers.delete(stream);
     }
 
-    return JSON.stringify({ ...header, ...out });
+    return { ...header, ...out };
   }
 
   function flush() {
@@ -125,7 +125,7 @@ const LummmenAnalyticsBus = (() => {
         if (!p) return;
         if (!p.click && !p.move && !p.hesitation && !p.frustration && !p.deadClick && !p.scroll) return;
 
-        navigator.sendBeacon(PAYLOAD_ENDPOINT, p);
+        navigator.sendBeacon(PAYLOAD_ENDPOINT, JSON.stringify(p));
         console.log(p);
       } catch (_) { } finally {
         flushing = false;
