@@ -121,11 +121,12 @@ const LummmenAnalyticsBus = (() => {
           timestamp: Date.now(),
         };
 
-        const payload = serializeOnce(header);
-        if (!payload) return;
+        const p = serializeOnce(header);
+        if (!p) return;
+        if (!p.click && !p.move && !p.hesitation && !p.frustration && !p.deadClick && !p.scroll) return;
 
-        navigator.sendBeacon(PAYLOAD_ENDPOINT, payload);
-        console.log(payload);
+        navigator.sendBeacon(PAYLOAD_ENDPOINT, p);
+        console.log(p);
       } catch (_) { } finally {
         flushing = false;
       }
