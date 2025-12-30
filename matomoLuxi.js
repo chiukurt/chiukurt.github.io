@@ -1,38 +1,39 @@
 
-// ABTEST ==============================================================================================================
 var matomoLuxiSiteId = "5";
 var matomoLuxiSampleSize = "100";
-// var _mtm = window._mtm = window._mtm || [];
-// var _paq = window._paq = window._paq || [];
-// var shouldLuxiAbTest = true;
-// document.documentElement.classList.add('luxi-ab-test-loading');
-// document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0}</style>';
-// var removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
-// var luxiAutoTimeout = setTimeout(() => {
-//   removeLuxiLoadingClass();
-//   if (!new URLSearchParams(window.location.search).has('pk_ab_test')) shouldLuxiAbTest = false;
-// }, 500);
-// (function() {
-//   var script = document.createElement('script');
-//   script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.3.01/abtest.min.js";
-//   script.integrity = "sha384-+bUq7ecXBASRJS4Zn1KW1G67ehvfDo2by/ckama+veKn+g/zVPAmim+/bqa75ixv";
-//   script.crossOrigin = "anonymous";
-//   script.async = true;
-//   document.head.appendChild(script);
-// })();
+
+// ABTEST ==============================================================================================================
+var _mtm = window._mtm = window._mtm || [];
+var _paq = window._paq = window._paq || [];
+var shouldLuxiAbTest = true;
+document.documentElement.classList.add('luxi-ab-test-loading');
+document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0}</style>';
+var removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
+var luxiAutoTimeout = setTimeout(() => {
+  removeLuxiLoadingClass();
+  if (!new URLSearchParams(window.location.search).has('pk_ab_test')) shouldLuxiAbTest = false;
+}, 500);
+(function() {
+  var script = document.createElement('script');
+  script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.3.01/abtest.min.js";
+  script.integrity = "sha384-+bUq7ecXBASRJS4Zn1KW1G67ehvfDo2by/ckama+veKn+g/zVPAmim+/bqa75ixv";
+  script.crossOrigin = "anonymous";
+  script.async = true;
+  document.head.appendChild(script);
+})();
 
 
 // DEFAULT =============================================================================================================
-  var _mtm = window._mtm = window._mtm || [];
-  var _paq = window._paq = window._paq || [];
-  (function() {
-    var script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.02/default.min.js";
-    script.integrity = "sha384-aIRAMkKxsFX6tOA6PFhqe85yPRXNadvhxK+X5tGYVLHHrwXdvTU9ma0mio9T+3jZ";
-    script.crossOrigin = "anonymous";
-    script.async = true;
-    document.head.appendChild(script);
-  })();
+  // var _mtm = window._mtm = window._mtm || [];
+  // var _paq = window._paq = window._paq || [];
+  // (function() {
+  //   var script = document.createElement('script');
+  //   script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.2.02/default.min.js";
+  //   script.integrity = "sha384-aIRAMkKxsFX6tOA6PFhqe85yPRXNadvhxK+X5tGYVLHHrwXdvTU9ma0mio9T+3jZ";
+  //   script.crossOrigin = "anonymous";
+  //   script.async = true;
+  //   document.head.appendChild(script);
+  // })();
 
 
 // Special MTM test container. Exclude this from client code ===========================================================
