@@ -2,26 +2,50 @@
 var matomoLuxiSiteId = "5";
 var matomoLuxiSampleSize = "100";
 
-// ABTEST ==============================================================================================================
-var _mtm = window._mtm = window._mtm || [];
-var _paq = window._paq = window._paq || [];
-var shouldLuxiAbTest = true;
-document.documentElement.classList.add('luxi-ab-test-loading');
-document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0}</style>';
-var removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
-var luxiAutoTimeout = setTimeout(() => {
-  removeLuxiLoadingClass();
-  if (!new URLSearchParams(window.location.search).has('pk_ab_test')) shouldLuxiAbTest = false;
-}, 500);
-(function() {
-  var script = document.createElement('script');
-  script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.3.01/abtest.min.js";
-  script.integrity = "sha384-+bUq7ecXBASRJS4Zn1KW1G67ehvfDo2by/ckama+veKn+g/zVPAmim+/bqa75ixv";
-  script.crossOrigin = "anonymous";
-  script.async = true;
-  document.head.appendChild(script);
+
+// Load previews
+(async function() {
+  var luxiferAbDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
+    async function getPreviewsOrTests() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        var response = await fetch(luxiferAbDataSource, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            idSite: matomoLuxiSiteId,
+            lummmenAbPreview: params.get('lummmen-ab-preview') || undefined
+          }),
+        });
+        return await response.json();
+      } catch (e) {
+        return [];
+      }
+    }
+    const previewsOrTests = await getPreviewsOrTests();
+    console.log ('Luxi A/B Previews or Tests:', previewsOrTests);
 })();
 
+
+// ABTEST (OLD) ==============================================================================================================
+// var _mtm = window._mtm = window._mtm || [];
+// var _paq = window._paq = window._paq || [];
+// var shouldLuxiAbTest = true;
+// document.documentElement.classList.add('luxi-ab-test-loading');
+// document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0}</style>';
+// var removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
+// var luxiAutoTimeout = setTimeout(() => {
+//   removeLuxiLoadingClass();
+//   if (!new URLSearchParams(window.location.search).has('pk_ab_test')) shouldLuxiAbTest = false;
+// }, 500);
+// (function() {
+//   var script = document.createElement('script');
+//   script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.3.01/abtest.min.js";
+//   script.integrity = "sha384-+bUq7ecXBASRJS4Zn1KW1G67ehvfDo2by/ckama+veKn+g/zVPAmim+/bqa75ixv";
+//   script.crossOrigin = "anonymous";
+//   script.async = true;
+//   document.head.appendChild(script);
+// })();
 
 // DEFAULT =============================================================================================================
   // var _mtm = window._mtm = window._mtm || [];
