@@ -26,9 +26,7 @@ var matomoLuxiSampleSize = "100";
       }
   }
   
-  const previewsOrTests = await getPreviewsOrTests();
-  console.log('Luxi A/B Previews or Tests:', previewsOrTests);
-  
+
   async function waitForElm(selector) {
     return new Promise(resolve => {
       var node = document.querySelector(selector);
@@ -56,12 +54,18 @@ var matomoLuxiSampleSize = "100";
     if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
     if (replacement.htmlReplacement !== undefined) node.innerHTML = replacement.htmlReplacement;
   }
-
-  const preview = previewsOrTests.preview;
-
-  for (const replacement of preview.replacements) {
+  document.documentElement.classList.add('luxi-ab-test-loading');
+  document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0}</style>';
+  var removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
+  var luxiAutoTimeout = setTimeout(() => {
+    removeLuxiLoadingClass();
+  }, 300);
+  const previewsOrTests = await getPreviewsOrTests();
+  const preview = previewsOrTests?.preview;
+  for (const replacement of preview?.replacements) {
     applyBVersion(replacement);
   }
+
 })();
 
 
