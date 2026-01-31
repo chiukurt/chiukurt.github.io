@@ -8,10 +8,6 @@ var matomoLuxiSampleSize = "100";
     async function getPreviewsOrTests() {
       try {
         const params = new URLSearchParams(window.location.search);
-        console.log({
-          idSite: matomoLuxiSiteId,
-          previewId: params.get('lummmen-ab-preview') || undefined
-        });
         var response = await fetch(luxiferAbDataSource, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -65,7 +61,6 @@ var matomoLuxiSampleSize = "100";
   for (const replacement of preview?.replacements) {
     applyBVersion(replacement);
   }
-
 })();
 
 
