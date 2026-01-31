@@ -11,14 +11,14 @@ var matomoLuxiSampleSize = "100";
         const params = new URLSearchParams(window.location.search);
         console.log({
           idSite: matomoLuxiSiteId,
-          lummmenAbPreview: params.get('lummmen-ab-preview') || undefined
+          previewId: params.get('lummmen-ab-preview') || undefined
         });
         var response = await fetch(luxiferAbDataSource, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
             idSite: matomoLuxiSiteId,
-            lummmenAbPreview: params.get('lummmen-ab-preview') || undefined
+            previewId: params.get('lummmen-ab-preview') || undefined
           }),
         });
         return await response.json();
