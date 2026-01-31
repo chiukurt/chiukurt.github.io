@@ -57,6 +57,8 @@ var matomoLuxiSampleSize = "100";
     if (replacement.htmlReplacement !== undefined) node.innerHTML = replacement.htmlReplacement;
   }
 
+  const preview = previewsOrTests.preview;
+
   for (const replacement of preview.replacements) {
     applyBVersion(replacement);
   }
