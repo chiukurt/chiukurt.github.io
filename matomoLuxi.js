@@ -2,7 +2,6 @@
 var matomoLuxiSiteId = "5";
 var matomoLuxiSampleSize = "100";
 
-
 // Load previews
 (async function () {
   var luxiferAbDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
@@ -25,9 +24,41 @@ var matomoLuxiSampleSize = "100";
       } catch (e) {
         return [];
       }
-    }
-    const previewsOrTests = await getPreviewsOrTests();
-    console.log ('Luxi A/B Previews or Tests:', previewsOrTests);
+  }
+  
+  const previewsOrTests = await getPreviewsOrTests();
+  console.log('Luxi A/B Previews or Tests:', previewsOrTests);
+  
+  async function waitForElm(selector) {
+    return new Promise(resolve => {
+      var node = document.querySelector(selector);
+      if (node) return resolve(node);
+
+      var observer = new MutationObserver(() => {
+        node = document.querySelector(selector);
+        if (node) {
+          observer.disconnect();
+          resolve(node);
+        }
+      });
+
+      var topNode = document.body || document.documentElement;
+      if (!(topNode instanceof Node)) return resolve(null);
+
+      observer.observe(topNode, { childList: true, subtree: true });
+    });
+  }
+
+  async function applyBVersion(replacement) {
+    const node = await waitForElm(replacement.selector);
+    if (!node) return;
+    if (replacement.style) Object.assign(node.style, replacement.style);
+    if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
+  }
+
+  for (const replacement of preview.replacements) {
+    applyBVersion(replacement);
+  }
 })();
 
 
