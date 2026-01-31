@@ -4,11 +4,15 @@ var matomoLuxiSampleSize = "100";
 
 
 // Load previews
-(async function() {
+(async function () {
   var luxiferAbDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
     async function getPreviewsOrTests() {
       try {
         const params = new URLSearchParams(window.location.search);
+        console.log({
+          idSite: matomoLuxiSiteId,
+          lummmenAbPreview: params.get('lummmen-ab-preview') || undefined
+        });
         var response = await fetch(luxiferAbDataSource, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
