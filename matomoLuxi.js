@@ -54,6 +54,7 @@ var matomoLuxiSampleSize = "100";
     if (!node) return;
     if (replacement.style) Object.assign(node.style, replacement.style);
     if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
+    if (replacement.htmlReplacement !== undefined) node.innerHTML = replacement.htmlReplacement;
   }
 
   for (const replacement of preview.replacements) {
