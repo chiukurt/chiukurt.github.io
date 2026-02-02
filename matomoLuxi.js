@@ -55,7 +55,7 @@ var matomoLuxiSampleSize = "100";
   var removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
   var luxiAutoTimeout = setTimeout(() => {
     removeLuxiLoadingClass();
-  }, 300);
+  }, 500);
   const previewsOrTests = await getPreviewsOrTests();
   const preview = previewsOrTests?.preview;
   for (const replacement of preview?.replacements) {
