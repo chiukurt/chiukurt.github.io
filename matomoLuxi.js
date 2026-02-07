@@ -53,7 +53,7 @@ var matomoLuxiSampleSize = "100";
   document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0 !important;}</style>';
   var removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
   var luxiAutoTimeout = setTimeout(() => {
-    // removeLuxiLoadingClass();
+    removeLuxiLoadingClass();
   }, 500);
   const replacements = await getReplacementsFromLummmen();
   const preview = replacements?.preview;
