@@ -5,7 +5,7 @@ var matomoLuxiSampleSize = "100";
 // Load previews
 (async function () {
   var luxiferAbDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
-    async function getPreviewsOrTests() {
+    async function getReplacementsFromLummmen() {
       try {
         const params = new URLSearchParams(window.location.search);
         var response = await fetch(luxiferAbDataSource, {
@@ -22,7 +22,6 @@ var matomoLuxiSampleSize = "100";
       }
   }
   
-
   async function waitForElm(selector) {
     return new Promise(resolve => {
       var node = document.querySelector(selector);
@@ -54,10 +53,10 @@ var matomoLuxiSampleSize = "100";
   document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0 !important;}</style>';
   var removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
   var luxiAutoTimeout = setTimeout(() => {
-    removeLuxiLoadingClass();
+    // removeLuxiLoadingClass();
   }, 500);
-  const previewsOrTests = await getPreviewsOrTests();
-  const preview = previewsOrTests?.preview;
+  const replacements = await getReplacementsFromLummmen();
+  const preview = replacements?.preview;
   for (const replacement of preview?.replacements) {
     applyBVersion(replacement);
   }
