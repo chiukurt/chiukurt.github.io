@@ -5,21 +5,21 @@ var matomoLuxiSampleSize = "100";
 // Load previews
 (async function () {
   var luxiferAbDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
-    async function getReplacementsFromLummmen() {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        var response = await fetch(luxiferAbDataSource, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            idSite: matomoLuxiSiteId,
-            previewId: params.get('lummmen-ab-preview') || undefined
-          }),
-        });
-        return await response.json();
-      } catch (e) {
-        return [];
-      }
+  async function getReplacementsFromLummmen() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      var response = await fetch(luxiferAbDataSource, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          idSite: matomoLuxiSiteId,
+          previewId: params.get('lummmen-ab-preview') || undefined
+        }),
+      });
+      return await response.json();
+    } catch (e) {
+      return [];
+    }
   }
   
   async function waitForElm(selector) {
