@@ -4,10 +4,10 @@ var matomoLuxiSampleSize = "100";
 
 // Load previews
 (async function () {
-  document.documentElement.classList.add('luxi-ab-test-loading');
-  document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0 !important;}</style>';
+  document.documentElement.classList.add('lummmen-ab-test-loading');
+  document.head.innerHTML += '<style>html.lummmen-ab-test-loading{opacity:0 !important;}</style>';
   const lummmenAbSource = "https://getabtestseu-573194387152.europe-west1.run.app";
-  const removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
+  const lummmenShowPage = () => document.documentElement.classList.remove("lummmen-ab-test-loading");
   const getReplacementsFromLummmen = () => fetch(lummmenAbSource, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -15,15 +15,10 @@ var matomoLuxiSampleSize = "100";
       idSite: matomoLuxiSiteId,
       previewId: new URLSearchParams(location.search).get("lummmen-ab-preview") ?? undefined,
     })}).then(r => r.json(), () => []);
-  
-  var luxiAutoTimeout = setTimeout(() => {
-    removeLuxiLoadingClass();
-  }, 500);
-  const replacements = await getReplacementsFromLummmen();
-  const preview = replacements?.preview;
-  for (const replacement of preview?.replacements) {
-    applyBVersion(replacement);
-  }
+  setTimeout(lummmenShowPage, 500);
+  const lummmenAbData = await getReplacementsFromLummmen();
+  const preview = lummmenAbData?.preview;
+  for (const r of preview?.replacements) { applyBVersion(r); }
 })();
 
 async function waitForElm(selector) {
