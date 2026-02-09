@@ -4,7 +4,10 @@ var matomoLuxiSampleSize = "100";
 
 // Load previews
 (async function () {
-  var luxiferAbDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
+  document.documentElement.classList.add('luxi-ab-test-loading');
+  document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0 !important;}</style>';
+  const luxiferAbDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
+  const removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
   const getReplacementsFromLummmen = () => fetch(luxiferAbDataSource, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -13,36 +16,6 @@ var matomoLuxiSampleSize = "100";
       previewId: new URLSearchParams(location.search).get("lummmen-ab-preview") ?? undefined,
     })}).then(r => r.json(), () => []);
   
-  async function waitForElm(selector) {
-    return new Promise(resolve => {
-      var node = document.querySelector(selector);
-      if (node) return resolve(node);
-
-      var observer = new MutationObserver(() => {
-        node = document.querySelector(selector);
-        if (node) {
-          observer.disconnect();
-          resolve(node);
-        }
-      });
-
-      var topNode = document.body || document.documentElement;
-      if (!(topNode instanceof Node)) return resolve(null);
-
-      observer.observe(topNode, { childList: true, subtree: true });
-    });
-  }
-
-  async function applyBVersion(replacement) {
-    const node = await waitForElm(replacement.selector);
-    if (!node) return;
-    if (replacement.style) Object.assign(node.style, replacement.style);
-    if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
-    if (replacement.htmlReplacement !== undefined) node.innerHTML = replacement.htmlReplacement;
-  }
-  document.documentElement.classList.add('luxi-ab-test-loading');
-  document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0 !important;}</style>';
-  var removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
   var luxiAutoTimeout = setTimeout(() => {
     removeLuxiLoadingClass();
   }, 500);
@@ -52,6 +25,34 @@ var matomoLuxiSampleSize = "100";
     applyBVersion(replacement);
   }
 })();
+
+async function waitForElm(selector) {
+  return new Promise(resolve => {
+    var node = document.querySelector(selector);
+    if (node) return resolve(node);
+
+    var observer = new MutationObserver(() => {
+      node = document.querySelector(selector);
+      if (node) {
+        observer.disconnect();
+        resolve(node);
+      }
+    });
+
+    var topNode = document.body || document.documentElement;
+    if (!(topNode instanceof Node)) return resolve(null);
+
+    observer.observe(topNode, { childList: true, subtree: true });
+  });
+}
+
+async function applyBVersion(replacement) {
+  const node = await waitForElm(replacement.selector);
+  if (!node) return;
+  if (replacement.style) Object.assign(node.style, replacement.style);
+  if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
+  if (replacement.htmlReplacement !== undefined) node.innerHTML = replacement.htmlReplacement;
+}
 
 
 // ABTEST (OLD) ==============================================================================================================
