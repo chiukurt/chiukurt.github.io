@@ -6,9 +6,9 @@ var matomoLuxiSampleSize = "100";
 (async function () {
   document.documentElement.classList.add('luxi-ab-test-loading');
   document.head.innerHTML += '<style>html.luxi-ab-test-loading{opacity:0 !important;}</style>';
-  const luxiferAbDataSource = "https://getabtestseu-573194387152.europe-west1.run.app";
+  const lummmenAbSource = "https://getabtestseu-573194387152.europe-west1.run.app";
   const removeLuxiLoadingClass = () => document.documentElement.classList.remove("luxi-ab-test-loading");
-  const getReplacementsFromLummmen = () => fetch(luxiferAbDataSource, {
+  const getReplacementsFromLummmen = () => fetch(lummmenAbSource, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
