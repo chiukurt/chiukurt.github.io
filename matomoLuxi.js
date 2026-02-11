@@ -47,6 +47,7 @@ async function applyBVersion(replacement) {
   if (replacement.style) Object.assign(node.style, replacement.style);
   if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
   if (replacement.htmlReplacement !== undefined) node.innerHTML = replacement.htmlReplacement;
+  if (replacement.placeholder !== undefined) node.placeholder = replacement.placeholder;
 }
 
 
