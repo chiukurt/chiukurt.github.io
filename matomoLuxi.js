@@ -48,6 +48,7 @@ async function applyBVersion(replacement) {
   if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
   if (replacement.htmlReplacement !== undefined) node.innerHTML = replacement.htmlReplacement;
   if (replacement.placeholder !== undefined) node.placeholder = replacement.placeholder;
+  if (replacement.src !== undefined) node.src = replacement.src;
 }
 
 
