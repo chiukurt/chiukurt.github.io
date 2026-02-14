@@ -121,6 +121,7 @@
     });
   }
 
+  // TODO: Add guards/validation for high risk items
   window.__LUMMMEN__.applyVariation = async function applyVariation(replacement) {
     const node = await window.__LUMMMEN__.waitForElm(replacement.selector);
     if (!node) return;
