@@ -14,7 +14,7 @@ var matomoLuxiSampleSize = "100";
   let resolveReady, rejectReady;
   const readyPromise = new Promise((resolve, reject) => { resolveReady = resolve; rejectReady = reject; });
   function markReady(k, v) {
-    if (REQUIRED.has(k)) return;
+    if (!REQUIRED.has(k)) return;
     store[k] = v; loaded.add(k);
     if (loaded.size === REQUIRED.size) resolveReady(store);
   }
