@@ -7,7 +7,7 @@
     window.__LUMMMEN__.markReady("matomo", "data");
   }, 3000);
 
-  window.__MY_APP__.when("tests").then((tests) => {
+  window.__LUMMMEN__.when("tests").then((tests) => {
     try {
       if (data.tests) console.log(data);//startAbTest(data.tests);
     } catch { lummmenShowPage(); }
