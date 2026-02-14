@@ -9,13 +9,13 @@
 
   window.__LUMMMEN__.when("tests").then((data) => {
     try {
-      if (data.tests) console.log(data);//startAbTest(data.tests);
+      if (data) console.log(data);//startAbTest(data.tests);
     } catch { lummmenShowPage(); }
   });
 
   window.__LUMMMEN__.ready.then((data) => {
     try {
-      if (data.tests) console.log(data);//startAbTest(data.tests);
+      if (data) console.log(data);//startAbTest(data.tests);
     } catch { lummmenShowPage(); }
   });
 
