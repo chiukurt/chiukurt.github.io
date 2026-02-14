@@ -2,23 +2,36 @@
 var matomoLuxiSiteId = "5";
 var matomoLuxiSampleSize = "100";
 
+
+
 // Load previews
 (async function () {
   document.documentElement.classList.add('lummmen-ab-test-loading');
   document.head.innerHTML += '<style>html.lummmen-ab-test-loading{opacity:0 !important;}</style>';
   const lummmenAbSource = "https://getabtestseu-573194387152.europe-west1.run.app";
   const lummmenShowPage = () => document.documentElement.classList.remove("lummmen-ab-test-loading");
-  const getReplacementsFromLummmen = () => fetch(lummmenAbSource, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      idSite: matomoLuxiSiteId,
-      previewId: new URLSearchParams(location.search).get("lummmen-ab-preview") ?? undefined,
-    })}).then(r => r.json(), () => []);
+  const REQUIRED = new Set(["tests","matomo"]), loaded = new Set(), store = {};
+  let resolveReady, rejectReady;
+  const readyPromise = new Promise((resolve, reject) => { resolveReady = resolve; rejectReady = reject; });
+  function markReady(k, v) {
+    if (REQUIRED.has(k)) return;
+    store[k] = v; loaded.add(k);
+    if (loaded.size === REQUIRED.size) resolveReady(store);
+  }
+  window.__LUMMMEN__ = { ready: readyPromise, markReady, fail: err => rejectReady(err), get: () => store };
+  (async () => 
+    window.__LUMMMEN__.markReady("tests", await fetch(lummmenAbSource, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        idSite: matomoLuxiSiteId,
+        previewId: new URLSearchParams(location.search).get("lummmen-ab-preview") ?? undefined
+      })
+    }).then(r => r.json(), () => []))
+  )();
   setTimeout(lummmenShowPage, 500);
-  const lummmenAbData = await getReplacementsFromLummmen();
-  const preview = lummmenAbData?.preview;
-  for (const r of preview?.replacements) { applyBVersion(r); }
+  
+  // const preview = lummmenAbData?.preview;
+  // for (const r of preview?.replacements) { applyBVersion(r); }
 
   (function() { // TODO: Replace me with real jsDelivr cdn link
     var script = document.createElement('script');
