@@ -59,12 +59,10 @@
             }
 
             function handleConsentButtonClick() {
-                console.log("init");
                 fakeOneTrustInit();
                 setCookie("statsCode", "C0000", 7); 
             }
             function handleDenyButtonClick() {
-                console.log("deny");
                 fakeOneTrustRemove();
                 deleteCookie("statsCode");
             }
