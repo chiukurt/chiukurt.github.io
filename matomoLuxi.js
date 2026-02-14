@@ -9,15 +9,15 @@ var _paq = window._paq = window._paq || [];
   const lummmenAbSource = "https://getabtestseu-573194387152.europe-west1.run.app";
   const lummmenShowPage = () => document.documentElement.classList.remove("lummmen-ab-test-loading");
   const REQUIRED = new Set(["tests", "analytics"]), store = {}, loaded = new Set(), resolvers = {}, keyPromises = {};
-  REQUIRED.forEach(key => keyPromises[key] = new Promise(resolve => resolvers[key] = resolve));
+  REQUIRED.forEach(k => keyPromises[k] = new Promise(resolve => resolvers[k] = resolve));
   let resolveAll;
   const allReady = new Promise(resolve => resolveAll = resolve);
   const markReady = (k, v) => {
-    if (!REQUIRED.has(key) || loaded.has(k)) return;
+    if (!REQUIRED.has(k) || loaded.has(k)) return;
     store[k] = v; loaded.add(k); resolvers[k](v);
     if (loaded.size === REQUIRED.size) resolveAll(store);
   };
-  window.__LUMMMEN__ = {  markReady, ready: allReady, when: key => keyPromises[key], get: key => store[key]};
+  window.__LUMMMEN__ = {  markReady, ready: allReady, when: k => keyPromises[k], get: k => store[k]};
   (async () => 
     window.__LUMMMEN__.markReady("tests", await fetch(lummmenAbSource, {
       method: "POST", headers: { "Content-Type": "application/json" },
