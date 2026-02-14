@@ -101,6 +101,8 @@
     }
   };
 
+  
+  // TODO: Replace with system that only sets up one observer due to performance concerns
   window.__LUMMMEN__.waitForElm = async function waitForElm(selector) {
     return new Promise(resolve => {
       var node = document.querySelector(selector);
