@@ -1,24 +1,23 @@
 
 var matomoLuxiSiteId = "5";
 var matomoLuxiSampleSize = "100";
-
-
-
-// Load previews
+var _mtm = window._mtm = window._mtm || [];
+var _paq = window._paq = window._paq || [];
 (async function () {
   document.documentElement.classList.add('lummmen-ab-test-loading');
   document.head.innerHTML += '<style>html.lummmen-ab-test-loading{opacity:0 !important;}</style>';
   const lummmenAbSource = "https://getabtestseu-573194387152.europe-west1.run.app";
   const lummmenShowPage = () => document.documentElement.classList.remove("lummmen-ab-test-loading");
-  const REQUIRED = new Set(["tests","matomo"]), loaded = new Set(), store = {};
-  let resolveReady, rejectReady;
-  const readyPromise = new Promise((resolve, reject) => { resolveReady = resolve; rejectReady = reject; });
-  function markReady(k, v) {
-    if (!REQUIRED.has(k)) return;
-    store[k] = v; loaded.add(k);
-    if (loaded.size === REQUIRED.size) resolveReady(store);
-  }
-  window.__LUMMMEN__ = { ready: readyPromise, markReady, fail: err => rejectReady(err), get: () => store };
+  const REQUIRED = new Set(["tests", "analytics"]), store = {}, loaded = new Set(), resolvers = {}, keyPromises = {};
+  REQUIRED.forEach(key => keyPromises[key] = new Promise(resolve => resolvers[key] = resolve));
+  let resolveAll;
+  const allReady = new Promise(resolve => resolveAll = resolve);
+  const markReady = (k, v) => {
+    if (!REQUIRED.has(key) || loaded.has(k)) return;
+    store[k] = v; loaded.add(k); resolvers[k](v);
+    if (loaded.size === REQUIRED.size) resolveAll(store);
+  };
+  window.__LUMMMEN__ = {  markReady, ready: allReady, when: key => keyPromises[key], get: key => store[key]};
   (async () => 
     window.__LUMMMEN__.markReady("tests", await fetch(lummmenAbSource, {
       method: "POST", headers: { "Content-Type": "application/json" },
