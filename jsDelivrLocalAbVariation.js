@@ -7,15 +7,15 @@
     window.__LUMMMEN__.markReady("matomo", "data");
   }, 3000);
 
+  // Apply previews and winners
   window.__LUMMMEN__.when("tests").then((data) => {
-    try {
-      if (data) console.log(data);//startAbTest(data.tests);
+    try { if (data) console.log("tests",data);//startAbTest(data.tests);
     } catch { lummmenShowPage(); }
   });
 
   window.__LUMMMEN__.ready.then((data) => {
-    try {
-      if (data) console.log(data);//startAbTest(data.tests);
+    if (data && data.preview) return;
+    try { if (data) console.log("full", data);//startAbTest(data.tests);
     } catch { lummmenShowPage(); }
   });
 
