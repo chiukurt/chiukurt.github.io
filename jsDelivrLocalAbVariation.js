@@ -122,7 +122,7 @@
   }
 
   window.__LUMMMEN__.applyVariation = async function applyVariation(replacement) {
-    const node = await waitForElm(replacement.selector);
+    const node = await window.__LUMMMEN__.waitForElm(replacement.selector);
     if (!node) return;
     if (replacement.style) Object.assign(node.style, replacement.style);
     if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
