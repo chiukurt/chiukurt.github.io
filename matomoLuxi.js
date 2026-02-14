@@ -19,6 +19,13 @@ var matomoLuxiSampleSize = "100";
   const lummmenAbData = await getReplacementsFromLummmen();
   const preview = lummmenAbData?.preview;
   for (const r of preview?.replacements) { applyBVersion(r); }
+
+  (function() { // TODO: Replace me with real jsDelivr cdn link
+    var script = document.createElement('script');
+    script.src = "jsDelivrLocalAbVariation.js";
+    script.async = true;
+    document.head.appendChild(script);
+  })();
 })();
 
 async function waitForElm(selector) {
@@ -83,7 +90,6 @@ async function applyBVersion(replacement) {
 //   script.async = true;
 //   document.head.appendChild(script);
 // })();
-
 
 // Special MTM test container. Exclude this from client code ===========================================================
 // function todayParam() {
