@@ -67,33 +67,11 @@
             {
               name: "test",
               activate: async function (event) {
-                async function waitForElm(selector) {
-                  return new Promise(resolve => {
-                    var node = document.querySelector(selector);
-                    if (node) return resolve(node);
-
-                    var observer = new MutationObserver(() => {
-                      node = document.querySelector(selector);
-                      if (node) {
-                        observer.disconnect();
-                        resolve(node);
-                      }
-                    });
-
-                    var topNode = document.body || document.documentElement;
-                    if (!(topNode instanceof Node)) return resolve(null);
-
-                    observer.observe(topNode, { childList: true, subtree: true });
-                  });
-                }
-
-                function applyBVersion(node) { 
-                  if (type === "simple_text") node.innerHTML = data;
-                  if (type === "simple_img") node.src = data;
-                }
-
-                waitForElm(selector).then((node) => { 
-                  if (node) applyBVersion(node);
+                const helper = window.__LUMMMEN__;
+                if (typeof helper?.waitForElm !== "function") return;
+                if (typeof helper?.inSegment !== "function") return;
+                helper.waitForElm(selector).then((node) => { 
+                  if (node) helper.applyVariation(node);
                 });
               },
             },
@@ -105,23 +83,53 @@
 
   if (!window.__LUMMMEN__) return;
   window.__LUMMMEN__.inSegment = function (test) {
-      const device = test.device;
-      try {
-        const uad = navigator.userAgentData;
-        const ua = navigator.userAgent || "";
-        const hasiPadOs = (uad && uad.platform === "MacIntel") || (!uad && /\bMacintosh\b/.test(ua));
-        const isiPad = /\biPad\b/.test(ua) || (hasiPadOs && (navigator.maxTouchPoints || 0) > 1);
-        const isAndroid = /\bAndroid\b/i.test(ua);
-        const isAndroidTablet = isAndroid && !/\bMobile\b/i.test(ua);
-        const isOtherTablet = /\b(Tablet|PlayBook|Silk|Kindle|Nexus 7|Nexus 10|SM-T)\b/i.test(ua);
-        const isTablet = isiPad || isAndroidTablet || isOtherTablet;
-        const isMobile = uad?.mobile || (!isTablet && /\b(Mobile|iPhone|iPod)\b/i.test(ua));
-        const d = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
-        return d === device;
-      } catch (e) {
-        return false;
-      }
-    };
+    const device = test.device;
+    try {
+      const uad = navigator.userAgentData;
+      const ua = navigator.userAgent || "";
+      const hasiPadOs = (uad && uad.platform === "MacIntel") || (!uad && /\bMacintosh\b/.test(ua));
+      const isiPad = /\biPad\b/.test(ua) || (hasiPadOs && (navigator.maxTouchPoints || 0) > 1);
+      const isAndroid = /\bAndroid\b/i.test(ua);
+      const isAndroidTablet = isAndroid && !/\bMobile\b/i.test(ua);
+      const isOtherTablet = /\b(Tablet|PlayBook|Silk|Kindle|Nexus 7|Nexus 10|SM-T)\b/i.test(ua);
+      const isTablet = isiPad || isAndroidTablet || isOtherTablet;
+      const isMobile = uad?.mobile || (!isTablet && /\b(Mobile|iPhone|iPod)\b/i.test(ua));
+      const d = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
+      return d === device;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  window.__LUMMMEN__.waitForElm = async function waitForElm(selector) {
+    return new Promise(resolve => {
+      var node = document.querySelector(selector);
+      if (node) return resolve(node);
+
+      var observer = new MutationObserver(() => {
+        node = document.querySelector(selector);
+        if (node) {
+          observer.disconnect();
+          resolve(node);
+        }
+      });
+
+      var topNode = document.body || document.documentElement;
+      if (!(topNode instanceof Node)) return resolve(null);
+
+      observer.observe(topNode, { childList: true, subtree: true });
+    });
+  }
+
+  window.__LUMMMEN__.applyVariation = async function applyVariation(replacement) {
+    const node = await waitForElm(replacement.selector);
+    if (!node) return;
+    if (replacement.style) Object.assign(node.style, replacement.style);
+    if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
+    if (replacement.htmlReplacement !== undefined) node.innerHTML = replacement.htmlReplacement;
+    if (replacement.placeholder !== undefined) node.placeholder = replacement.placeholder;
+    if (replacement.src !== undefined) node.src = replacement.src;
+  }
 
   const getLuxiCookie = n => ((v = `; ${document.cookie}`.split(`; ${n}=`)) && v.length === 2 ? v.pop().split(';').shift() : undefined);
   const setLuxiCookie = (n, v) => document.cookie = `${n}=${v};expires=${new Date(Date.now() + 365*24*60*60*1000).toUTCString()};path=/`;

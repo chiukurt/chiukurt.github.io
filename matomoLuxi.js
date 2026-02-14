@@ -28,9 +28,6 @@ var _paq = window._paq = window._paq || [];
     }).then(r => r.json(), () => []))
   )();
   setTimeout(lummmenShowPage, 500);
-  
-  // const preview = lummmenAbData?.preview;
-  // for (const r of preview?.replacements) { applyBVersion(r); }
 
   (function() { // TODO: Replace me with real jsDelivr cdn link
     var script = document.createElement('script');
@@ -39,37 +36,6 @@ var _paq = window._paq = window._paq || [];
     document.head.appendChild(script);
   })();
 })();
-
-async function waitForElm(selector) {
-  return new Promise(resolve => {
-    var node = document.querySelector(selector);
-    if (node) return resolve(node);
-
-    var observer = new MutationObserver(() => {
-      node = document.querySelector(selector);
-      if (node) {
-        observer.disconnect();
-        resolve(node);
-      }
-    });
-
-    var topNode = document.body || document.documentElement;
-    if (!(topNode instanceof Node)) return resolve(null);
-
-    observer.observe(topNode, { childList: true, subtree: true });
-  });
-}
-
-async function applyBVersion(replacement) {
-  const node = await waitForElm(replacement.selector);
-  if (!node) return;
-  if (replacement.style) Object.assign(node.style, replacement.style);
-  if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
-  if (replacement.htmlReplacement !== undefined) node.innerHTML = replacement.htmlReplacement;
-  if (replacement.placeholder !== undefined) node.placeholder = replacement.placeholder;
-  if (replacement.src !== undefined) node.src = replacement.src;
-}
-
 
 // ABTEST (OLD) ==============================================================================================================
 // var _mtm = window._mtm = window._mtm || [];
