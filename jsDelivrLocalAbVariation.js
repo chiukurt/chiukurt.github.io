@@ -14,7 +14,7 @@
   });
 
   window.__LUMMMEN__.ready.then((data) => {
-    if (data && data.preview) return;
+    if (data && data.preview) return; // Abort matomo if in preview mode
     try { if (data) console.log("full", data);//startAbTest(data.tests);
     } catch { lummmenShowPage(); }
   });
@@ -23,7 +23,7 @@
 
   _paq.push(['requireConsent']);  
 
-  function startMTM(){
+  function startMtm(){
     function todayParam() {
       var pad = (number) => (number < 10 ? '0' : '') + number;
       var today = new Date();
@@ -36,10 +36,36 @@
     })();
   }
 
-  function allowTracking(){
+  function normalizeUrl(u) {
+    try {
+      var parsed = new URL(u, window.location.origin);
+      var params = new URLSearchParams(parsed.search);
+      params.delete('pk_ab_test');
+      var sortedParams = new URLSearchParams();
+      Array.from(params.keys()).sort().forEach(key => {
+        sortedParams.set(key, params.get(key));
+      });
+      return parsed.pathname + (sortedParams.toString() ? '?' + sortedParams.toString() : '');
+    } catch (e) {
+      return u;
+    }
+  }
+  
+  function startracking(){
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);
-    startMTM();
+    startMatomo()
+    startMtm();
+  }
+
+  function startMatomo() {
+    if (!matomoLuxiSampleSize || !matomoLuxiSiteId) return;
+    _paq.push(["setTrackerUrl", `${luxiferAnalytics}/matomo.php`]);
+    _paq.push(['setSiteId', matomoLuxiSiteId]);
+    var d = document, g = d.createElement("script"), s = d.getElementsByTagName("script")[0];
+    g.async = true; g.src = `${luxiferAnalytics}/matomo.js`;
+    s.parentNode.insertBefore(g, s);
+    g.onload = () => { window.__LUMMMEN__.markReady("analytics", 200) };
   }
 
   const getLuxiCookie = n => ((v = `; ${document.cookie}`.split(`; ${n}=`)) && v.length === 2 ? v.pop().split(';').shift() : undefined);
@@ -54,36 +80,15 @@
   if (inSample(luxiSample)) { 
     _paq.push(["setConsentGiven"]);
     _paq.push(["rememberConsentGiven"]);
-    allowTracking();
+    startracking();
   }
 })();
 
 
 // (async function () {
-
 //   (function () {
-//     function normalizeUrl(u) {
-//       try {
-//         var parsed = new URL(u, window.location.origin);
-//         var params = new URLSearchParams(parsed.search);
-//         params.delete('pk_ab_test');
-//         var sortedParams = new URLSearchParams();
-//         Array.from(params.keys()).sort().forEach(key => {
-//           sortedParams.set(key, params.get(key));
-//         });
-//         return parsed.pathname + (sortedParams.toString() ? '?' + sortedParams.toString() : '');
-//       } catch (e) {
-//         return u;
-//       }
-//     }
-
 //     function startAbTest(tests) { 
-//       if (!testsLoaded || !matomoLoaded) return;
-//       if (!shouldLuxiAbTest || tests.length === 0) {
-//         lummmenShowPage();
-//         return;
-//       }
-
+//       if (!tests || !Array.isArray(tests)) return;
 //       tests.forEach((test) => {
 //         var { name, url, type, data, selector, device } = test;
 //         var currentUrl = normalizeUrl(window.location.pathname + window.location.search);
@@ -147,33 +152,5 @@
 //       });
 //       removeLuxiLoadingClass();
 //     }
-
-//     async function getTests() {
-//       try {
-//         var response = await fetch(luxiferAbDataSource, {
-//           method: 'POST',
-//           headers: {'Content-Type': 'application/json'},
-//           body: JSON.stringify({ idSite: matomoLuxiSiteId }),
-//         });
-//         return await response.json();
-//       } catch (e) {
-//         return [];
-//       }
-//     }
-
-//     var tests = [];
-//     var testsLoaded = false;
-//     var matomoLoaded = false;
-//     _paq.push(["setTrackerUrl", `${luxiferAnalytics}/matomo.php`]);
-//     _paq.push(['setSiteId', matomoLuxiSiteId]);
-//     var d = document, g = d.createElement("script"), s = d.getElementsByTagName("script")[0];
-//     g.async = true; g.src = `${luxiferAnalytics}/matomo.js`;
-//     s.parentNode.insertBefore(g, s);
-//     g.onload = () => { window.__LUMMMEN__.markReady("analytics", 200) };
 //   })();
-
-
-
-
-
 // })();
