@@ -453,6 +453,7 @@
         const lower = src.toLowerCase();
         if (lower.startsWith("javascript:")) return;
         if (lower.startsWith("data:")) return;
+        if (!_URL) return;
         try {
           const url = new _URL(src, window.location.origin);
           if (
