@@ -29,7 +29,6 @@
   }
   
   function startracking() {
-    console.log("tracking started");
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);
     startMatomo()
@@ -53,7 +52,6 @@
     if (!Array.isArray(tests) || tests.length === 0) return;
     tests.forEach((test) => {
       var { name, url, replacements } = test;
-      console.log("testing...: ", test);
       if (!name || !url || !replacements) return;
       var currentUrl = normalizeUrl(window.location.pathname + window.location.search);
       var testUrl = normalizeUrl(url);
@@ -61,7 +59,6 @@
       _paq.push(["AbTesting::create", {
           name: name ?? "Unknown",
           trigger: () => {
-            console.log("segment: ", typeof window.__LUMMMEN__?.inSegment === "function" && window.__LUMMMEN__.inSegment(test));
               return typeof window.__LUMMMEN__?.inSegment === "function" && window.__LUMMMEN__.inSegment(test);
           },
           includedTargets: [{ attribute: "url", type: "equals_exactly", value: url, inverted: "0" }],
@@ -69,18 +66,14 @@
           variations: [
             {
               name: "original",
-              activate: function (event) {
-                console.log("original");
-              },
+              activate: function (event) { },
             },
             {
               name: "test",
               activate: async function (event) {
-                                console.log("testing more...." , test);
                 const helper = window.__LUMMMEN__;
                 if (typeof helper?.waitForElm !== "function") return;
                 if (typeof helper?.inSegment !== "function") return;
-                console.log("test");
                 replacements.forEach((r) => {
                   helper.waitForElm(r.selector).then((node) => { 
                     if (node) helper.applyVariation(node, r);
@@ -122,18 +115,12 @@
     let domReadyPromise = null;
 
     function whenDomReady() {
-      console.log("[waitForElmHub] whenDomReady called");
-      if (document.body || document.documentElement) {
-        console.log("[waitForElmHub] DOM ready immediately");
-        return Promise.resolve();
-      }
-      if (domReadyPromise) {
-        console.log("[waitForElmHub] domReadyPromise already exists");
-        return domReadyPromise;
-      }
+      if (document.body || document.documentElement) return Promise.resolve();
+      
+      if (domReadyPromise) return domReadyPromise;
+      
       domReadyPromise = new Promise((resolve) => {
         const done = () => {
-          console.log("[waitForElmHub] DOMContentLoaded event fired");
           resolve();
         };
         if (document.readyState === "loading") {
@@ -147,21 +134,15 @@
 
     function getTopNode() {
       const topNode = document.body || document.documentElement;
-      console.log("[waitForElmHub] getTopNode:", topNode);
       return topNode instanceof Node ? topNode : null;
     }
 
     function ensureObserver() {
-      if (observer) {
-        console.log("[waitForElmHub] Observer already exists");
-        return true;
-      }
+      if (observer) return true;
+      
       const topNode = getTopNode();
-      if (!topNode) {
-        console.log("[waitForElmHub] No top node found for observer");
-        return false;
-      }
-
+      if (!topNode) return false;
+      
       observer = new MutationObserver(() => {
         if (ticking) return;
         ticking = true;
@@ -172,7 +153,6 @@
       });
 
       observer.observe(topNode, { childList: true, subtree: true });
-      console.log("[waitForElmHub] Observer attached");
       return true;
     }
 
@@ -181,11 +161,9 @@
       if (!observer) return;
       observer.disconnect();
       observer = null;
-      console.log("[waitForElmHub] Observer disconnected");
     }
 
     function flush() {
-      console.log("[waitForElmHub] flush called, pendingBySelector.size:", pendingBySelector.size);
       if (pendingBySelector.size === 0) {
         stopObserverIfIdle();
         return;
@@ -194,14 +172,12 @@
       const selectors = Array.from(pendingBySelector.keys());
       for (const selector of selectors) {
         const waiters = pendingBySelector.get(selector);
-        console.log("[waitForElmHub] flush selector:", selector, "waiters:", waiters);
         if (!waiters || waiters.length === 0) {
           pendingBySelector.delete(selector);
           continue;
         }
 
         const node = document.querySelector(selector);
-        console.log("[waitForElmHub] flush querySelector:", selector, "node:", node);
         if (!node) continue;
 
         pendingBySelector.delete(selector);
@@ -218,27 +194,22 @@
       const opts = options || {};
       const timeoutMs = typeof opts.timeoutMs === "number" ? opts.timeoutMs : 300;
 
-      console.log("[waitForElmHub] waitForElm called:", selector, opts);
+
 
       return new Promise((resolve, reject) => {
         if (!selector || typeof selector !== "string") {
-          console.log("[waitForElmHub] Invalid selector:", selector);
           return resolve(null);
         }
 
         const existing = document.querySelector(selector);
-        console.log("[waitForElmHub] waitForElm querySelector:", selector, "existing:", existing);
         if (existing) return resolve(existing);
 
         // If body/html isn't available yet, wait for DOM ready then retry.
         if (!getTopNode()) {
-          console.log("[waitForElmHub] No top node, waiting for DOM ready");
           whenDomReady().then(() => {
             const nowExisting = document.querySelector(selector);
-            console.log("[waitForElmHub] DOM ready, querySelector:", selector, "nowExisting:", nowExisting);
             if (nowExisting) return resolve(nowExisting);
             if (!ensureObserver()) {
-              console.log("[waitForElmHub] Failed to ensure observer after DOM ready");
               return resolve(null);
             }
 
@@ -254,7 +225,6 @@
                   if (list.length === 0) pendingBySelector.delete(selector);
                 }
                 stopObserverIfIdle();
-                console.log("[waitForElmHub] Timeout reached for selector:", selector);
                 resolve(null);
               }, timeoutMs);
             }
@@ -270,7 +240,6 @@
         }
 
         if (!ensureObserver()) {
-          console.log("[waitForElmHub] Failed to ensure observer");
           return resolve(null);
         }
 
@@ -291,7 +260,6 @@
               if (list.length === 0) pendingBySelector.delete(selector);
             }
             stopObserverIfIdle();
-            console.log("[waitForElmHub] Timeout reached for selector:", selector);
             resolve(null);
           }, timeoutMs);
         }
@@ -329,7 +297,6 @@
 
   // Apply previews and winners
   window.__LUMMMEN__.when("tests").then((data) => {
-    console.log("t: ", data)
     try {
       if (data?.preview) {
         data.preview.replacements.forEach((r) => {
@@ -352,7 +319,6 @@
   });
 
   window.__LUMMMEN__.ready.then((data) => {
-    console.log("r: ", data);
     try {
       if (data?.tests?.ongoing) startAbTesting(data.tests.ongoing);
     } catch { lummmenShowPage(); }
