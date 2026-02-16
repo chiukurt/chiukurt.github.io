@@ -209,10 +209,8 @@
           whenDomReady().then(() => {
             const nowExisting = document.querySelector(selector);
             if (nowExisting) return resolve(nowExisting);
-            if (!ensureObserver()) {
-              return resolve(null);
-            }
-
+            if (!ensureObserver()) return resolve(null);
+            
             // Register waiter after DOM is ready (so observer can attach)
             const waiter = { resolve, reject, start: Date.now(), timeoutMs, timeoutId: undefined };
 
@@ -239,10 +237,8 @@
           return;
         }
 
-        if (!ensureObserver()) {
-          return resolve(null);
-        }
-
+        if (!ensureObserver()) return resolve(null);
+        
         const waiter = {
           resolve,
           reject,
@@ -279,15 +275,132 @@
     return window.__LUMMMEN__.__waitForElmHub.waitForElm(selector, options);
   };
 
-  // TODO: Add guards/validation for high risk items
   window.__LUMMMEN__.applyVariation = async function applyVariation(node, replacement) {
+    function sanitizeToFragment(html, bannedHostTags) {
+      if (typeof html !== "string") return null;
+
+      const banned = bannedHostTags instanceof Set ? bannedHostTags : new Set();
+      const urlBearing = [
+        "href", "src", "srcset", "xlink:href", "formaction", "action", "poster", "srcdoc"
+      ];
+      const tpl = document.createElement("template");
+      tpl.innerHTML = html;
+
+      const walker = document.createTreeWalker(tpl.content, NodeFilter.SHOW_ELEMENT, null);
+      while (walker.nextNode()) {
+        const el = walker.currentNode;
+        const tag = (el.tagName || "").toLowerCase();
+        if (banned.has(tag)) return null;
+        for (const attr of Array.from(el.attributes)) {
+          const name = attr.name.toLowerCase();
+          const value = (attr.value || "").trim();
+          if (name.startsWith("on")) return null;
+          if (urlBearing.includes(name)) return null;
+          if (name === "style") return null;
+          if (name !== "class") return null;
+          if (!/^[a-z0-9_\-\s]+$/i.test(value)) return null;
+        }
+      }
+
+      return tpl.content;
+    }
+
+    function sanitizeStyleObject(styleObj) {
+      if (!styleObj || typeof styleObj !== "object" || Array.isArray(styleObj)) return null;
+
+      const out = {};
+      const bannedProps = ["background", "background-image", "filter", "mask", "content", "cursor"];
+      const isSafeProp = (prop) =>
+        typeof prop === "string" &&
+        /^[a-z][a-z0-9-]*$/i.test(prop) &&
+        !/^--/i.test(prop) &&
+        !/^behavior$/i.test(prop) &&
+        !bannedProps.includes(prop.toLowerCase());
+      
+      const normalizeCssValueForScan = (input) => {
+        const s = String(input);
+        const noComments = s.replace(/\/\*[\s\S]*?\*\//g, "");
+        const deEscaped = noComments.replace(/\\\s*/g, "");
+        const collapsed = deEscaped.replace(/\s+/g, "");
+        return collapsed.toLowerCase();
+      };
+
+      const isSafeValue = (val) => {
+        if (val === null || val === undefined) return false;
+        const raw = String(val).trim();
+        if (!raw) return false;
+        if (/[<>"'`;\\]/.test(raw)) return false;
+        const scan = normalizeCssValueForScan(raw);
+        if (scan.includes("expression(")) return false;
+        if (scan.includes("javascript:")) return false;
+        if (scan.includes("vbscript:")) return false;
+        if (scan.includes("data:")) return false;
+        if (scan.includes("@import")) return false;
+        if (scan.includes("url(")) return false;
+        return true;
+      };
+
+      for (const [rawProp, rawVal] of Object.entries(styleObj)) {
+        if (!isSafeProp(rawProp)) continue;
+        if (!isSafeValue(rawVal)) continue;
+        out[rawProp] = String(rawVal).trim();
+      }
+
+      return out;
+    }
+
     if (!node) return;
-    if (replacement.style) Object.assign(node.style, replacement.style);
-    if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
-    if (replacement.htmlReplacement !== undefined) node.innerHTML = replacement.htmlReplacement;
-    if (replacement.placeholder !== undefined) node.placeholder = replacement.placeholder;
-    if (replacement.src !== undefined) node.src = replacement.src;
-  }
+    if (!replacement || typeof replacement !== "object") return;
+
+    const tag = (node.tagName || "").toLowerCase();
+    const hasHtml = replacement.htmlReplacement !== undefined;
+    const hasStyle = replacement.style !== undefined;
+    const hasText = replacement.textContent !== undefined;
+    const hasPlaceholder = replacement.placeholder !== undefined;
+    const hasSrc = replacement.src !== undefined;
+    let sanitizedFrag = null;
+    let sanitizedStyle = null;
+    if (hasHtml) {
+      const bannedHostTags = new Set(["a", "input", "textarea", "button", "img"]);
+      if (bannedHostTags.has(tag)) return;
+      sanitizedFrag = sanitizeToFragment(replacement.htmlReplacement, bannedHostTags);
+      if (!sanitizedFrag) return;
+    }
+
+    if (hasSrc) {
+      if (tag !== "img") return;
+      if (typeof replacement.src !== "string") return;
+      const src = replacement.src.trim().toLowerCase();
+      if (!src) return;
+      if (src.startsWith("javascript:")) return;
+      if (src.startsWith("data:")) return;
+    }
+
+    if (hasStyle) {
+      sanitizedStyle = sanitizeStyleObject(replacement.style);
+      if (!sanitizedStyle || Object.keys(sanitizedStyle).length === 0) return;
+    }
+
+    if (hasPlaceholder) {
+      if (typeof replacement.placeholder !== "string") return;
+      if (!["input", "textarea"].includes(tag)) return;
+    }
+
+    if (hasText) {
+      if (typeof replacement.textContent !== "string" && typeof replacement.textContent !== "number") return;
+    }
+
+    // If validation passed, apply changes
+    if (hasHtml) {
+      node.replaceChildren();
+      node.appendChild(sanitizedFrag.cloneNode(true));
+    }
+
+    if (hasStyle) Object.assign(node.style, sanitizedStyle);
+    if (hasText) node.textContent = replacement.textContent;
+    if (hasPlaceholder) node.placeholder = replacement.placeholder;
+    if (hasSrc) node.src = typeof replacement.src === "string" ? replacement.src.trim() : replacement.src;
+  };
 
   const getLuxiCookie = n => ((v = `; ${document.cookie}`.split(`; ${n}=`)) && v.length === 2 ? v.pop().split(';').shift() : undefined);
   const setLuxiCookie = (n, v) => document.cookie = `${n}=${v};expires=${new Date(Date.now() + 365*24*60*60*1000).toUTCString()};path=/`;
@@ -295,33 +408,30 @@
   const luxiferAnalytics = "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net";
   if (typeof matomoLuxiSiteId === 'undefined' || typeof matomoLuxiSampleSize === 'undefined') return;
 
-  // Apply previews and winners
   window.__LUMMMEN__.when("tests").then((data) => {
     try {
-      if (data?.preview) {
-        data.preview.replacements.forEach((r) => {
-          window.__LUMMMEN__.waitForElm(r.selector).then((node) => { 
-            if (node) window.__LUMMMEN__.applyVariation(node, r);
-          });
-        });
-      }
-
-      if (data?.permanent) {
-        data.permanent.forEach((t) => {
-          t.replacements.forEach((r) => {
-            window.__LUMMMEN__.waitForElm(r.selector).then((node) => { 
+      ["preview", "permanent"].forEach(type => {
+        const items = data?.[type];
+        if (!items) return;
+        (Array.isArray(items) ? items : [items]).forEach(t => {
+          (t.replacements || []).forEach(r => {
+            window.__LUMMMEN__.waitForElm(r.selector).then(node => {
               if (node) window.__LUMMMEN__.applyVariation(node, r);
             });
           });
         });
-      }
-    } catch { lummmenShowPage(); }
+      });
+    } catch {
+      if (typeof lummmenShowPage === "function") lummmenShowPage();
+    }
   });
 
   window.__LUMMMEN__.ready.then((data) => {
     try {
       if (data?.tests?.ongoing) startAbTesting(data.tests.ongoing);
-    } catch { lummmenShowPage(); }
+    } catch {
+      if (typeof lummmenShowPage === "function") lummmenShowPage();
+    }
   });
 
   _paq.push(['requireConsent']);  
