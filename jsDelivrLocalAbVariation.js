@@ -50,6 +50,7 @@
     if (!tests || !Array.isArray(tests)) return;
     tests.forEach((test) => {
       var { name, url, replacements } = test;
+      console.log("testing...: ", test);
       if (!name || !url || !replacements) return;
       var currentUrl = normalizeUrl(window.location.pathname + window.location.search);
       var testUrl = normalizeUrl(url);
@@ -57,7 +58,8 @@
       _paq.push(["AbTesting::create", {
           name: name ?? "Unknown",
           trigger: () => {
-            return typeof window.__LUMMMEN__?.inSegment === "function" && window.__LUMMMEN__.inSegment(test);
+            console.log("segment: ", typeof window.__LUMMMEN__?.inSegment === "function" && window.__LUMMMEN__.inSegment(test));
+              return typeof window.__LUMMMEN__?.inSegment === "function" && window.__LUMMMEN__.inSegment(test);
           },
           includedTargets: [{ attribute: "url", type: "equals_exactly", value: url, inverted: "0" }],
           excludedTargets: [],
@@ -71,6 +73,7 @@
             {
               name: "test",
               activate: async function (event) {
+                                console.log("testing more...." , test);
                 const helper = window.__LUMMMEN__;
                 if (typeof helper?.waitForElm !== "function") return;
                 if (typeof helper?.inSegment !== "function") return;
