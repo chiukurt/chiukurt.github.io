@@ -518,6 +518,11 @@
         const items = data?.[type];
         if (!items) return;
         (Array.isArray(items) ? items : [items]).forEach(t => {
+          if (
+            type === "permanent" &&
+            typeof window.__LUMMMEN_AB__?.inSegment === "function" &&
+            !window.__LUMMMEN_AB__.inSegment(t)
+          ) return;
           (t.replacements || []).forEach(r => {
             window.__LUMMMEN_AB__.waitFor(r.selector).then(node => {
               if (node) window.__LUMMMEN_AB__.applyVariation(node, r);
