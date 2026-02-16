@@ -47,6 +47,7 @@
   }
 
   function startAbTesting(tests) { 
+    console.log("testing..", tests);
     if (!tests || !Array.isArray(tests)) return;
     tests.forEach((test) => {
       var { name, url, replacements } = test;
@@ -350,7 +351,6 @@
 
   window.__LUMMMEN__.ready.then((data) => {
     console.log("r: ", data);
-    if (new URLSearchParams(location.search).get("lummmen-ab-preview")) return; // Abort matomo if in preview mode
     try {
       if (data?.tests?.ongoing) startAbTesting(data.tests.ongoing);
     } catch { lummmenShowPage(); }
