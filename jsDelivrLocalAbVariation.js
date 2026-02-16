@@ -311,7 +311,6 @@
 
           if (name.startsWith("on")) return null;
           if (urlBearing.includes(name)) return null;
-          if (name !== "class") return null;
           if (!/^[a-z0-9_\-\s]+$/i.test(value)) return null;
         }
       }
