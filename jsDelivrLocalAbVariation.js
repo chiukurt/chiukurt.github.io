@@ -281,7 +281,18 @@
 
       const banned = bannedHostTags instanceof Set ? bannedHostTags : new Set();
       const urlBearing = [
-        "href", "src", "srcset", "xlink:href", "formaction", "action", "poster", "srcdoc"
+        "style",
+        "on*",
+        "href",
+        "src",
+        "xlink:href",
+        "formaction",
+        "srcset",
+        "poster",
+        "action",
+        "srcdoc",
+        "target",
+        "download"
       ];
       const tpl = document.createElement("template");
       tpl.innerHTML = html;
