@@ -188,6 +188,7 @@
     const _AB_SAFE_STYLE_PROP_RE = /^[a-z][a-z0-9-]*$/i;
 
     function inSegment(test) {
+      if (!test || !test.device) return false;
       const device = test && test.device;
       try {
         const uad = navigator.userAgentData;
