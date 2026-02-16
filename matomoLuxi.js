@@ -7,7 +7,10 @@ var _paq = window._paq = window._paq || [];
   document.documentElement.classList.add('lummmen-ab-test-loading');
   document.head.innerHTML += '<style>html.lummmen-ab-test-loading{opacity:0 !important;}</style>';
   const lummmenAbSource = "https://getabtestseu-573194387152.europe-west1.run.app";
-  const lummmenShowPage = () => document.documentElement.classList.remove("lummmen-ab-test-loading");
+  const lummmenShowPage = () => {
+    window.__LUMMMEN_TOO_LATE__ = true;
+    document.documentElement.classList.remove("lummmen-ab-test-loading");
+  };
   const REQUIRED = new Set(["tests", "analytics"]), store = {}, loaded = new Set(), resolvers = {}, keyPromises = {};
   REQUIRED.forEach(k => keyPromises[k] = new Promise(resolve => resolvers[k] = resolve));
   let resolveAll;

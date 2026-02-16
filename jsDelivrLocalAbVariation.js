@@ -58,7 +58,8 @@
       if (currentUrl !== testUrl) return;
       _paq.push(["AbTesting::create", {
           name: name ?? "Unknown",
-          trigger: () => {
+        trigger: () => {
+              if (window.__LUMMMEN_TOO_LATE__) return false;
               return typeof window.__LUMMMEN_AB__?.inSegment === "function" && window.__LUMMMEN_AB__.inSegment(test);
           },
           includedTargets: [{ attribute: "url", type: "equals_exactly", value: url, inverted: "0" }],
