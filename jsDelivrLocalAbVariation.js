@@ -276,37 +276,84 @@
   };
 
   window.__LUMMMEN__.applyVariation = async function applyVariation(node, replacement) {
-    if (!node) return;
-    if (!replacement || typeof replacement !== "object") return;
-    const tag = (node.tagName || "").toLowerCase();
+    function sanitizeToFragment(html, bannedHostTags) {
+      if (typeof html !== "string") return null;
 
-    const html = replacement.htmlReplacement;
-    if (html !== undefined) {
-      const bannedHostTags = new Set(["a", "input", "textarea", "button", "img"]);
-      if (bannedHostTags.has(tag)) return;
-      if (typeof html !== "string") return;
-      const lower = html.toLowerCase();
-      if (lower.includes("<script") || lower.includes("</script")) return;
-      if (/(^|[\s"'`=])on[a-z]+\s*=/.test(lower)) return;
-      if (lower.includes("javascript:")) return;
-      if (/(^|[\s"'`=])(href|src|srcset|xlink:href|formaction|poster|action|srcdoc|target|download)\s*=/.test(lower)) return;
-      if (/(^|[\s"'`=])style\s*=/.test(lower)) return;
-      if (/<\s*(iframe|object|embed|svg|math)\b/.test(lower)) return;
-      node.innerHTML = html;
+      const banned = bannedHostTags instanceof Set ? bannedHostTags : new Set();
+      const urlBearing = ["href", "src", "srcset", "xlink:href", "formaction", "action", "poster", "srcdoc"];
+      const tpl = document.createElement("template");
+      tpl.innerHTML = html;
+
+      const walker = document.createTreeWalker(tpl.content, NodeFilter.SHOW_ELEMENT, null);
+      while (walker.nextNode()) {
+        const el = walker.currentNode;
+        const tag = (el.tagName || "").toLowerCase();
+        if (banned.has(tag)) return null;
+        for (const attr of Array.from(el.attributes)) {
+          const name = attr.name.toLowerCase();
+          const value = (attr.value || "").trim();
+          if (name.startsWith("on")) return null;
+          if (urlBearing.includes(name)) return null;
+          if (name === "style") return null;
+          if (name !== "class") return null;
+          if (!/^[a-z0-9_\-\s]+$/i.test(value)) return null;
+        }
+      }
+
+      return tpl.content;
     }
 
-    if (replacement.style) Object.assign(node.style, replacement.style);
-    if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
-    if (replacement.placeholder !== undefined) node.placeholder = replacement.placeholder;
-    if (replacement.src !== undefined) {
+    if (!node) return;
+    if (!replacement || typeof replacement !== "object") return;
+
+    const tag = (node.tagName || "").toLowerCase();
+    const hasHtml = replacement.htmlReplacement !== undefined;
+    const hasStyle = replacement.style !== undefined;
+    const hasText = replacement.textContent !== undefined;
+    const hasPlaceholder = replacement.placeholder !== undefined;
+    const hasSrc = replacement.src !== undefined;
+    let sanitizedFrag = null;
+    if (hasHtml) {
+      const bannedHostTags = new Set(["a", "input", "textarea", "button", "img"]);
+      if (bannedHostTags.has(tag)) return;
+      sanitizedFrag = sanitizeToFragment(replacement.htmlReplacement, bannedHostTags);
+      if (!sanitizedFrag) return;
+    }
+
+    if (hasSrc) {
       if (tag !== "img") return;
       if (typeof replacement.src !== "string") return;
       const src = replacement.src.trim().toLowerCase();
+      if (!src) return;
       if (src.startsWith("javascript:")) return;
       if (src.startsWith("data:")) return;
-      node.src = replacement.src;
     }
-  }
+
+    if (hasStyle) {
+      if (!replacement.style || typeof replacement.style !== "object") return;
+      if (Array.isArray(replacement.style)) return;
+    }
+
+    if (hasPlaceholder) {
+      if (typeof replacement.placeholder !== "string") return;
+      if (!["input", "textarea"].includes(tag)) return;
+    }
+
+    if (hasText) {
+      if (typeof replacement.textContent !== "string" && typeof replacement.textContent !== "number") return;
+    }
+
+    // If validation passed, apply changes
+    if (hasHtml) {
+      node.replaceChildren();
+      node.appendChild(sanitizedFrag.cloneNode(true));
+    }
+
+    if (hasStyle) Object.assign(node.style, replacement.style);
+    if (hasText) node.textContent = replacement.textContent;
+    if (hasPlaceholder) node.placeholder = replacement.placeholder;
+    if (hasSrc) node.src = replacement.src;
+  };
 
   const getLuxiCookie = n => ((v = `; ${document.cookie}`.split(`; ${n}=`)) && v.length === 2 ? v.pop().split(';').shift() : undefined);
   const setLuxiCookie = (n, v) => document.cookie = `${n}=${v};expires=${new Date(Date.now() + 365*24*60*60*1000).toUTCString()};path=/`;
