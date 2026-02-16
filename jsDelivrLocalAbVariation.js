@@ -209,10 +209,8 @@
           whenDomReady().then(() => {
             const nowExisting = document.querySelector(selector);
             if (nowExisting) return resolve(nowExisting);
-            if (!ensureObserver()) {
-              return resolve(null);
-            }
-
+            if (!ensureObserver()) return resolve(null);
+            
             // Register waiter after DOM is ready (so observer can attach)
             const waiter = { resolve, reject, start: Date.now(), timeoutMs, timeoutId: undefined };
 
@@ -239,10 +237,8 @@
           return;
         }
 
-        if (!ensureObserver()) {
-          return resolve(null);
-        }
-
+        if (!ensureObserver()) return resolve(null);
+        
         const waiter = {
           resolve,
           reject,
@@ -279,14 +275,37 @@
     return window.__LUMMMEN__.__waitForElmHub.waitForElm(selector, options);
   };
 
-  // TODO: Add guards/validation for high risk items
   window.__LUMMMEN__.applyVariation = async function applyVariation(node, replacement) {
     if (!node) return;
+    if (!replacement || typeof replacement !== "object") return;
+    const tag = (node.tagName || "").toLowerCase();
+
+    const html = replacement.htmlReplacement;
+    if (html !== undefined) {
+      const bannedHostTags = new Set(["a", "input", "textarea", "button", "img"]);
+      if (bannedHostTags.has(tag)) return;
+      if (typeof html !== "string") return;
+      const lower = html.toLowerCase();
+      if (lower.includes("<script") || lower.includes("</script")) return;
+      if (/(^|[\s"'`=])on[a-z]+\s*=/.test(lower)) return;
+      if (lower.includes("javascript:")) return;
+      if (/(^|[\s"'`=])(href|src|srcset|xlink:href|formaction|poster|action|srcdoc|target|download)\s*=/.test(lower)) return;
+      if (/(^|[\s"'`=])style\s*=/.test(lower)) return;
+      if (/<\s*(iframe|object|embed|svg|math)\b/.test(lower)) return;
+      node.innerHTML = html;
+    }
+
     if (replacement.style) Object.assign(node.style, replacement.style);
     if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
-    if (replacement.htmlReplacement !== undefined) node.innerHTML = replacement.htmlReplacement;
     if (replacement.placeholder !== undefined) node.placeholder = replacement.placeholder;
-    if (replacement.src !== undefined) node.src = replacement.src;
+    if (replacement.src !== undefined) {
+      if (tag !== "img") return;
+      if (typeof replacement.src !== "string") return;
+      const src = replacement.src.trim().toLowerCase();
+      if (src.startsWith("javascript:")) return;
+      if (src.startsWith("data:")) return;
+      node.src = replacement.src;
+    }
   }
 
   const getLuxiCookie = n => ((v = `; ${document.cookie}`.split(`; ${n}=`)) && v.length === 2 ? v.pop().split(';').shift() : undefined);
@@ -295,33 +314,30 @@
   const luxiferAnalytics = "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net";
   if (typeof matomoLuxiSiteId === 'undefined' || typeof matomoLuxiSampleSize === 'undefined') return;
 
-  // Apply previews and winners
   window.__LUMMMEN__.when("tests").then((data) => {
     try {
-      if (data?.preview) {
-        data.preview.replacements.forEach((r) => {
-          window.__LUMMMEN__.waitForElm(r.selector).then((node) => { 
-            if (node) window.__LUMMMEN__.applyVariation(node, r);
-          });
-        });
-      }
-
-      if (data?.permanent) {
-        data.permanent.forEach((t) => {
-          t.replacements.forEach((r) => {
-            window.__LUMMMEN__.waitForElm(r.selector).then((node) => { 
+      ["preview", "permanent"].forEach(type => {
+        const items = data?.[type];
+        if (!items) return;
+        (Array.isArray(items) ? items : [items]).forEach(t => {
+          (t.replacements || []).forEach(r => {
+            window.__LUMMMEN__.waitForElm(r.selector).then(node => {
               if (node) window.__LUMMMEN__.applyVariation(node, r);
             });
           });
         });
-      }
-    } catch { lummmenShowPage(); }
+      });
+    } catch {
+      lummmenShowPage();
+    }
   });
 
   window.__LUMMMEN__.ready.then((data) => {
     try {
       if (data?.tests?.ongoing) startAbTesting(data.tests.ongoing);
-    } catch { lummmenShowPage(); }
+    } catch {
+      lummmenShowPage();
+    }
   });
 
   _paq.push(['requireConsent']);  
