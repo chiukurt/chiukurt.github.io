@@ -439,6 +439,7 @@
       let sanitizedStyle = null;
 
       if (hasHtml) {
+        if (_AB_BANNED_TAGS.has(tag)) return;
         sanitizedFrag = sanitizeToFragment(replacement.htmlReplacement);
         if (!sanitizedFrag) return;
       }
