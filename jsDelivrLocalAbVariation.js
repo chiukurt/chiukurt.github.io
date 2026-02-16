@@ -102,7 +102,7 @@
       return false;
     }
   };
-  
+
   window.__LUMMMEN__.__waitForElmHub = window.__LUMMMEN__.__waitForElmHub || (function () {
     const pendingBySelector = new Map();
 
@@ -321,6 +321,7 @@
     console.log("t: ", data)
     try {
       if (data?.preview) {
+        console.log(data.preview.selector);
         window.__LUMMMEN__.waitForElm(data.preview.selector).then((node) => { 
           if (node) window.__LUMMMEN__.applyVariation(node, data.preview.replacement);
         });
