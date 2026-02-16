@@ -59,7 +59,7 @@
       _paq.push(["AbTesting::create", {
           name: name ?? "Unknown",
           trigger: () => {
-              return typeof window.__LUMMMEN__?.inSegment === "function" && window.__LUMMMEN__.inSegment(test);
+              return typeof window.__LUMMMEN_AB__?.inSegment === "function" && window.__LUMMMEN_AB__.inSegment(test);
           },
           includedTargets: [{ attribute: "url", type: "equals_exactly", value: url, inverted: "0" }],
           excludedTargets: [],
@@ -109,7 +109,6 @@
     const _NodeCloneNode = Node.prototype.cloneNode;
 
     const _URL = window.URL;
-    const _URLSearchParams = window.URLSearchParams;
 
     const _AB_BANNED_TAGS = new Set([
       "a",
