@@ -49,8 +49,8 @@
   function startAbTesting(tests) { 
     if (!tests || !Array.isArray(tests)) return;
     tests.forEach((test) => {
-      var { name, url, selector, replacement } = test;
-      if (!name || !url || !selector || !replacement) return;
+      var { name, url, replacements } = test;
+      if (!name || !url || !replacements) return;
       var currentUrl = normalizeUrl(window.location.pathname + window.location.search);
       var testUrl = normalizeUrl(url);
       if (currentUrl !== testUrl) return;
@@ -72,8 +72,10 @@
                 const helper = window.__LUMMMEN__;
                 if (typeof helper?.waitForElm !== "function") return;
                 if (typeof helper?.inSegment !== "function") return;
-                helper.waitForElm(selector).then((node) => { 
-                  if (node) helper.applyVariation(node, replacement);
+                replacements.forEach((r) => {
+                  helper.waitForElm(r.selector).then((node) => { 
+                    if (node) helper.applyVariation(node, r);
+                  });
                 });
               },
             },
@@ -321,16 +323,19 @@
     console.log("t: ", data)
     try {
       if (data?.preview) {
-        console.log(data.preview.selector);
-        window.__LUMMMEN__.waitForElm(data.preview.selector).then((node) => { 
-          if (node) window.__LUMMMEN__.applyVariation(node, data.preview.replacement);
+        data.preview.replacements.forEach((r) => {
+          window.__LUMMMEN__.waitForElm(r.selector).then((node) => { 
+            if (node) window.__LUMMMEN__.applyVariation(node, r);
+          });
         });
       }
 
       if (data?.permanent) {
         data.permanent.forEach((t) => {
-          window.__LUMMMEN__.waitForElm(t.selector).then((node) => { 
-            if (node) window.__LUMMMEN__.applyVariation(node, t.replacement);
+          t.replacements.forEach((r) => {
+            window.__LUMMMEN__.waitForElm(r.selector).then((node) => { 
+              if (node) window.__LUMMMEN__.applyVariation(node, r);
+            });
           });
         });
       }
