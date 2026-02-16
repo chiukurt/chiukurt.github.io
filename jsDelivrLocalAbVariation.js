@@ -28,10 +28,10 @@
     }
   }
   
-  function startracking() {
+  function starTracking() {
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);
-    startMatomo()
+    startMatomo();
     startMtm();
   }
 
@@ -59,24 +59,22 @@
       _paq.push(["AbTesting::create", {
           name: name ?? "Unknown",
           trigger: () => {
-              return typeof window.__LUMMMEN__?.inSegment === "function" && window.__LUMMMEN__.inSegment(test);
+              return typeof window.__LUMMMEN_AB__?.inSegment === "function" && window.__LUMMMEN_AB__.inSegment(test);
           },
           includedTargets: [{ attribute: "url", type: "equals_exactly", value: url, inverted: "0" }],
           excludedTargets: [],
           variations: [
-            {
-              name: "original",
-              activate: function (event) { },
-            },
+            { name: "original", activate: function (event) { } },
             {
               name: "test",
               activate: async function (event) {
-                const helper = window.__LUMMMEN__;
-                if (typeof helper?.waitForElm !== "function") return;
-                if (typeof helper?.inSegment !== "function") return;
+                const ab = window.__LUMMMEN_AB__;
+                if (typeof ab?.waitFor !== "function") return;
+                if (typeof ab?.applyVariation !== "function") return;
+
                 replacements.forEach((r) => {
-                  helper.waitForElm(r.selector).then((node) => { 
-                    if (node) helper.applyVariation(node, r);
+                  ab.waitFor(r.selector).then((node) => {
+                    if (node) ab.applyVariation(node, r);
                   });
                 });
               },
@@ -88,228 +86,294 @@
   }
 
   if (!window.__LUMMMEN__) return;
-  window.__LUMMMEN__.inSegment = function (test) {
-    const device = test.device;
-    try {
-      const uad = navigator.userAgentData;
-      const ua = navigator.userAgent || "";
-      const hasiPadOs = (uad && uad.platform === "MacIntel") || (!uad && /\bMacintosh\b/.test(ua));
-      const isiPad = /\biPad\b/.test(ua) || (hasiPadOs && (navigator.maxTouchPoints || 0) > 1);
-      const isAndroid = /\bAndroid\b/i.test(ua);
-      const isAndroidTablet = isAndroid && !/\bMobile\b/i.test(ua);
-      const isOtherTablet = /\b(Tablet|PlayBook|Silk|Kindle|Nexus 7|Nexus 10|SM-T)\b/i.test(ua);
-      const isTablet = isiPad || isAndroidTablet || isOtherTablet;
-      const isMobile = uad?.mobile || (!isTablet && /\b(Mobile|iPhone|iPod)\b/i.test(ua));
-      const d = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
-      return d === device;
-    } catch (e) {
-      return false;
+  (function initLummmenAbGlobal() {
+    if (window.__LUMMMEN_AB__) return;
+
+    const _DateNow = Date.now.bind(Date);
+    const _SetTimeout = window.setTimeout.bind(window);
+    const _ClearTimeout = window.clearTimeout.bind(window);
+    const _RAF = (window.requestAnimationFrame || function (cb) { return _SetTimeout(cb, 16); }).bind(window);
+
+    const _MutationObserver = window.MutationObserver;
+    const _Node = window.Node;
+    const _NodeFilter = window.NodeFilter;
+
+    const _DocumentQuerySelector = document.querySelector.bind(document);
+    const _DocumentCreateElement = document.createElement.bind(document);
+    const _DocumentCreateTreeWalker = document.createTreeWalker
+      ? document.createTreeWalker.bind(document)
+      : null;
+
+    const _ElementReplaceChildren = Element.prototype.replaceChildren;
+    const _NodeAppendChild = Node.prototype.appendChild;
+    const _NodeCloneNode = Node.prototype.cloneNode;
+
+    const _URL = window.URL;
+
+    const _AB_BANNED_HTML_REPLACE_TAGS = new Set([
+      "a",
+      "input",
+      "textarea",
+      "button",
+      "select",
+      "option",
+      "form",
+      "img",
+      "script",
+      "object",
+      "embed",
+      "link",
+      "meta",
+      "base",
+      "video",
+      "audio",
+      "source",
+      "track",
+      "picture",
+      "canvas",
+      "svg",
+      "math",
+      "style",
+      "template",
+      "slot",
+      "portal",
+      "iframe",
+    ]);
+
+    const _AB_BANNED_ATTRS = new Set([
+      "style",
+      "href",
+      "src",
+      "xlink:href",
+      "formaction",
+      "srcset",
+      "action",
+      "srcdoc",
+      "target",
+      "download",
+      "background",
+      "cite",
+      "longdesc",
+      "usemap",
+      "profile",
+      "manifest",
+      "ping",
+      "xmlns",
+      "xml:base",
+      "xml:lang",
+      "formtarget",
+      "formenctype",
+      "formmethod",
+      "sandbox",
+      "poster",
+      "integrity",
+      "nonce",
+      "data",
+      "codebase",
+      "lowsrc",
+      "dynsrc",
+    ]);
+
+    const _AB_SAFE_ATTR_VALUE_RE = /^[a-z0-9_\-\s]+$/i;
+
+    const _AB_BANNED_STYLE_PROPS = new Set([
+      "background",
+      "background-image",
+      "filter",
+      "mask",
+      "content",
+      "cursor",
+    ]);
+
+    const _AB_SAFE_STYLE_PROP_RE = /^[a-z][a-z0-9-]*$/i;
+
+    function inSegment(test) {
+      if (!test?.device) return false;
+      const device = test.device;
+      try {
+        const uad = navigator.userAgentData;
+        const ua = navigator.userAgent || "";
+        const hasiPadOs = (uad && uad.platform === "MacIntel") || (!uad && /\bMacintosh\b/.test(ua));
+        const isiPad = /\biPad\b/.test(ua) || (hasiPadOs && (navigator.maxTouchPoints || 0) > 1);
+        const isAndroid = /\bAndroid\b/i.test(ua);
+        const isAndroidTablet = isAndroid && !/\bMobile\b/i.test(ua);
+        const isOtherTablet = /\b(Tablet|PlayBook|Silk|Kindle|Nexus 7|Nexus 10|SM-T)\b/i.test(ua);
+        const isTablet = isiPad || isAndroidTablet || isOtherTablet;
+        const isMobile = uad?.mobile || (!isTablet && /\b(Mobile|iPhone|iPod)\b/i.test(ua));
+        const d = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
+        return d === device;
+      } catch (e) {
+        return false;
+      }
     }
-  };
 
-  window.__LUMMMEN__.__waitForElmHub = window.__LUMMMEN__.__waitForElmHub || (function () {
-    const pendingBySelector = new Map();
+    const waitFor = (function createWaitFor() {
+      const pendingBySelector = new Map();
+      let observer = null;
+      let ticking = false;
+      let domReadyPromise = null;
 
-    let observer = null;
-    let ticking = false;
-    let domReadyPromise = null;
+      function whenDomReady() {
+        if (document.body || document.documentElement) return Promise.resolve();
+        if (domReadyPromise) return domReadyPromise;
 
-    function whenDomReady() {
-      if (document.body || document.documentElement) return Promise.resolve();
-      
-      if (domReadyPromise) return domReadyPromise;
-      
-      domReadyPromise = new Promise((resolve) => {
-        const done = () => {
-          resolve();
-        };
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", done, { once: true });
-        } else {
-          done();
-        }
-      });
-      return domReadyPromise;
-    }
+        domReadyPromise = new Promise((resolve) => {
+          const done = () => resolve();
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", done, { once: true });
+          } else {
+            done();
+          }
+        });
 
-    function getTopNode() {
-      const topNode = document.body || document.documentElement;
-      return topNode instanceof Node ? topNode : null;
-    }
-
-    function ensureObserver() {
-      if (observer) return true;
-      
-      const topNode = getTopNode();
-      if (!topNode) return false;
-      
-      observer = new MutationObserver(() => {
-        if (ticking) return;
-        ticking = true;
-        (window.requestAnimationFrame || window.setTimeout)(() => {
-          ticking = false;
-          flush();
-        }, 16);
-      });
-
-      observer.observe(topNode, { childList: true, subtree: true });
-      return true;
-    }
-
-    function stopObserverIfIdle() {
-      if (pendingBySelector.size !== 0) return;
-      if (!observer) return;
-      observer.disconnect();
-      observer = null;
-    }
-
-    function flush() {
-      if (pendingBySelector.size === 0) {
-        stopObserverIfIdle();
-        return;
+        return domReadyPromise;
       }
 
-      const selectors = Array.from(pendingBySelector.keys());
-      for (const selector of selectors) {
-        const waiters = pendingBySelector.get(selector);
-        if (!waiters || waiters.length === 0) {
-          pendingBySelector.delete(selector);
-          continue;
-        }
-
-        const node = document.querySelector(selector);
-        if (!node) continue;
-
-        pendingBySelector.delete(selector);
-        for (const w of waiters) {
-          if (w.timeoutId) clearTimeout(w.timeoutId);
-          w.resolve(node);
-        }
+      function getTopNode() {
+        const topNode = document.body || document.documentElement;
+        return topNode instanceof _Node ? topNode : null;
       }
 
-      stopObserverIfIdle();
-    }
+      function ensureObserver() {
+        if (observer) return true;
+        const topNode = getTopNode();
+        if (!topNode) return false;
+        if (!_MutationObserver) return false;
 
-    function waitForElm(selector, options) {
-      const opts = options || {};
-      const timeoutMs = typeof opts.timeoutMs === "number" ? opts.timeoutMs : 300;
-
-
-
-      return new Promise((resolve, reject) => {
-        if (!selector || typeof selector !== "string") {
-          return resolve(null);
-        }
-
-        const existing = document.querySelector(selector);
-        if (existing) return resolve(existing);
-
-        // If body/html isn't available yet, wait for DOM ready then retry.
-        if (!getTopNode()) {
-          whenDomReady().then(() => {
-            const nowExisting = document.querySelector(selector);
-            if (nowExisting) return resolve(nowExisting);
-            if (!ensureObserver()) return resolve(null);
-            
-            // Register waiter after DOM is ready (so observer can attach)
-            const waiter = { resolve, reject, start: Date.now(), timeoutMs, timeoutId: undefined };
-
-            if (timeoutMs > 0) {
-              waiter.timeoutId = window.setTimeout(() => {
-                const list = pendingBySelector.get(selector);
-                if (list) {
-                  const idx = list.indexOf(waiter);
-                  if (idx >= 0) list.splice(idx, 1);
-                  if (list.length === 0) pendingBySelector.delete(selector);
-                }
-                stopObserverIfIdle();
-                resolve(null);
-              }, timeoutMs);
-            }
-
-            const list = pendingBySelector.get(selector);
-            if (list) list.push(waiter);
-            else pendingBySelector.set(selector, [waiter]);
-
+        observer = new _MutationObserver(() => {
+          if (ticking) return;
+          ticking = true;
+          _RAF(() => {
+            ticking = false;
             flush();
           });
+        });
 
+        observer.observe(topNode, { childList: true, subtree: true });
+        return true;
+      }
+
+      function stopObserverIfIdle() {
+        if (pendingBySelector.size !== 0) return;
+        if (!observer) return;
+        observer.disconnect();
+        observer = null;
+      }
+
+      function flush() {
+        if (pendingBySelector.size === 0) {
+          stopObserverIfIdle();
           return;
         }
 
-        if (!ensureObserver()) return resolve(null);
-        
-        const waiter = {
-          resolve,
-          reject,
-          start: Date.now(),
-          timeoutMs,
-          timeoutId: undefined,
-        };
+        const selectors = Array.from(pendingBySelector.keys());
+        for (const selector of selectors) {
+          const waiters = pendingBySelector.get(selector);
+          if (!waiters || waiters.length === 0) {
+            pendingBySelector.delete(selector);
+            continue;
+          }
 
-        if (timeoutMs > 0) {
-          waiter.timeoutId = window.setTimeout(() => {
-            const list = pendingBySelector.get(selector);
-            if (list) {
-              const idx = list.indexOf(waiter);
-              if (idx >= 0) list.splice(idx, 1);
-              if (list.length === 0) pendingBySelector.delete(selector);
-            }
-            stopObserverIfIdle();
-            resolve(null);
-          }, timeoutMs);
+          const node = _DocumentQuerySelector(selector);
+          if (!node) continue;
+
+          pendingBySelector.delete(selector);
+          for (const w of waiters) {
+            if (w.timeoutId) _ClearTimeout(w.timeoutId);
+            w.resolve(node);
+          }
         }
 
-        const list = pendingBySelector.get(selector);
-        if (list) list.push(waiter);
-        else pendingBySelector.set(selector, [waiter]);
+        stopObserverIfIdle();
+      }
 
-        flush();
-      });
-    }
+      return function waitForElm(selector, options) {
+        const opts = options || {};
+        const timeoutMs = typeof opts.timeoutMs === "number" ? opts.timeoutMs : 300;
 
-    return { waitForElm, flush };
-  })();
+        return new Promise((resolve) => {
+          if (!selector || typeof selector !== "string") return resolve(null);
 
-  window.__LUMMMEN__.waitForElm = async function waitForElm(selector, options) {
-    return window.__LUMMMEN__.__waitForElmHub.waitForElm(selector, options);
-  };
+          const existing = _DocumentQuerySelector(selector);
+          if (existing) return resolve(existing);
 
-  window.__LUMMMEN__.applyVariation = async function applyVariation(node, replacement) {
-    function sanitizeToFragment(html, bannedHostTags) {
+          if (!getTopNode()) {
+            whenDomReady().then(() => {
+              const nowExisting = _DocumentQuerySelector(selector);
+              if (nowExisting) return resolve(nowExisting);
+              if (!ensureObserver()) return resolve(null);
+
+              const waiter = { resolve, start: _DateNow(), timeoutMs, timeoutId: undefined };
+
+              if (timeoutMs > 0) {
+                waiter.timeoutId = _SetTimeout(() => {
+                  const list = pendingBySelector.get(selector);
+                  if (list) {
+                    const idx = list.indexOf(waiter);
+                    if (idx >= 0) list.splice(idx, 1);
+                    if (list.length === 0) pendingBySelector.delete(selector);
+                  }
+                  stopObserverIfIdle();
+                  resolve(null);
+                }, timeoutMs);
+              }
+
+              const list = pendingBySelector.get(selector);
+              if (list) list.push(waiter);
+              else pendingBySelector.set(selector, [waiter]);
+
+              flush();
+            });
+            return;
+          }
+
+          if (!ensureObserver()) return resolve(null);
+
+          const waiter = { resolve, start: _DateNow(), timeoutMs, timeoutId: undefined };
+
+          if (timeoutMs > 0) {
+            waiter.timeoutId = _SetTimeout(() => {
+              const list = pendingBySelector.get(selector);
+              if (list) {
+                const idx = list.indexOf(waiter);
+                if (idx >= 0) list.splice(idx, 1);
+                if (list.length === 0) pendingBySelector.delete(selector);
+              }
+              stopObserverIfIdle();
+              resolve(null);
+            }, timeoutMs);
+          }
+
+          const list = pendingBySelector.get(selector);
+          if (list) list.push(waiter);
+          else pendingBySelector.set(selector, [waiter]);
+
+          flush();
+        });
+      };
+    })();
+
+    function sanitizeToFragment(html) {
       if (typeof html !== "string") return null;
 
-      const banned = bannedHostTags instanceof Set ? bannedHostTags : new Set();
-      const urlBearing = [
-        "style",
-        "on*",
-        "href",
-        "src",
-        "xlink:href",
-        "formaction",
-        "srcset",
-        "poster",
-        "action",
-        "srcdoc",
-        "target",
-        "download"
-      ];
-      const tpl = document.createElement("template");
+      const tpl = _DocumentCreateElement("template");
       tpl.innerHTML = html;
 
-      const walker = document.createTreeWalker(tpl.content, NodeFilter.SHOW_ELEMENT, null);
+      if (!_DocumentCreateTreeWalker) return null;
+      const walker = _DocumentCreateTreeWalker(tpl.content, _NodeFilter.SHOW_ELEMENT, null);
+
       while (walker.nextNode()) {
         const el = walker.currentNode;
         const tag = (el.tagName || "").toLowerCase();
-        if (banned.has(tag)) return null;
+        if (_AB_BANNED_HTML_REPLACE_TAGS.has(tag)) return null;
+
         for (const attr of Array.from(el.attributes)) {
           const name = attr.name.toLowerCase();
           const value = (attr.value || "").trim();
+
           if (name.startsWith("on")) return null;
-          if (urlBearing.includes(name)) return null;
-          if (name === "style") return null;
-          if (name !== "class") return null;
-          if (!/^[a-z0-9_\-\s]+$/i.test(value)) return null;
+          if (_AB_BANNED_ATTRS.has(name)) return null;
+          if (!_AB_SAFE_ATTR_VALUE_RE.test(value)) return null;
         }
       }
 
@@ -320,14 +384,14 @@
       if (!styleObj || typeof styleObj !== "object" || Array.isArray(styleObj)) return null;
 
       const out = {};
-      const bannedProps = ["background", "background-image", "filter", "mask", "content", "cursor"];
+
       const isSafeProp = (prop) =>
         typeof prop === "string" &&
-        /^[a-z][a-z0-9-]*$/i.test(prop) &&
-        !/^--/i.test(prop) &&
+        _AB_SAFE_STYLE_PROP_RE.test(prop) &&
+        !prop.startsWith("--") &&
         !/^behavior$/i.test(prop) &&
-        !bannedProps.includes(prop.toLowerCase());
-      
+        !_AB_BANNED_STYLE_PROPS.has(prop.toLowerCase());
+
       const normalizeCssValueForScan = (input) => {
         const s = String(input);
         const noComments = s.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -341,6 +405,7 @@
         const raw = String(val).trim();
         if (!raw) return false;
         if (/[<>"'`;\\]/.test(raw)) return false;
+
         const scan = normalizeCssValueForScan(raw);
         if (scan.includes("expression(")) return false;
         if (scan.includes("javascript:")) return false;
@@ -360,66 +425,90 @@
       return out;
     }
 
-    if (!node) return;
-    if (!replacement || typeof replacement !== "object") return;
+    async function applyVariation(node, replacement) {
+      if (!node) return;
+      if (!replacement || typeof replacement !== "object") return;
 
-    const tag = (node.tagName || "").toLowerCase();
-    const hasHtml = replacement.htmlReplacement !== undefined;
-    const hasStyle = replacement.style !== undefined;
-    const hasText = replacement.textContent !== undefined;
-    const hasPlaceholder = replacement.placeholder !== undefined;
-    const hasSrc = replacement.src !== undefined;
-    let sanitizedFrag = null;
-    let sanitizedStyle = null;
-    if (hasHtml) {
-      const bannedHostTags = new Set(["a", "input", "textarea", "button", "img"]);
-      if (bannedHostTags.has(tag)) return;
-      sanitizedFrag = sanitizeToFragment(replacement.htmlReplacement, bannedHostTags);
-      if (!sanitizedFrag) return;
-    }
+      const tag = (node.tagName || "").toLowerCase();
+      const hasHtml = replacement.htmlReplacement !== undefined;
+      const hasStyle = replacement.style !== undefined;
+      const hasText = replacement.textContent !== undefined;
+      const hasPlaceholder = replacement.placeholder !== undefined;
+      const hasSrc = replacement.src !== undefined;
 
-    if (hasSrc) {
-      if (tag !== "img") return;
-      if (typeof replacement.src !== "string") return;
-      const src = replacement.src.trim();
-      if (!src) return;
-      if (src.toLowerCase().startsWith("javascript:")) return;
-      if (src.toLowerCase().startsWith("data:")) return;
-      try {
-        const url = new URL(src, window.location.origin);
-        if (url.origin !== "https://firebasestorage.googleapis.com" || !url.pathname.startsWith("/v0/b/ux-pro.appspot.com/o/publicAbTests")) return;
-      } catch {
-        return;
+      let sanitizedFrag = null;
+      let sanitizedStyle = null;
+
+      if (hasHtml) {
+        if (_AB_BANNED_HTML_REPLACE_TAGS.has(tag)) return;
+        sanitizedFrag = sanitizeToFragment(replacement.htmlReplacement);
+        if (!sanitizedFrag) return;
       }
+
+      if (hasSrc) {
+        if (tag !== "img") return;
+        if (typeof replacement.src !== "string") return;
+        const src = replacement.src.trim();
+        if (!src) return;
+        const lower = src.toLowerCase();
+        if (lower.startsWith("javascript:")) return;
+        if (lower.startsWith("data:")) return;
+        if (!_URL) return;
+        try {
+          const url = new _URL(src, window.location.origin);
+          if (
+            url.origin !== "https://firebasestorage.googleapis.com" ||
+            !url.pathname.startsWith("/v0/b/ux-pro.appspot.com/o/publicAbTests")
+          ) return;
+        } catch {
+          return;
+        }
+      }
+
+      if (hasStyle) {
+        sanitizedStyle = sanitizeStyleObject(replacement.style);
+        if (!sanitizedStyle || Object.keys(sanitizedStyle).length === 0) return;
+      }
+
+      if (hasPlaceholder) {
+        if (typeof replacement.placeholder !== "string") return;
+        if (!["input", "textarea"].includes(tag)) return;
+      }
+
+      if (hasText) {
+        if (typeof replacement.textContent !== "string" && typeof replacement.textContent !== "number") return;
+      }
+
+      if (hasHtml) {
+        if (typeof _ElementReplaceChildren === "function") {
+          _ElementReplaceChildren.call(node);
+        } else {
+          while (node.firstChild) node.removeChild(node.firstChild);
+        }
+        _NodeAppendChild.call(node, _NodeCloneNode.call(sanitizedFrag, true));
+      }
+
+      if (hasStyle) Object.assign(node.style, sanitizedStyle);
+      if (hasText) node.textContent = replacement.textContent;
+      if (hasPlaceholder) node.placeholder = replacement.placeholder;
+      if (hasSrc) node.src = replacement.src.trim();
     }
 
-    if (hasStyle) {
-      sanitizedStyle = sanitizeStyleObject(replacement.style);
-      if (!sanitizedStyle || Object.keys(sanitizedStyle).length === 0) return;
-    }
+    const api = Object.freeze({
+      inSegment,
+      waitFor,
+      applyVariation,
+    });
 
-    if (hasPlaceholder) {
-      if (typeof replacement.placeholder !== "string") return;
-      if (!["input", "textarea"].includes(tag)) return;
-    }
+    Object.defineProperty(window, "__LUMMMEN_AB__", {
+      value: api,
+      writable: false,
+      configurable: false,
+      enumerable: false,
+    });
+  })();
 
-    if (hasText) {
-      if (typeof replacement.textContent !== "string" && typeof replacement.textContent !== "number") return;
-    }
-
-    // If validation passed, apply changes
-    if (hasHtml) {
-      node.replaceChildren();
-      node.appendChild(sanitizedFrag.cloneNode(true));
-    }
-
-    if (hasStyle) Object.assign(node.style, sanitizedStyle);
-    if (hasText) node.textContent = replacement.textContent;
-    if (hasPlaceholder) node.placeholder = replacement.placeholder;
-    if (hasSrc) node.src = typeof replacement.src === "string" ? replacement.src.trim() : replacement.src;
-  };
-
-  const getLuxiCookie = n => ((v = `; ${document.cookie}`.split(`; ${n}=`)) && v.length === 2 ? v.pop().split(';').shift() : undefined);
+  const getLuxiCookie = n => { const parts = `; ${document.cookie}`.split(`; ${n}=`); return parts.length === 2 ? parts[1].split(';').shift() : undefined; };
   const setLuxiCookie = (n, v) => document.cookie = `${n}=${v};expires=${new Date(Date.now() + 365*24*60*60*1000).toUTCString()};path=/`;
   const inSample = (inputNum) => parseInt(inputNum, 10) <= parseInt(matomoLuxiSampleSize, 10);
   const luxiferAnalytics = "https://luxifer-analytics-cdn-fcbkengwhub0fdd9.z01.azurefd.net";
@@ -431,9 +520,14 @@
         const items = data?.[type];
         if (!items) return;
         (Array.isArray(items) ? items : [items]).forEach(t => {
+          if (
+            type === "permanent" &&
+            typeof window.__LUMMMEN_AB__?.inSegment === "function" &&
+            !window.__LUMMMEN_AB__.inSegment(t)
+          ) return;
           (t.replacements || []).forEach(r => {
-            window.__LUMMMEN__.waitForElm(r.selector).then(node => {
-              if (node) window.__LUMMMEN__.applyVariation(node, r);
+            window.__LUMMMEN_AB__.waitFor(r.selector).then(node => {
+              if (node) window.__LUMMMEN_AB__.applyVariation(node, r);
             });
           });
         });
@@ -461,6 +555,6 @@
   if (inSample(luxiSample) && !new URLSearchParams(location.search).has('lummmen-ab-preview')) { 
     _paq.push(["setConsentGiven"]);
     _paq.push(["rememberConsentGiven"]);
-    startracking();
+    starTracking();
   }
 })();
