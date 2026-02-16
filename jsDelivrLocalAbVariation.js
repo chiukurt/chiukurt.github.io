@@ -45,10 +45,11 @@
     g.onload = () => { window.__LUMMMEN__.markReady("analytics", 200) };
   }
 
-  function startAbTest(tests) { 
+  function startAbTesting(tests) { 
     if (!tests || !Array.isArray(tests)) return;
     tests.forEach((test) => {
-      var { name, url, type, data, selector, device } = test;
+      var { name, url, selector, replacement } = test;
+      if (!name || !url || !selector || !replacement) return;
       var currentUrl = normalizeUrl(window.location.pathname + window.location.search);
       var testUrl = normalizeUrl(url);
       if (currentUrl !== testUrl) return;
@@ -71,7 +72,7 @@
                 if (typeof helper?.waitForElm !== "function") return;
                 if (typeof helper?.inSegment !== "function") return;
                 helper.waitForElm(selector).then((node) => { 
-                  if (node) helper.applyVariation(node);
+                  if (node) helper.applyVariation(node, replacement);
                 });
               },
             },
@@ -101,30 +102,121 @@
     }
   };
 
-  // TODO: Replace with system that only sets up one observer due to performance concerns
-  window.__LUMMMEN__.waitForElm = async function waitForElm(selector) {
-    return new Promise(resolve => {
-      var node = document.querySelector(selector);
-      if (node) return resolve(node);
 
-      var observer = new MutationObserver(() => {
-        node = document.querySelector(selector);
-        if (node) {
-          observer.disconnect();
-          resolve(node);
-        }
+  window.__LUMMMEN__.__waitForElmHub = window.__LUMMMEN__.__waitForElmHub || (function () {
+    const pendingBySelector = new Map();
+
+    let observer = null;
+    let ticking = false;
+
+    function getTopNode() {
+      const topNode = document.body || document.documentElement;
+      return topNode instanceof Node ? topNode : null;
+    }
+
+    function ensureObserver() {
+      if (observer) return true;
+      const topNode = getTopNode();
+      if (!topNode) return false;
+
+      observer = new MutationObserver(() => {
+        if (ticking) return;
+        ticking = true;
+        (window.requestAnimationFrame || window.setTimeout)(() => {
+          ticking = false;
+          flush();
+        }, 16);
       });
 
-      var topNode = document.body || document.documentElement;
-      if (!(topNode instanceof Node)) return resolve(null);
-
       observer.observe(topNode, { childList: true, subtree: true });
-    });
-  }
+      return true;
+    }
+
+    function stopObserverIfIdle() {
+      if (pendingBySelector.size !== 0) return;
+      if (!observer) return;
+      observer.disconnect();
+      observer = null;
+    }
+
+    function flush() {
+      if (pendingBySelector.size === 0) {
+        stopObserverIfIdle();
+        return;
+      }
+
+      const selectors = Array.from(pendingBySelector.keys());
+      for (const selector of selectors) {
+        const waiters = pendingBySelector.get(selector);
+        if (!waiters || waiters.length === 0) {
+          pendingBySelector.delete(selector);
+          continue;
+        }
+
+        const node = document.querySelector(selector);
+        if (!node) continue;
+
+        pendingBySelector.delete(selector);
+        for (const w of waiters) {
+          if (w.timeoutId) clearTimeout(w.timeoutId);
+          w.resolve(node);
+        }
+      }
+
+      stopObserverIfIdle();
+    }
+
+    function waitForElm(selector, options) {
+      const opts = options || {};
+      const timeoutMs = typeof opts.timeoutMs === "number" ? opts.timeoutMs : 300;
+
+      return new Promise((resolve, reject) => {
+        if (!selector || typeof selector !== "string") return resolve(null);
+
+        const existing = document.querySelector(selector);
+        if (existing) return resolve(existing);
+
+        if (!ensureObserver()) return resolve(null);
+
+        const waiter = {
+          resolve,
+          reject,
+          start: Date.now(),
+          timeoutMs,
+          timeoutId: undefined,
+        };
+
+        if (timeoutMs > 0) {
+          waiter.timeoutId = window.setTimeout(() => {
+            const list = pendingBySelector.get(selector);
+            if (list) {
+              const idx = list.indexOf(waiter);
+              if (idx >= 0) list.splice(idx, 1);
+              if (list.length === 0) pendingBySelector.delete(selector);
+            }
+            stopObserverIfIdle();
+            resolve(null);
+          }, timeoutMs);
+        }
+
+        const list = pendingBySelector.get(selector);
+        if (list) list.push(waiter);
+        else pendingBySelector.set(selector, [waiter]);
+
+        flush();
+      });
+    }
+
+    return { waitForElm, flush };
+  })();
+
+  // TODO completed: only one observer is used for all waitForElm calls.
+  window.__LUMMMEN__.waitForElm = async function waitForElm(selector, options) {
+    return window.__LUMMMEN__.__waitForElmHub.waitForElm(selector, options);
+  };
 
   // TODO: Add guards/validation for high risk items
-  window.__LUMMMEN__.applyVariation = async function applyVariation(replacement) {
-    const node = await window.__LUMMMEN__.waitForElm(replacement.selector);
+  window.__LUMMMEN__.applyVariation = async function applyVariation(node, replacement) {
     if (!node) return;
     if (replacement.style) Object.assign(node.style, replacement.style);
     if (replacement.textContent !== undefined) node.textContent = replacement.textContent;
@@ -141,13 +233,29 @@
 
   // Apply previews and winners
   window.__LUMMMEN__.when("tests").then((data) => {
-    try { if (data) console.log("tests",data);//startAbTest(data.tests);
+    try {
+      if (data?.previews) {
+        data.previews.forEach((t) => {
+          window.__LUMMMEN__.waitForElm(t.selector).then((node) => { 
+            if (node) window.__LUMMMEN__.applyVariation(node, t.replacement);
+          });
+        });
+      }
+
+      if (data?.permanent) {
+        data.permanent.forEach((t) => {
+          window.__LUMMMEN__.waitForElm(t.selector).then((node) => { 
+            if (node) window.__LUMMMEN__.applyVariation(node, t.replacement);
+          });
+        });
+      }
     } catch { lummmenShowPage(); }
   });
 
   window.__LUMMMEN__.ready.then((data) => {
     if (new URLSearchParams(location.search).get("lummmen-ab-preview")) return; // Abort matomo if in preview mode
-    try { if (data) console.log("full", data);//startAbTest(data.tests);
+    try {
+      if (data?.ongoing) startAbTesting(data.ongoing);
     } catch { lummmenShowPage(); }
   });
 
