@@ -375,7 +375,7 @@
         });
       });
     } catch {
-      lummmenShowPage();
+      if (typeof lummenShowPage === "function") lummmenShowPage();
     }
   });
 
@@ -383,7 +383,7 @@
     try {
       if (data?.tests?.ongoing) startAbTesting(data.tests.ongoing);
     } catch {
-      lummmenShowPage();
+      if (typeof lummenShowPage === "function") lummmenShowPage();
     }
   });
 
