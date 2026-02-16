@@ -236,10 +236,8 @@
     console.log("t: ", data)
     try {
       if (data?.preview) {
-        data.preview.forEach((t) => {
-          window.__LUMMMEN__.waitForElm(t.selector).then((node) => { 
-            if (node) window.__LUMMMEN__.applyVariation(node, t.replacement);
-          });
+        window.__LUMMMEN__.waitForElm(data.preview.selector).then((node) => { 
+          if (node) window.__LUMMMEN__.applyVariation(node, data.preview.replacement);
         });
       }
 
@@ -255,7 +253,6 @@
 
   window.__LUMMMEN__.ready.then((data) => {
     console.log("r: ", data);
-    console.log("search: ", new URLSearchParams(location.search).get("lummmen-ab-preview"))
     if (new URLSearchParams(location.search).get("lummmen-ab-preview")) return; // Abort matomo if in preview mode
     try {
       if (data?.ongoing) startAbTesting(data.ongoing);
@@ -269,7 +266,7 @@
     luxiSample = Math.floor(Math.random() * 100) + 1;
     setLuxiCookie("luxiSample", luxiSample);
   }
-  if (inSample(luxiSample)) { 
+  if (inSample(luxiSample) && !new URLSearchParams(location.search).has('lummmen-ab-preview')) { 
     _paq.push(["setConsentGiven"]);
     _paq.push(["rememberConsentGiven"]);
     startracking();
