@@ -31,7 +31,7 @@
   function starTracking() {
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);
-    startMatomo()
+    startMatomo();
     startMtm();
   }
 
@@ -188,8 +188,8 @@
     const _AB_SAFE_STYLE_PROP_RE = /^[a-z][a-z0-9-]*$/i;
 
     function inSegment(test) {
-      if (!test || !test.device) return false;
-      const device = test && test.device;
+      if (!test?.device) return false;
+      const device = test.device;
       try {
         const uad = navigator.userAgentData;
         const ua = navigator.userAgent || "";
