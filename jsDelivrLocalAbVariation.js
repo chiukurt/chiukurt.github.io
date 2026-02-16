@@ -111,6 +111,83 @@
     const _URL = window.URL;
     const _URLSearchParams = window.URLSearchParams;
 
+    const _AB_BANNED_TAGS = new Set([
+      "a",
+      "input",
+      "textarea",
+      "button",
+      "select",
+      "option",
+      "form",
+      "img",
+      "script",
+      "object",
+      "embed",
+      "link",
+      "meta",
+      "base",
+      "video",
+      "audio",
+      "source",
+      "track",
+      "picture",
+      "canvas",
+      "svg",
+      "math",
+      "style",
+      "template",
+      "slot",
+      "portal",
+      "iframe",
+    ]);
+
+    const _AB_BANNED_ATTRS = new Set([
+      "style",
+      "href",
+      "src",
+      "xlink:href",
+      "formaction",
+      "srcset",
+      "action",
+      "srcdoc",
+      "target",
+      "download",
+      "background",
+      "cite",
+      "longdesc",
+      "usemap",
+      "profile",
+      "manifest",
+      "ping",
+      "xmlns",
+      "xml:base",
+      "xml:lang",
+      "formtarget",
+      "formenctype",
+      "formmethod",
+      "sandbox",
+      "poster",
+      "integrity",
+      "nonce",
+      "data",
+      "codebase",
+      "lowsrc",
+      "dynsrc",
+    ]);
+
+    const _AB_SAFE_ATTR_VALUE_RE = /^[a-z0-9_\-\s]+$/i;
+
+    const _AB_BANNED_STYLE_PROPS = new Set([
+      "background",
+      "background-image",
+      "filter",
+      "mask",
+      "content",
+      "cursor",
+    ]);
+
+    const _AB_SAFE_STYLE_PROP_RE = /^[a-z][a-z0-9-]*$/i;
+
     function inSegment(test) {
       const device = test && test.device;
       try {
@@ -276,23 +353,8 @@
       };
     })();
 
-    function sanitizeToFragment(html, bannedHostTags) {
+    function sanitizeToFragment(html) {
       if (typeof html !== "string") return null;
-
-      const banned = bannedHostTags instanceof Set ? bannedHostTags : new Set();
-      const urlBearing = [
-        "style",
-        "href",
-        "src",
-        "xlink:href",
-        "formaction",
-        "srcset",
-        "poster",
-        "action",
-        "srcdoc",
-        "target",
-        "download",
-      ];
 
       const tpl = _DocumentCreateElement("template");
       tpl.innerHTML = html;
@@ -303,15 +365,15 @@
       while (walker.nextNode()) {
         const el = walker.currentNode;
         const tag = (el.tagName || "").toLowerCase();
-        if (banned.has(tag)) return null;
+        if (_AB_BANNED_TAGS.has(tag)) return null;
 
         for (const attr of Array.from(el.attributes)) {
           const name = attr.name.toLowerCase();
           const value = (attr.value || "").trim();
 
           if (name.startsWith("on")) return null;
-          if (urlBearing.includes(name)) return null;
-          if (!/^[a-z0-9_\-\s]+$/i.test(value)) return null;
+          if (_AB_BANNED_ATTRS.has(name)) return null;
+          if (!_AB_SAFE_ATTR_VALUE_RE.test(value)) return null;
         }
       }
 
@@ -322,13 +384,13 @@
       if (!styleObj || typeof styleObj !== "object" || Array.isArray(styleObj)) return null;
 
       const out = {};
-      const bannedProps = ["background", "background-image", "filter", "mask", "content", "cursor"];
+
       const isSafeProp = (prop) =>
         typeof prop === "string" &&
-        /^[a-z][a-z0-9-]*$/i.test(prop) &&
-        !/^--/i.test(prop) &&
+        _AB_SAFE_STYLE_PROP_RE.test(prop) &&
+        !prop.startsWith("--") &&
         !/^behavior$/i.test(prop) &&
-        !bannedProps.includes(prop.toLowerCase());
+        !_AB_BANNED_STYLE_PROPS.has(prop.toLowerCase());
 
       const normalizeCssValueForScan = (input) => {
         const s = String(input);
@@ -343,6 +405,7 @@
         const raw = String(val).trim();
         if (!raw) return false;
         if (/[<>"'`;\\]/.test(raw)) return false;
+
         const scan = normalizeCssValueForScan(raw);
         if (scan.includes("expression(")) return false;
         if (scan.includes("javascript:")) return false;
@@ -377,9 +440,7 @@
       let sanitizedStyle = null;
 
       if (hasHtml) {
-        const bannedHostTags = new Set(["a", "input", "textarea", "button", "img"]);
-        if (bannedHostTags.has(tag)) return;
-        sanitizedFrag = sanitizeToFragment(replacement.htmlReplacement, bannedHostTags);
+        sanitizedFrag = sanitizeToFragment(replacement.htmlReplacement);
         if (!sanitizedFrag) return;
       }
 
