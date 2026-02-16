@@ -110,7 +110,7 @@
 
     const _URL = window.URL;
 
-    const _AB_BANNED_TAGS = new Set([
+    const _AB_BANNED_HTML_REPLACE_TAGS = new Set([
       "a",
       "input",
       "textarea",
@@ -364,7 +364,7 @@
       while (walker.nextNode()) {
         const el = walker.currentNode;
         const tag = (el.tagName || "").toLowerCase();
-        if (_AB_BANNED_TAGS.has(tag)) return null;
+        if (_AB_BANNED_HTML_REPLACE_TAGS.has(tag)) return null;
 
         for (const attr of Array.from(el.attributes)) {
           const name = attr.name.toLowerCase();
@@ -439,7 +439,7 @@
       let sanitizedStyle = null;
 
       if (hasHtml) {
-        if (_AB_BANNED_TAGS.has(tag)) return;
+        if (_AB_BANNED_HTML_REPLACE_TAGS.has(tag)) return;
         sanitizedFrag = sanitizeToFragment(replacement.htmlReplacement);
         if (!sanitizedFrag) return;
       }
