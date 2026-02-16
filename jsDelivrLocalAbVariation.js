@@ -370,10 +370,16 @@
     if (hasSrc) {
       if (tag !== "img") return;
       if (typeof replacement.src !== "string") return;
-      const src = replacement.src.trim().toLowerCase();
+      const src = replacement.src.trim();
       if (!src) return;
-      if (src.startsWith("javascript:")) return;
-      if (src.startsWith("data:")) return;
+      if (src.toLowerCase().startsWith("javascript:")) return;
+      if (src.toLowerCase().startsWith("data:")) return;
+      try {
+        const url = new URL(src, window.location.origin);
+        if (url.origin !== "https://firebasestorage.googleapis.com" || !url.pathname.startsWith("/v0/b/ux-pro.appspot.com/o/publicAbTests")) return;
+      } catch {
+        return;
+      }
     }
 
     if (hasStyle) {
