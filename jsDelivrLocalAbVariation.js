@@ -46,9 +46,11 @@
     g.onload = () => { window.__LUMMMEN__.markReady("analytics", 200) };
   }
 
-  function startAbTesting(tests) { 
-    console.log("testing..", tests);
-    if (!tests || !Array.isArray(tests)) return;
+  function startAbTesting(testObjects) { 
+    if (!testObjects)  return;
+    let tests;
+    if (typeof testObjects === "object" && testObjects !== null) tests = Object.values(testObjects);
+    if (!Array.isArray(tests) || tests.length === 0) return;
     tests.forEach((test) => {
       var { name, url, replacements } = test;
       console.log("testing...: ", test);
