@@ -103,11 +103,27 @@
   };
 
 
+
   window.__LUMMMEN__.__waitForElmHub = window.__LUMMMEN__.__waitForElmHub || (function () {
     const pendingBySelector = new Map();
 
     let observer = null;
     let ticking = false;
+    let domReadyPromise = null;
+
+    function whenDomReady() {
+      if (document.body || document.documentElement) return Promise.resolve();
+      if (domReadyPromise) return domReadyPromise;
+      domReadyPromise = new Promise((resolve) => {
+        const done = () => resolve();
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", done, { once: true });
+        } else {
+          done();
+        }
+      });
+      return domReadyPromise;
+    }
 
     function getTopNode() {
       const topNode = document.body || document.documentElement;
@@ -176,6 +192,39 @@
         const existing = document.querySelector(selector);
         if (existing) return resolve(existing);
 
+        // If body/html isn't available yet, wait for DOM ready then retry.
+        if (!getTopNode()) {
+          whenDomReady().then(() => {
+            const nowExisting = document.querySelector(selector);
+            if (nowExisting) return resolve(nowExisting);
+            if (!ensureObserver()) return resolve(null);
+
+            // Register waiter after DOM is ready (so observer can attach)
+            const waiter = { resolve, reject, start: Date.now(), timeoutMs, timeoutId: undefined };
+
+            if (timeoutMs > 0) {
+              waiter.timeoutId = window.setTimeout(() => {
+                const list = pendingBySelector.get(selector);
+                if (list) {
+                  const idx = list.indexOf(waiter);
+                  if (idx >= 0) list.splice(idx, 1);
+                  if (list.length === 0) pendingBySelector.delete(selector);
+                }
+                stopObserverIfIdle();
+                resolve(null);
+              }, timeoutMs);
+            }
+
+            const list = pendingBySelector.get(selector);
+            if (list) list.push(waiter);
+            else pendingBySelector.set(selector, [waiter]);
+
+            flush();
+          });
+
+          return;
+        }
+
         if (!ensureObserver()) return resolve(null);
 
         const waiter = {
@@ -210,7 +259,6 @@
     return { waitForElm, flush };
   })();
 
-  // TODO completed: only one observer is used for all waitForElm calls.
   window.__LUMMMEN__.waitForElm = async function waitForElm(selector, options) {
     return window.__LUMMMEN__.__waitForElmHub.waitForElm(selector, options);
   };
