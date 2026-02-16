@@ -309,11 +309,14 @@
       if (!styleObj || typeof styleObj !== "object" || Array.isArray(styleObj)) return null;
 
       const out = {};
+      const bannedProps = ["background", "background-image", "filter", "mask", "content", "cursor"];
       const isSafeProp = (prop) =>
         typeof prop === "string" &&
         /^[a-z][a-z0-9-]*$/i.test(prop) &&
-        !/^--/i.test(prop) && 
-        !/^behavior$/i.test(prop);
+        !/^--/i.test(prop) &&
+        !/^behavior$/i.test(prop) &&
+        !bannedProps.includes(prop.toLowerCase());
+      
       const normalizeCssValueForScan = (input) => {
         const s = String(input);
         const noComments = s.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -322,14 +325,11 @@
         return collapsed.toLowerCase();
       };
 
-      const isSafeValue = (val, prop) => {
+      const isSafeValue = (val) => {
         if (val === null || val === undefined) return false;
         const raw = String(val).trim();
         if (!raw) return false;
         if (/[<>"'`;\\]/.test(raw)) return false;
-        const p = String(prop || "").toLowerCase();
-        const bannedProps = ["background", "background-image", "filter", "mask", "content", "cursor"];
-        if (bannedProps.includes(p)) return false;
         const scan = normalizeCssValueForScan(raw);
         if (scan.includes("expression(")) return false;
         if (scan.includes("javascript:")) return false;
@@ -337,7 +337,6 @@
         if (scan.includes("data:")) return false;
         if (scan.includes("@import")) return false;
         if (scan.includes("url(")) return false;
-      
         return true;
       };
 
@@ -397,7 +396,7 @@
       node.appendChild(sanitizedFrag.cloneNode(true));
     }
 
-    if (hasStyle) Object.assign(node.style, replacement.style);
+    if (hasStyle) Object.assign(node.style, sanitizedStyle);
     if (hasText) node.textContent = replacement.textContent;
     if (hasPlaceholder) node.placeholder = replacement.placeholder;
     if (hasSrc) node.src = replacement.src;
