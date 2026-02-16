@@ -280,7 +280,9 @@
       if (typeof html !== "string") return null;
 
       const banned = bannedHostTags instanceof Set ? bannedHostTags : new Set();
-      const urlBearing = ["href", "src", "srcset", "xlink:href", "formaction", "action", "poster", "srcdoc"];
+      const urlBearing = [
+        "href", "src", "srcset", "xlink:href", "formaction", "action", "poster", "srcdoc"
+      ];
       const tpl = document.createElement("template");
       tpl.innerHTML = html;
 
@@ -303,6 +305,51 @@
       return tpl.content;
     }
 
+    function sanitizeStyleObject(styleObj) {
+      if (!styleObj || typeof styleObj !== "object" || Array.isArray(styleObj)) return null;
+
+      const out = {};
+      const isSafeProp = (prop) =>
+        typeof prop === "string" &&
+        /^[a-z][a-z0-9-]*$/i.test(prop) &&
+        !/^--/i.test(prop) && 
+        !/^behavior$/i.test(prop);
+      const normalizeCssValueForScan = (input) => {
+        const s = String(input);
+        const noComments = s.replace(/\/\*[\s\S]*?\*\//g, "");
+        const deEscaped = noComments.replace(/\\\s*/g, "");
+        const collapsed = deEscaped.replace(/\s+/g, "");
+        return collapsed.toLowerCase();
+      };
+
+      const isSafeValue = (val, prop) => {
+        if (val === null || val === undefined) return false;
+        const raw = String(val).trim();
+        if (!raw) return false;
+        if (/[<>"'`;\\]/.test(raw)) return false;
+        const p = String(prop || "").toLowerCase();
+        const bannedProps = ["background", "background-image", "filter", "mask", "content", "cursor"];
+        if (bannedProps.includes(p)) return false;
+        const scan = normalizeCssValueForScan(raw);
+        if (scan.includes("expression(")) return false;
+        if (scan.includes("javascript:")) return false;
+        if (scan.includes("vbscript:")) return false;
+        if (scan.includes("data:")) return false;
+        if (scan.includes("@import")) return false;
+        if (scan.includes("url(")) return false;
+      
+        return true;
+      };
+
+      for (const [rawProp, rawVal] of Object.entries(styleObj)) {
+        if (!isSafeProp(rawProp)) continue;
+        if (!isSafeValue(rawVal)) continue;
+        out[rawProp] = String(rawVal).trim();
+      }
+
+      return out;
+    }
+
     if (!node) return;
     if (!replacement || typeof replacement !== "object") return;
 
@@ -313,6 +360,7 @@
     const hasPlaceholder = replacement.placeholder !== undefined;
     const hasSrc = replacement.src !== undefined;
     let sanitizedFrag = null;
+    let sanitizedStyle = null;
     if (hasHtml) {
       const bannedHostTags = new Set(["a", "input", "textarea", "button", "img"]);
       if (bannedHostTags.has(tag)) return;
@@ -330,8 +378,8 @@
     }
 
     if (hasStyle) {
-      if (!replacement.style || typeof replacement.style !== "object") return;
-      if (Array.isArray(replacement.style)) return;
+      sanitizedStyle = sanitizeStyleObject(replacement.style);
+      if (!sanitizedStyle || Object.keys(sanitizedStyle).length === 0) return;
     }
 
     if (hasPlaceholder) {
