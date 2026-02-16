@@ -399,7 +399,7 @@
     if (hasStyle) Object.assign(node.style, sanitizedStyle);
     if (hasText) node.textContent = replacement.textContent;
     if (hasPlaceholder) node.placeholder = replacement.placeholder;
-    if (hasSrc) node.src = replacement.src;
+    if (hasSrc) node.src = typeof replacement.src === "string" ? replacement.src.trim() : replacement.src;
   };
 
   const getLuxiCookie = n => ((v = `; ${document.cookie}`.split(`; ${n}=`)) && v.length === 2 ? v.pop().split(';').shift() : undefined);
@@ -422,7 +422,7 @@
         });
       });
     } catch {
-      if (typeof lummenShowPage === "function") lummmenShowPage();
+      if (typeof lummmenShowPage === "function") lummmenShowPage();
     }
   });
 
@@ -430,7 +430,7 @@
     try {
       if (data?.tests?.ongoing) startAbTesting(data.tests.ongoing);
     } catch {
-      if (typeof lummenShowPage === "function") lummmenShowPage();
+      if (typeof lummmenShowPage === "function") lummmenShowPage();
     }
   });
 
