@@ -64,7 +64,9 @@
           variations: [
             {
               name: "original",
-              activate: function (event) { },
+              activate: function (event) {
+                console.log("original");
+              },
             },
             {
               name: "test",
@@ -72,6 +74,7 @@
                 const helper = window.__LUMMMEN__;
                 if (typeof helper?.waitForElm !== "function") return;
                 if (typeof helper?.inSegment !== "function") return;
+                console.log("test");
                 replacements.forEach((r) => {
                   helper.waitForElm(r.selector).then((node) => { 
                     if (node) helper.applyVariation(node, r);
