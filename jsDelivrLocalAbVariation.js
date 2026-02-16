@@ -233,6 +233,7 @@
 
   // Apply previews and winners
   window.__LUMMMEN__.when("tests").then((data) => {
+    console.log("t: ", data)
     try {
       if (data?.previews) {
         data.previews.forEach((t) => {
@@ -253,6 +254,8 @@
   });
 
   window.__LUMMMEN__.ready.then((data) => {
+    console.log("r: ", data);
+    console.long("search: ", new URLSearchParams(location.search).get("lummmen-ab-preview"))
     if (new URLSearchParams(location.search).get("lummmen-ab-preview")) return; // Abort matomo if in preview mode
     try {
       if (data?.ongoing) startAbTesting(data.ongoing);
