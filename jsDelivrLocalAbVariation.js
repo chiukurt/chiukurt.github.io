@@ -272,7 +272,6 @@
       const inBrowser = inBrowserSegment(test);
       const inWeekday = inWeekdaySegment(test);
       const inHour = inHourSegment(test);
-      console.log `AB Test "${test}": inDevice=${inDevice}, inLanguage=${inLanguage}, inBrowser=${inBrowser}, inWeekday=${inWeekday}, inHour=${inHour}`;
       return inDevice && inLanguage && inBrowser && inWeekday && inHour;
     }
 
