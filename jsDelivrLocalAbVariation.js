@@ -189,23 +189,36 @@
     const _AB_SAFE_STYLE_PROP_RE = /^[a-z][a-z0-9-]*$/i;
 
     function inSegment(test) {
-      if (!test?.device) return false;
-      const device = test.device;
-      try {
-        const uad = navigator.userAgentData;
-        const ua = navigator.userAgent || "";
-        const hasiPadOs = (uad && uad.platform === "MacIntel") || (!uad && /\bMacintosh\b/.test(ua));
-        const isiPad = /\biPad\b/.test(ua) || (hasiPadOs && (navigator.maxTouchPoints || 0) > 1);
-        const isAndroid = /\bAndroid\b/i.test(ua);
-        const isAndroidTablet = isAndroid && !/\bMobile\b/i.test(ua);
-        const isOtherTablet = /\b(Tablet|PlayBook|Silk|Kindle|Nexus 7|Nexus 10|SM-T)\b/i.test(ua);
-        const isTablet = isiPad || isAndroidTablet || isOtherTablet;
-        const isMobile = uad?.mobile || (!isTablet && /\b(Mobile|iPhone|iPod)\b/i.test(ua));
-        const d = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
-        return d === device;
-      } catch (e) {
-        return false;
+      function inDeviceSegment(test) {
+        if (!test?.device) return true;
+        const device = test.device;
+        try {
+          const uad = navigator.userAgentData;
+          const ua = navigator.userAgent || "";
+          const hasiPadOs = (uad && uad.platform === "MacIntel") || (!uad && /\bMacintosh\b/.test(ua));
+          const isiPad = /\biPad\b/.test(ua) || (hasiPadOs && (navigator.maxTouchPoints || 0) > 1);
+          const isAndroid = /\bAndroid\b/i.test(ua);
+          const isAndroidTablet = isAndroid && !/\bMobile\b/i.test(ua);
+          const isOtherTablet = /\b(Tablet|PlayBook|Silk|Kindle|Nexus 7|Nexus 10|SM-T)\b/i.test(ua);
+          const isTablet = isiPad || isAndroidTablet || isOtherTablet;
+          const isMobile = uad?.mobile || (!isTablet && /\b(Mobile|iPhone|iPod)\b/i.test(ua));
+          const d = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
+          return d === device;
+        } catch (e) {
+          return false;
+        }
       }
+
+      function inLanguageSegment(test) {
+        if (!test?.languages?.length) return true;
+        const langs = navigator.languages || [navigator.language || navigator.userLanguage || "en"];
+        return test.languages.some((l) => langs.includes(l));
+      }
+
+      const inDevice = inDeviceSegment(test);
+      const inLanguage = inLanguageSegment(test);
+      console.log `AB Test "${test.name}": inDevice=${inDevice}, inLanguage=${inLanguage}`;
+      return inDevice && inLanguage;
     }
 
     const waitFor = (function createWaitFor() {
