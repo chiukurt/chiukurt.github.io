@@ -215,10 +215,65 @@
         return test.languages.some((l) => langs.includes(l));
       }
 
+      function inBrowserSegment(test) {
+        function detectBrowser() {
+          const ua = navigator.userAgent;
+          if (ua.includes("Edg/")) return "edge";
+          if (ua.includes("OPR/") || ua.includes("Opera")) return "opera";
+          if (ua.includes("Brave/")) return "brave";
+          if (ua.includes("Firefox/")) return "firefox";
+          if (ua.includes("Chrome/") && !ua.includes("Edg/") && !ua.includes("OPR/")) return "chrome";
+          if (ua.includes("Safari/") && !ua.includes("Chrome/") && !ua.includes("Chromium")) return "safari";
+          return "unknown";
+        }
+        if (!test?.browsers?.length) return true;
+        const current = detectBrowser();
+        return test.browsers
+          .map(b => b.toLowerCase())
+          .includes(current);
+      }
+
+      function inWeekdaySegment(test) {
+        function getWeekday() {
+          const days = [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ];
+
+          return days[new Date().getDay()];
+        }
+
+        if (!test?.weekdays?.length) return true;
+        const today = getWeekday();
+
+        return test.weekdays
+          .map(d => d.toLowerCase())
+          .includes(today);
+      }
+
+      function inHourSegment(test) {
+        if (!test?.hours?.length) return true;
+        const currentHour = new Date().getHours();
+        return test.hours.some(range => {
+          const [start, end] = range.split("~").map(Number);
+          if (isNaN(start) || isNaN(end)) return false;
+
+          return currentHour >= start && currentHour <= end;
+        });
+      }
+
       const inDevice = inDeviceSegment(test);
       const inLanguage = inLanguageSegment(test);
-      console.log `AB Test "${test}": inDevice=${inDevice}, inLanguage=${inLanguage}`;
-      return inDevice && inLanguage;
+      const inBrowser = inBrowserSegment(test);
+      const inWeekday = inWeekdaySegment(test);
+      const inHour = inHourSegment(test);
+      console.log `AB Test "${test}": inDevice=${inDevice}, inLanguage=${inLanguage}, inBrowser=${inBrowser}, inWeekday=${inWeekday}, inHour=${inHour}`;
+      return inDevice && inLanguage && inBrowser && inWeekday && inHour;
     }
 
     const waitFor = (function createWaitFor() {
