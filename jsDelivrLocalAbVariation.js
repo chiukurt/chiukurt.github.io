@@ -217,7 +217,7 @@
 
       const inDevice = inDeviceSegment(test);
       const inLanguage = inLanguageSegment(test);
-      console.log `AB Test "${test.name}": inDevice=${inDevice}, inLanguage=${inLanguage}`;
+      console.log `AB Test "${test}": inDevice=${inDevice}, inLanguage=${inLanguage}`;
       return inDevice && inLanguage;
     }
 
