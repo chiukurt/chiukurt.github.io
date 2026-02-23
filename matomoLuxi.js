@@ -23,7 +23,6 @@ var _paq = window._paq = window._paq || [];
   window.__LUMMMEN__ = { markReady, ready: allReady, when: k => keyPromises[k], get: k => store[k] };
 
   (async () => {
-    const startTime = performance.now(); // Start timing
     const previewId = new URLSearchParams(location.search).get("lummmen-ab-preview");
     const cacheKey = "lummmen-ab-tests";
     let tests;
@@ -46,8 +45,6 @@ var _paq = window._paq = window._paq || [];
       }
     }
     window.__LUMMMEN__.markReady("tests", tests);
-    const endTime = performance.now(); // End timing
-    console.log(`[LUMMMEN] AB test fetch took ${(endTime - startTime).toFixed(2)} ms`);
   })();
   setTimeout(lummmenShowPage, 500);
 
