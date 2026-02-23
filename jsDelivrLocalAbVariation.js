@@ -593,10 +593,14 @@
             typeof window.__LUMMMEN_AB__?.inSegment === "function" &&
             !window.__LUMMMEN_AB__.inSegment(t)
           ) return;
-          (t.replacements || []).forEach(r => {
+          const promises = (t.replacements || []).map(r =>
             window.__LUMMMEN_AB__.waitFor(r.selector).then(node => {
               if (node) window.__LUMMMEN_AB__.applyVariation(node, r);
-            });
+            })
+          );
+
+          Promise.all(promises).then(() => {
+            if (typeof lummmenShowPage === "function") lummmenShowPage();
           });
         });
       });
