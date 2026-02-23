@@ -20,16 +20,35 @@ var _paq = window._paq = window._paq || [];
     store[k] = v; loaded.add(k); resolvers[k](v);
     if (loaded.size === REQUIRED.size) resolveAll(store);
   };
-  window.__LUMMMEN__ = {  markReady, ready: allReady, when: k => keyPromises[k], get: k => store[k]};
-  (async () => 
-    window.__LUMMMEN__.markReady("tests", await fetch(lummmenAbSource, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        idSite: matomoLuxiSiteId,
-        previewId: new URLSearchParams(location.search).get("lummmen-ab-preview") ?? undefined
-      })
-    }).then(r => r.json(), () => []))
-  )();
+  window.__LUMMMEN__ = { markReady, ready: allReady, when: k => keyPromises[k], get: k => store[k] };
+
+  (async () => {
+    const startTime = performance.now(); // Start timing
+    const previewId = new URLSearchParams(location.search).get("lummmen-ab-preview");
+    const cacheKey = "lummmen-ab-tests";
+    let tests;
+    if (previewId) {
+      tests = await fetch(lummmenAbSource, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idSite: matomoLuxiSiteId, previewId })
+      }).then(r => r.json(), () => []);
+      sessionStorage.setItem(cacheKey, JSON.stringify(tests));
+    } else {
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        tests = JSON.parse(cached);
+      } else {
+        tests = await fetch(lummmenAbSource, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idSite: matomoLuxiSiteId })
+        }).then(r => r.json(), () => []);
+        sessionStorage.setItem(cacheKey, JSON.stringify(tests));
+      }
+    }
+    window.__LUMMMEN__.markReady("tests", tests);
+    const endTime = performance.now(); // End timing
+    console.log(`[LUMMMEN] AB test fetch took ${(endTime - startTime).toFixed(2)} ms`);
+  })();
   setTimeout(lummmenShowPage, 500);
 
   (function() { // TODO: Replace me with real jsDelivr cdn link
