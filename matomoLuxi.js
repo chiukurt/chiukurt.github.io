@@ -23,28 +23,35 @@ var _paq = window._paq = window._paq || [];
   window.__LUMMMEN__ = { markReady, ready: allReady, when: k => keyPromises[k], get: k => store[k] };
 
   (async () => {
-    const previewId = new URLSearchParams(location.search).get("lummmen-ab-preview");
-    const cacheKey = "lummmen-ab-tests";
-    let tests;
-    if (previewId) {
-      tests = await fetch(lummmenAbSource, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idSite: matomoLuxiSiteId, previewId })
-      }).then(r => r.json(), () => []);
-      sessionStorage.setItem(cacheKey, JSON.stringify(tests));
-    } else {
-      const cached = sessionStorage.getItem(cacheKey);
-      if (cached) {
-        tests = JSON.parse(cached);
-      } else {
+      const previewId = new URLSearchParams(location.search).get("lummmen-ab-preview");
+      const cacheKey = "lummmen-ab-tests";
+      let tests;
+      const startTime = performance.now();
+      console.log("[LUMMMEN] Fetch AB tests started:", startTime);
+  
+      if (previewId) {
         tests = await fetch(lummmenAbSource, {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idSite: matomoLuxiSiteId })
+          body: JSON.stringify({ idSite: matomoLuxiSiteId, previewId })
         }).then(r => r.json(), () => []);
         sessionStorage.setItem(cacheKey, JSON.stringify(tests));
+        console.log("[LUMMMEN] Fetch AB tests (preview) finished:", performance.now() - startTime, "ms");
+      } else {
+        const cached = sessionStorage.getItem(cacheKey);
+        if (cached) {
+          tests = JSON.parse(cached);
+          console.log("[LUMMMEN] Loaded AB tests from cache:", performance.now() - startTime, "ms");
+        } else {
+          tests = await fetch(lummmenAbSource, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ idSite: matomoLuxiSiteId })
+          }).then(r => r.json(), () => []);
+          sessionStorage.setItem(cacheKey, JSON.stringify(tests));
+          console.log("[LUMMMEN] Fetch AB tests (live) finished:", performance.now() - startTime, "ms");
+        }
       }
-    }
-    window.__LUMMMEN__.markReady("tests", tests);
+      window.__LUMMMEN__.markReady("tests", tests);
+      console.log("[LUMMMEN] AB tests marked ready:", performance.now() - startTime, "ms");
   })();
   setTimeout(lummmenShowPage, 500);
 
