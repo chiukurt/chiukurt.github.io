@@ -322,7 +322,6 @@
         }
 
         const wanted = test.referrers;
-        if (wanted.length === 0) return true;
         if (wanted.includes("direct") && isDirectTraffic()) return true;
         if (wanted.includes("external") && isExternalReferrer()) return true;
         if (wanted.includes("campaign") && hasCampaignParams()) return true;
