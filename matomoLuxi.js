@@ -22,29 +22,29 @@ var _paq = window._paq = window._paq || [];
   };
   window.__LUMMMEN__ = { markReady, ready: allReady, when: k => keyPromises[k], get: k => store[k] };
   (async () => {
-      const previewId = new URLSearchParams(location.search).get("lummmen-ab-preview");
-      const cacheKey = "lummmen-ab-tests";
-      let tests;
-      if (previewId) {
+    const previewId = new URLSearchParams(location.search).get("lummmen-ab-preview");
+    const cacheKey = "lummmen-ab-tests";
+    let tests;
+    if (previewId) {
+      tests = await fetch(lummmenAbSource, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idSite: matomoLuxiSiteId, previewId })
+      }).then(r => r.json(), () => []);
+      sessionStorage.setItem(cacheKey, JSON.stringify(tests));
+    } else {
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        tests = JSON.parse(cached);
+        console.log("[LUMMMEN] Loaded AB tests from cache:", performance.now() - startTime, "ms");
+      } else {
         tests = await fetch(lummmenAbSource, {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idSite: matomoLuxiSiteId, previewId })
+          body: JSON.stringify({ idSite: matomoLuxiSiteId })
         }).then(r => r.json(), () => []);
         sessionStorage.setItem(cacheKey, JSON.stringify(tests));
-      } else {
-        const cached = sessionStorage.getItem(cacheKey);
-        if (cached) {
-          tests = JSON.parse(cached);
-          console.log("[LUMMMEN] Loaded AB tests from cache:", performance.now() - startTime, "ms");
-        } else {
-          tests = await fetch(lummmenAbSource, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ idSite: matomoLuxiSiteId })
-          }).then(r => r.json(), () => []);
-          sessionStorage.setItem(cacheKey, JSON.stringify(tests));
-        }
       }
-      window.__LUMMMEN__.markReady("tests", tests);
+    }
+    window.__LUMMMEN__.markReady("tests", tests);
   })();
   setTimeout(lummmenShowPage, 400);
   (function() {
