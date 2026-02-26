@@ -49,7 +49,7 @@ var _paq = window._paq = window._paq || [];
   (function() {
     var script = document.createElement('script');
     script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.4.02/abtest.min.js";
-    script.integrity = "sha384-K7D3cwCwGR0x3kUUv+kQvOb+5RGynsVOl4FFn9NZMGn+GtYqx0VTdjtk6gJLL8Ny";
+    script.integrity = "sha384-BVwBpsnXVYMuq6FeCtYy+RC2hVwi184PqSnUKf0O2o2pXrcC/lvsYtXqnEyYqhO7";
     script.crossOrigin = "anonymous";
     script.async = true;
     document.head.appendChild(script);
