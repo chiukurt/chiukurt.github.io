@@ -269,62 +269,109 @@
 
       function inReferrerSegment(test) {
         if (!test?.referrers?.length) return true;
-        const referrer = (document.referrer || "").trim();
-        const CAMPAIGN_KEYS = [
-          "utm_source",
-          "utm_medium",
-          "utm_campaign",
-          "utm_term",
-          "utm_content",
-          "utm_id",
-          "gclid",
-          "gbraid",
-          "wbraid",
-          "fbclid",
-          "msclkid",
-          "ttclid",
-          "li_fat_id",
-          "epik",
-          "scid",
-          "rdt_cid",
-        ];
+        const wanted = test.referrers
+          .filter(Boolean)
+          .map((x) => String(x).toLowerCase());
+        const STORAGE_KEY = "lummmen-ab-referrer";
+        const now = Date.now();
 
-        function hasCampaignParams() {
+        function safeJsonParse(s) {
           try {
-            const qs = new URLSearchParams(window.location.search || "");
-            for (const k of CAMPAIGN_KEYS) {
-              if (qs.has(k)) return true;
+            return JSON.parse(s);
+          } catch {
+            return null;
+          }
+        }
+
+        function readStored() {
+          try {
+            const raw = window.sessionStorage?.getItem(STORAGE_KEY);
+            if (!raw) return null;
+            const obj = safeJsonParse(raw);
+            if (!obj || typeof obj !== "object") return null;
+            return obj;
+          } catch {
+            return null;
+          }
+        }
+
+        function writeStored(obj) {
+          try {
+            if (!window.sessionStorage) return;
+            window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ ...obj }));
+          } catch { }
+        }
+
+        function computeCurrent() {
+          const referrer = (document.referrer || "").trim();
+          const CAMPAIGN_KEYS = [
+            "utm_source",
+            "utm_medium",
+            "utm_campaign",
+            "utm_term",
+            "utm_content",
+            "utm_id",
+            "gclid",
+            "gbraid",
+            "wbraid",
+            "fbclid",
+            "msclkid",
+            "ttclid",
+            "li_fat_id",
+            "epik",
+            "scid",
+            "rdt_cid",
+          ];
+
+          const hasCampaignParams = (() => {
+            try {
+              const qs = new URLSearchParams(window.location.search || "");
+              for (const k of CAMPAIGN_KEYS) {
+                if (qs.has(k)) return true;
+              }
+              return false;
+            } catch {
+              return false;
             }
-            return false;
-          } catch {
-            return false;
-          }
+          })();
+
+          const isExternalReferrer = (() => {
+            if (!referrer) return false;
+            try {
+              const r = new URL(referrer, window.location.href);
+              return r.origin !== window.location.origin;
+            } catch {
+              return true;
+            }
+          })();
+
+          const isDirectTraffic = (() => {
+            if (!referrer) return true;
+            try {
+              const r = new URL(referrer, window.location.href);
+              return r.origin === window.location.origin;
+            } catch {
+              return false;
+            }
+          })();
+
+          return {
+            hasCampaignParams,
+            isExternalReferrer,
+            isDirectTraffic,
+            referrer: referrer || "",
+          };
         }
 
-        function isExternalReferrer() {
-          if (!referrer) return false;
-          try {
-            const r = new URL(referrer, window.location.href);
-            return r.origin !== window.location.origin;
-          } catch {
-            return true;
-          }
-        }
+        const stored = readStored();
+        const current = computeCurrent();
+        if (!stored) writeStored(current);
 
-        function isDirectTraffic() {
-          if (!referrer) return true;
-          try {
-            const r = new URL(referrer, window.location.href);
-            return r.origin === window.location.origin;
-          } catch {
-            return false;
-          }
-        }
+        const effective = stored || current;
 
-        const wanted = test.referrers;
-        if (wanted.includes("direct") && isDirectTraffic()) return true;
-        if (wanted.includes("external") && isExternalReferrer()) return true;
-        if (wanted.includes("campaign") && hasCampaignParams()) return true;
+        if (wanted.includes("direct") && effective.isDirectTraffic) return true;
+        if (wanted.includes("external") && effective.isExternalReferrer) return true;
+        if (wanted.includes("campaign") && effective.hasCampaignParams) return true;
         return false;
       }
 
