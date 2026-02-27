@@ -28,7 +28,7 @@
     }
   }
   
-  function starTracking() {
+  function startTracking() {
     try { window.__LUMMMEN_AB__?.initReferrerSession?.(); } catch {}
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);
@@ -176,8 +176,6 @@
       "dynsrc",
     ]);
 
-    const _AB_SAFE_ATTR_VALUE_RE = /^[a-z0-9_\-\s]+$/i;
-
     const _AB_BANNED_STYLE_PROPS = new Set([
       "background",
       "background-image",
@@ -312,27 +310,27 @@
       } catch { }
     }
 
+    const CAMPAIGN_KEYS = [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_term",
+      "utm_content",
+      "utm_id",
+      "gclid",
+      "gbraid",
+      "wbraid",
+      "fbclid",
+      "msclkid",
+      "ttclid",
+      "li_fat_id",
+      "epik",
+      "scid",
+      "rdt_cid",
+    ];
+
     function computeReferrerInfo() {
       const referrer = (document.referrer || "").trim();
-      const CAMPAIGN_KEYS = [
-        "utm_source",
-        "utm_medium",
-        "utm_campaign",
-        "utm_term",
-        "utm_content",
-        "utm_id",
-        "gclid",
-        "gbraid",
-        "wbraid",
-        "fbclid",
-        "msclkid",
-        "ttclid",
-        "li_fat_id",
-        "epik",
-        "scid",
-        "rdt_cid",
-      ];
-
       const hasCampaignParams = (() => {
         try {
           const qs = new URLSearchParams(window.location.search || "");
@@ -381,7 +379,11 @@
     }
 
     function getReferrerInfo() {
-      return readStoredReferrerInfo() || computeReferrerInfo();
+      const stored = readStoredReferrerInfo();
+      if (stored) return stored;
+      const current = computeReferrerInfo();
+      writeStoredReferrerInfo(current);
+      return current;
     }
 
     const waitFor = (function createWaitFor() {
@@ -760,6 +762,6 @@
   if (inSample(luxiSample) && !new URLSearchParams(location.search).has('lummmen-ab-preview')) { 
     _paq.push(["setConsentGiven"]);
     _paq.push(["rememberConsentGiven"]);
-    starTracking();
+    startTracking();
   }
 })();
