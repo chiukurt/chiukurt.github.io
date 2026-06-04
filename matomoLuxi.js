@@ -48,7 +48,7 @@ var _paq = window._paq = window._paq || [];
   (function() {
     var script = document.createElement('script');
     script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.5.00/abtest.min.js";
-    script.integrity = "sha384-Pyquw/Vr1WD9av9SxboAD5YfYIg9VQ+aYvtDHnRe1HDpnlYB8Ye9wlFRQsxnlwlw";
+    script.integrity = "sha384-PBYjGClXI08Pgco2+fhMGu1MxCitOXCvxQFjhbZ9pJi99tzIJNUWBgoD9Gvvg/rp";
     script.crossOrigin = "anonymous";
     script.async = true;
     document.head.appendChild(script);
