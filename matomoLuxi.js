@@ -179,18 +179,23 @@ const LummmenAnalyticsBus = (() => {
     return { ...header, ...out };
   }
 
+  function testReturn(input) {
+    console.log(input);
+  }
+
   function flush() {
+    console.log("Flush attempt");
     window._paq = window._paq || [];
     var _paq = window._paq;
 
     _paq.push([function () {
       try {
-        if (flushing) return;
+        if (flushing) return testReturn("Already flushing");
         flushing = true;
         const pageViewId = this.getPageViewId();
         const visitorId = this.getVisitorId();
         const url = this.getCurrentUrl();
-        if (!visitorId || !url) return;
+        if (!visitorId || !url) return testReturn("Missing visitorId or url");
 
         const screen = {
           w: document.documentElement.scrollWidth,
@@ -207,8 +212,8 @@ const LummmenAnalyticsBus = (() => {
         };
 
         const p = serializeOnce(header);
-        if (!p) return;
-        if (!p.click && !p.move && !p.hesitation && !p.frustration && !p.deadClick && !p.scroll) return;
+        if (!p) return testReturn("No data to flush");
+        if (!p.click && !p.move && !p.hesitation && !p.frustration && !p.deadClick && !p.scroll) return testReturn("No events to send");
 
         // navigator.sendBeacon(PAYLOAD_ENDPOINT, JSON.stringify(p));
         console.log("Flushing Luxi data:", p);
