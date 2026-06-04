@@ -102,6 +102,7 @@ var _paq = window._paq = window._paq || [];
   function startTracking(){
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);
+    console.log(_paq);
     startMTM();
   }
 
@@ -135,6 +136,7 @@ var _paq = window._paq = window._paq || [];
 // FAKE DEFAULT =============================================================================================================
 
 const LummmenAnalyticsBus = (() => {
+  console.log("init bus");
   const buffers = new Map();
   let flushing = false;
   let timer = null;
