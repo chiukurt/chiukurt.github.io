@@ -344,6 +344,32 @@ document.addEventListener("mouseout", pushLummmenCtData);
 
 let latestLummmenMove = null;
 let lastLummmenMove = null;
+let lastLummmenScrollPercent = 0;
+let lummmenScrollTimer = null;
+let pendingLummmenScroll = null;
+
+function pushLummmenScrollData() {
+  if (!pendingLummmenScroll) return;
+
+  const { scrollY, pageHeight, viewportHeight } = pendingLummmenScroll;
+  const scrollableHeight = Math.max(pageHeight - viewportHeight, 0);
+  const percent = scrollableHeight > 0
+    ? Math.min(100, Math.max(0, Math.floor((scrollY / scrollableHeight) * 100)))
+    : 100;
+  const roundedPercent = Math.floor(percent / 10) * 10;
+
+  if (roundedPercent <= lastLummmenScrollPercent) return;
+
+  const scrollMilestones = [];
+  for (let milestone = lastLummmenScrollPercent + 10; milestone <= roundedPercent; milestone += 10) {
+    scrollMilestones.push(milestone);
+  }
+
+  if (scrollMilestones.length) {
+    LummmenAnalyticsBus.push("scroll", scrollMilestones);
+    lastLummmenScrollPercent = roundedPercent;
+  }
+}
 
 document.addEventListener("pointermove", e => {
   latestLummmenMove = {
@@ -361,6 +387,15 @@ window.addEventListener("scroll", () => {
   }
   latestLummmenMove.scrollX = window.scrollX;
   latestLummmenMove.scrollY = window.scrollY;
+
+  pendingLummmenScroll = {
+    scrollY: window.scrollY,
+    pageHeight: document.documentElement.scrollHeight,
+    viewportHeight: window.innerHeight,
+  };
+
+  clearTimeout(lummmenScrollTimer);
+  lummmenScrollTimer = setTimeout(pushLummmenScrollData, 500);
 }, { passive: true });
 
 setInterval(() => {
