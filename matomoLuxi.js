@@ -352,14 +352,13 @@ function pushLummmenScrollData() {
   lummmenScrollFrame = null;
 
   const scrollY = window.scrollY;
-  const scrollX = window.scrollX;
   const pageHeight = document.documentElement.scrollHeight;
   const viewportHeight = window.innerHeight;
   const scrollableHeight = Math.max(pageHeight - viewportHeight, 0);
   const percent = scrollableHeight > 0
-    ? Math.min(100, Math.max(0, Math.floor((scrollY / scrollableHeight) * 100)))
+    ? Math.min(100, Math.max(0, Math.round((scrollY / scrollableHeight) * 10) * 10))
     : 100;
-
+  
   if (lastLummmenScrollPercent !== null && Math.abs(percent - lastLummmenScrollPercent) < 10) return;
 
   const direction = scrollY < lastLummmenScrollY ? "up" : "down";
