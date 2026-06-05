@@ -361,8 +361,6 @@ function pushLummmenScrollData() {
   
   if (lastLummmenScrollPercent !== null && Math.abs(percent - lastLummmenScrollPercent) < 10) return;
 
-  const direction = scrollY < lastLummmenScrollY ? "up" : "down";
-
   LummmenAnalyticsBus.push("scrollTo", {
     timestamp: Date.now(),
     percent,
