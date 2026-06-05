@@ -213,7 +213,7 @@ const LummmenAnalyticsBus = (() => {
 
         const p = serializeOnce(header);
         if (!p) return testReturn("No data to flush");
-        if (!p.click && !p.move && !p.hesitation && !p.frustration && !p.deadClick && !p.scroll) return testReturn("No events to send");
+        if (!p.click && !p.move && !p.hesitation && !p.frustration && !p.deadClick && !p.scrollTo) return testReturn("No events to send");
 
         // navigator.sendBeacon(PAYLOAD_ENDPOINT, JSON.stringify(p));
         console.log("Flushing Luxi data:", p);
@@ -366,7 +366,10 @@ function pushLummmenScrollData() {
   }
 
   if (scrollMilestones.length) {
-    LummmenAnalyticsBus.push("scroll", scrollMilestones);
+    LummmenAnalyticsBus.push("scrollTo", {
+      timestamp: Date.now(),
+      percent: roundedPercent,
+    });
     lastLummmenScrollPercent = roundedPercent;
   }
 }
