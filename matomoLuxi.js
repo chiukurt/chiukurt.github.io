@@ -213,7 +213,7 @@ const LummmenAnalyticsBus = (() => {
 
         const p = serializeOnce(header);
         if (!p) return testReturn("No data to flush");
-        if (!p.click && !p.move && !p.hesitation && !p.frustration && !p.deadClick && !p.scroll) return testReturn("No events to send");
+        if (!p.click && !p.move && !p.hesitation && !p.frustration && !p.deadClick && !p.scrollTo) return testReturn("No events to send");
 
         // navigator.sendBeacon(PAYLOAD_ENDPOINT, JSON.stringify(p));
         console.log("Flushing Luxi data:", p);
@@ -351,7 +351,7 @@ let pendingLummmenScroll = null;
 function pushLummmenScrollData() {
   if (!pendingLummmenScroll) return;
 
-  const { scrollY, pageHeight, viewportHeight } = pendingLummmenScroll;
+  const { scrollX, scrollY, pageHeight, viewportHeight } = pendingLummmenScroll;
   const scrollableHeight = Math.max(pageHeight - viewportHeight, 0);
   const percent = scrollableHeight > 0
     ? Math.min(100, Math.max(0, Math.floor((scrollY / scrollableHeight) * 100)))
@@ -366,7 +366,12 @@ function pushLummmenScrollData() {
   }
 
   if (scrollMilestones.length) {
-    LummmenAnalyticsBus.push("scroll", scrollMilestones);
+    LummmenAnalyticsBus.push("scrollTo", {
+      timestamp: Date.now(),
+      x: scrollX,
+      y: scrollY,
+      percent: roundedPercent,
+    });
     lastLummmenScrollPercent = roundedPercent;
   }
 }
@@ -389,6 +394,7 @@ window.addEventListener("scroll", () => {
   latestLummmenMove.scrollY = window.scrollY;
 
   pendingLummmenScroll = {
+    scrollX: window.scrollX,
     scrollY: window.scrollY,
     pageHeight: document.documentElement.scrollHeight,
     viewportHeight: window.innerHeight,
