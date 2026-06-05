@@ -367,11 +367,6 @@ function pushLummmenScrollData() {
   LummmenAnalyticsBus.push("scrollTo", {
     timestamp: Date.now(),
     percent,
-    scrollX,
-    scrollY,
-    direction,
-    pageHeight,
-    viewportHeight,
   });
 
   lastLummmenScrollY = scrollY;
