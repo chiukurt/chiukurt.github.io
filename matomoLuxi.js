@@ -142,7 +142,7 @@ const LummmenAnalyticsBus = (() => {
   let timer = null;
 
   const MAX_BEACON_BYTES = 32 * 1024;
-  const FLUSH_INTERVAL_MS = 60000;
+  const FLUSH_INTERVAL_MS = 5000; // TODO: revert this to 60000 in production
   const PAYLOAD_ENDPOINT = "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
 
   const encoder = new TextEncoder();
