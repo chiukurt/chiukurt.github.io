@@ -80,6 +80,61 @@ var _paq = window._paq = window._paq || [];
 //   g.async=true; g.src='https://analytics.luxifer.app/js/container_t9d5lGU5.js?d=' + todayParam(); s.parentNode.insertBefore(g, s);
 // })();
 
+// FAKE DEFAULT =============================================================================================================
+
+(function(){
+  if (typeof matomoLuxiSiteId === 'undefined' || typeof matomoLuxiSampleSize === 'undefined') {
+    return;
+  }
+
+  _paq.push(['requireConsent']);
+  (function () {
+    _paq.push(["setTrackerUrl", "https://analytics.luxifer.app/matomo.php"]);
+    _paq.push(['setSiteId', matomoLuxiSiteId]);
+    var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+    g.async = true; g.src = 'https://analytics.luxifer.app/matomo.js'; s.parentNode.insertBefore(g, s);
+  })();
+
+  function startMTM(){
+    return;
+  }
+
+  function startTracking(){
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    console.log(_paq);
+    startMTM();
+  }
+
+  function getLuxiCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+
+  function setLuxiCookie(name, value) {
+    const d = new Date();
+    d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
+  }
+
+  const inSample = (inputNum) =>
+    parseInt(inputNum, 10) <= parseInt(matomoLuxiSampleSize, 10);
+
+  let luxiSample = getLuxiCookie("luxiSample");
+  if (!luxiSample) {
+    luxiSample = Math.floor(Math.random() * 100) + 1;
+    setLuxiCookie("luxiSample", luxiSample);
+  }
+  if (inSample(luxiSample)) { 
+    _paq.push(["setConsentGiven"]);
+    _paq.push(["rememberConsentGiven"]);
+    startTracking();
+  }
+})();
+
+// END FAKE DEFAULT =============================================================================================================
+
 const LummmenAnalyticsBus = (() => {
   const buffers = new Map();
   let flushing = false;
