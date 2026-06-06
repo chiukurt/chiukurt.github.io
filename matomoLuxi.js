@@ -307,8 +307,9 @@ function pushLummmenCtData(event) {
   const hoverDuration = event.type === "mouseout" && LummmenCtData.hoverElement === el && typeof hoverStart === "number"
     ? now - hoverStart
     : null;
-  const isShortHover = hoverDuration !== null && hoverDuration < 500;
   const hasDuration = hoverDuration !== null;
+  const isShortHover = hasDuration && hoverDuration < 500;
+
   var activity = "click";
 
   if (event.type === "click") {
@@ -322,6 +323,8 @@ function pushLummmenCtData(event) {
     if (didClickElement || isShortHover) return;
   } else return;
 
+  if (activity === "hesitation" && !hasDuration || hoverDuration < 0) return;
+
   const x = event.pageX;
   const y = event.pageY;
   
@@ -333,7 +336,7 @@ function pushLummmenCtData(event) {
       y,
     };
 
-    if (hasDuration) payload.duration = Math.max(0, hoverDuration);
+    if (hasDuration) payload.duration = hoverDuration;
     LummmenAnalyticsBus.push(activity, payload);
   } else {
     LummmenAnalyticsBus.push("deadClick", [x,y]);
