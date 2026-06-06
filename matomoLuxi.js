@@ -192,6 +192,35 @@ const LummmenAnalyticsBus = (() => {
   return { push, flush, size };
 })();
 
+function getLummmenInteractiveElement(element) {
+  if (!element) return null;
+
+  const interactiveRoles = new Set(["button", "link", "menuitem", "checkbox", "radio", "switch"]);
+  const interactiveTags = new Set(["button", "a", "input", "textarea", "select", "label", "option"]);
+
+  function checkElement(el) {
+    if (!el) return null;
+
+    const tagName = el.tagName?.toLowerCase();
+    const role = el.getAttribute?.("role");
+    const hasTabIndex = el.hasAttribute?.("tabindex") && parseInt(el.getAttribute("tabindex")) >= 0;
+
+    if (
+      interactiveTags.has(tagName) || interactiveRoles.has(role) ||
+      el.hasAttribute?.("onclick") || el.hasAttribute?.("onkeypress") ||
+      typeof el.onclick === 'function' || hasTabIndex
+    ) {
+      return el;
+    } else if (getComputedStyle(el).cursor === "pointer") {
+      return checkElement(el.parentElement);
+    }
+
+    return null;
+  }
+
+  return checkElement(element);
+}
+
 function pushLummmenCtData(event) {
   function getLuxiElementDetails(element) {
     const identifier = {};
@@ -212,46 +241,19 @@ function pushLummmenCtData(event) {
     return identifier;
   }
 
-  function getLuxiInteractiveElement(element) {
-    if (!element) return null;
-
-    const interactiveRoles = new Set(["button", "link", "menuitem", "checkbox", "radio", "switch"]);
-    const interactiveTags = new Set(["button", "a", "input", "textarea", "select", "label", "option"]);
-
-    function checkElement(el) {
-      if (!el) return false;
-
-      const tagName = el.tagName?.toLowerCase();
-      const role = el.getAttribute?.("role");
-      const hasTabIndex = el.hasAttribute?.("tabindex") && parseInt(el.getAttribute("tabindex")) >= 0;
-      
-      if (
-        interactiveTags.has(tagName) || interactiveRoles.has(role) ||
-        el.hasAttribute?.("onclick") || el.hasAttribute?.("onkeypress") ||
-        typeof el.onclick === 'function' || hasTabIndex
-      ) {
-          return el;
-      } else if (getComputedStyle(el).cursor === "pointer") {
-          return checkElement(el.parentElement);
-      }
-
-      return null;
-    }
-
-    return checkElement(element);
-  }
-
   if (typeof matomoLuxiSiteId === 'undefined') return;
-  const el = getLuxiInteractiveElement(event.target);
+  const el = getLummmenInteractiveElement(event.target);
   if (!LummmenAnalyticsBus) return;
   const now = Date.now();
-  const prevHoverTime = LummmenCtData.lastHoverTime || false;
   const prevClickTime = LummmenCtData.lastClickTime || false;
-  const hoverStart = LummmenCtData.hoverStart || false;
+  const hoverStart = LummmenCtData.hoverStart;
   const didClickElement = LummmenCtData.lastClickElement === el
   const isRapidClick = (prevClickTime && (now - prevClickTime < 3000));
-  const isShortHover = (!prevHoverTime || (now - prevHoverTime < 500));
-  const hasDuration = event.type === "mouseout" && hoverStart && typeof hoverStart === "number";
+  const hoverDuration = event.type === "mouseout" && LummmenCtData.hoverElement === el && typeof hoverStart === "number"
+    ? now - hoverStart
+    : null;
+  const isShortHover = hoverDuration !== null && hoverDuration < 500;
+  const hasDuration = hoverDuration !== null;
   var activity = "click";
 
   if (event.type === "click") {
@@ -259,6 +261,7 @@ function pushLummmenCtData(event) {
     LummmenCtData.lastClickElement = el;
     if (didClickElement && isRapidClick) activity = "frustration";
   } else if (event.type === "mouseout") {
+    if (el && event.relatedTarget && el.contains(event.relatedTarget)) return;
     LummmenCtData.lastHoverTime = now;
     activity = "hesitation";
     if (didClickElement || isShortHover) return;
@@ -275,7 +278,7 @@ function pushLummmenCtData(event) {
       y,
     };
 
-    if (hasDuration) payload.duration = Math.max(0, now - hoverStart);
+    if (hasDuration) payload.duration = Math.max(0, hoverDuration);
     LummmenAnalyticsBus.push(activity, payload);
   } else {
     LummmenAnalyticsBus.push("deadClick", [x,y]);
@@ -293,8 +296,12 @@ let lastLummmenScrollY = window.scrollY;
 let lastLummmenScrollPercent = null;
 let lummmenScrollFrame = null;
 
-function updateLummmenHoverStart(){
+function updateLummmenHoverStart(event){
+  const el = getLummmenInteractiveElement(event.target);
+  if (!el || (event.relatedTarget && el.contains(event.relatedTarget))) return;
+
   LummmenCtData.hoverStart = Date.now();
+  LummmenCtData.hoverElement = el;
 }
 
 function pushLummmenScrollData() {
