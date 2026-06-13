@@ -276,35 +276,90 @@ function getLummmenInteractiveElement(element) {
   return checkElement(element);
 }
 
-function pushLummmenCtData(event) {
-  function getLuxiElementDetails(element) {
-    const identifier = {};
-    if (element.id) {
-        identifier.id = element.id;
-        const label = document.querySelector(`label[for="${element.id}"]`);
-        if (label) identifier.label = label.textContent.trim();
-    }
-    if (element.className) identifier.className = element.className;
-    if (element.tagName) identifier.tagName = element.tagName.toLowerCase();
-    if (element.textContent?.trim()) identifier.textContent = element.textContent.trim();
-    if (element.getAttribute("data-key")) identifier.dataKey = element.getAttribute("data-key");
-    if (element.getAttribute("aria-label")) identifier.ariaLabel = element.getAttribute("aria-label");
-    ["name", "role", "href", "onclick", "placeholder", "type"].forEach(attr => {
-      const val = element.getAttribute(attr);
-      if (val) identifier[attr] = val;
-    });
-    return identifier;
+function getLuxiElementDetails(element) {
+  const identifier = {};
+  if (element.id) {
+    identifier.id = element.id;
+    const label = document.querySelector(`label[for="${element.id}"]`);
+    if (label) identifier.label = label.textContent.trim();
   }
+  if (element.className) identifier.className = cleanLummmenClassName(element.className);
+  if (element.tagName) identifier.tagName = element.tagName.toLowerCase();
+  if (element.textContent?.trim()) identifier.textContent = element.textContent.trim();
+  if (element.getAttribute("data-key")) identifier.dataKey = element.getAttribute("data-key");
+  if (element.getAttribute("aria-label")) identifier.ariaLabel = element.getAttribute("aria-label");
+  ["name", "role", "href", "onclick", "placeholder", "type"].forEach(attr => {
+    const val = element.getAttribute(attr);
+    if (val) identifier[attr] = val;
+  });
+  return identifier;
+}
+
+function cleanLummmenClassName(className) {
+  return String(className)
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter((word) => !["active", "show"].includes(word.toLowerCase()))
+    .join(" ");
+}
+
+const lummmenOmitParamRegex = new RegExp(
+  "^(auth_token|token|oseid|pr_prod_strat|_ga|_gi|_gl|utm_.*|gcl.*|gad_.*|_gid|fbclid|msclkid|dclid|yclid|twclid|li_.*|srsltid|mc_.*|mkt_tok|pk_.*|vero_.*|oly_.*|gbraid|wbraid)$",
+  "i",
+);
+
+function getLummmenHashUrl(url) {
+  const urlWithoutHash = String(url).replace(/#.*$/, "");
+
+  try {
+    const urlObj = new URL(urlWithoutHash, window.location.href);
+    for (const key of Array.from(urlObj.searchParams.keys())) {
+      if (lummmenOmitParamRegex.test(key)) {
+        urlObj.searchParams.delete(key);
+      }
+    }
+    return urlObj.toString();
+  } catch (_) {
+    return urlWithoutHash;
+  }
+}
+
+function orderLummmenAttributes(element) {
+  return Object.keys(element)
+    .sort()
+    .reduce((obj, key) => {
+      obj[key] = element[key];
+      return obj;
+    }, {});
+}
+
+async function hashLummmenElement(element, url) {
+  const payload = JSON.stringify({
+    url: getLummmenHashUrl(url),
+    orderedElement: orderLummmenAttributes(element),
+  });
+  const bytes = new TextEncoder().encode(payload);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("")
+    .substring(0, 16);
+}
+
+async function pushLummmenCtData(event) {
 
   if (typeof matomoLuxiSiteId === 'undefined') return;
-  const el = getLummmenInteractiveElement(event.target);
+  const targetElement = event.target && event.target.nodeType === 1 ? event.target : null;
+  const el = getLummmenInteractiveElement(targetElement);
   if (!LummmenAnalyticsBus) return;
   const now = Date.now();
   const prevClickTime = LummmenCtData.lastClickTime || false;
   const hoverStart = LummmenCtData.hoverStart;
-  const didClickElement = LummmenCtData.lastClickElement === el
+  const trackedHoverElement = el || targetElement;
+  const didClickElement = el && LummmenCtData.lastClickElement === el
   const isRapidClick = (prevClickTime && (now - prevClickTime < 3000));
-  const hoverDuration = event.type === "mouseout" && LummmenCtData.hoverElement === el && typeof hoverStart === "number"
+  const hoverDuration = event.type === "mouseout" && LummmenCtData.hoverElement === trackedHoverElement && typeof hoverStart === "number"
     ? now - hoverStart
     : null;
   const hasDuration = hoverDuration !== null;
@@ -317,7 +372,7 @@ function pushLummmenCtData(event) {
     LummmenCtData.lastClickElement = el;
     if (didClickElement && isRapidClick) activity = "frustration";
   } else if (event.type === "mouseout") {
-    if (el && event.relatedTarget && el.contains(event.relatedTarget)) return;
+    if (trackedHoverElement && event.relatedTarget && trackedHoverElement.contains(event.relatedTarget)) return;
     LummmenCtData.lastHoverTime = now;
     activity = "hesitation";
     if (didClickElement || isShortHover) return;
@@ -338,7 +393,16 @@ function pushLummmenCtData(event) {
 
     if (hasDuration) payload.duration = hoverDuration;
     LummmenAnalyticsBus.push(activity, payload);
-  } else {
+  } else if (activity === "hesitation" && targetElement) {
+    const payload = {
+      elementId: await hashLummmenElement(getLuxiElementDetails(targetElement), window.location.href),
+      timestamp: now,
+      x,
+      y,
+      duration: hoverDuration,
+    };
+    LummmenAnalyticsBus.push(activity, payload);
+  } else if (activity === "click") {
     LummmenAnalyticsBus.push("deadClick", [x,y]);
   }
 }
@@ -355,11 +419,13 @@ let lastLummmenScrollPercent = null;
 let lummmenScrollFrame = null;
 
 function updateLummmenHoverStart(event){
-  const el = getLummmenInteractiveElement(event.target);
-  if (!el || (event.relatedTarget && el.contains(event.relatedTarget))) return;
+  const targetElement = event.target && event.target.nodeType === 1 ? event.target : null;
+  const el = getLummmenInteractiveElement(targetElement);
+  const trackedHoverElement = el || targetElement;
+  if (!trackedHoverElement || (event.relatedTarget && trackedHoverElement.contains(event.relatedTarget))) return;
 
   LummmenCtData.hoverStart = Date.now();
-  LummmenCtData.hoverElement = el;
+  LummmenCtData.hoverElement = trackedHoverElement;
 }
 
 function pushLummmenScrollData() {
