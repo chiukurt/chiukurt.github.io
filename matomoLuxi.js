@@ -308,6 +308,7 @@ const lummmenOmitParamRegex = new RegExp(
   "^(auth_token|token|oseid|pr_prod_strat|_ga|_gi|_gl|utm_.*|gcl.*|gad_.*|_gid|fbclid|msclkid|dclid|yclid|twclid|li_.*|srsltid|mc_.*|mkt_tok|pk_.*|vero_.*|oly_.*|gbraid|wbraid)$",
   "i",
 );
+const lummmenHashEncoder = new TextEncoder();
 
 function getLummmenHashUrl(url) {
   const urlWithoutHash = String(url).replace(/#.*$/, "");
@@ -339,7 +340,7 @@ async function hashLummmenElement(element, url) {
     url: getLummmenHashUrl(url),
     orderedElement: orderLummmenAttributes(element),
   });
-  const bytes = new TextEncoder().encode(payload);
+  const bytes = lummmenHashEncoder.encode(payload);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest))
     .map((byte) => byte.toString(16).padStart(2, "0"))
@@ -357,7 +358,7 @@ async function pushLummmenCtData(event) {
   const prevClickTime = LummmenCtData.lastClickTime || false;
   const hoverStart = LummmenCtData.hoverStart;
   const trackedHoverElement = el || targetElement;
-  const didClickElement = el && LummmenCtData.lastClickElement === el
+  const didClickElement = el && LummmenCtData.lastClickElement === el;
   const isRapidClick = (prevClickTime && (now - prevClickTime < 3000));
   const hoverDuration = event.type === "mouseout" && LummmenCtData.hoverElement === trackedHoverElement && typeof hoverStart === "number"
     ? now - hoverStart
@@ -394,8 +395,15 @@ async function pushLummmenCtData(event) {
     if (hasDuration) payload.duration = hoverDuration;
     LummmenAnalyticsBus.push(activity, payload);
   } else if (activity === "hesitation" && targetElement) {
+    let elementId;
+    try {
+      elementId = await hashLummmenElement(getLuxiElementDetails(targetElement), window.location.href);
+    } catch (_) {
+      return;
+    }
+
     const payload = {
-      elementId: await hashLummmenElement(getLuxiElementDetails(targetElement), window.location.href),
+      elementId,
       timestamp: now,
       x,
       y,
