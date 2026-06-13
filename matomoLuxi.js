@@ -141,7 +141,7 @@ const LummmenAnalyticsBus = (() => {
   let timer = null;
 
   const MAX_BEACON_BYTES = 32 * 1024;
-  const FLUSH_INTERVAL_MS = 5000;
+  const FLUSH_INTERVAL_MS = 5000; // TODO: revert me to 60000
   const PAYLOAD_ENDPOINT = "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
 
   const encoder = new TextEncoder();
@@ -210,7 +210,7 @@ const LummmenAnalyticsBus = (() => {
         if (!p.click && !p.move && !p.hesitation && !p.frustration && !p.deadClick && !p.scrollTo) return;
 
         // navigator.sendBeacon(PAYLOAD_ENDPOINT, JSON.stringify(p));
-        console.log(p);
+        console.log(p); // TODO: revert me to sendBeacon
       } catch (_) { } finally {
         flushing = false;
       }
