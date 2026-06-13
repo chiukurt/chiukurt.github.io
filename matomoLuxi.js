@@ -362,6 +362,7 @@ function orderLummmenAttributes(element) {
 }
 
 async function hashLummmenElement(element, url) {
+  console.log(element); // TODO: Remove me
   const payload = JSON.stringify({
     url: getLummmenHashUrl(url),
     orderedElement: orderLummmenAttributes(element),
