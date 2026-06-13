@@ -276,12 +276,38 @@ function getLummmenInteractiveElement(element) {
   return checkElement(element);
 }
 
+function getLummmenLabelText(element) {
+  if (!element.id) return null;
+
+  try {
+    if (element.labels && element.labels.length > 0) {
+      return element.labels[0].textContent.trim();
+    }
+
+    const escapedId = window.CSS && CSS.escape ? CSS.escape(element.id) : null;
+    if (escapedId) {
+      const label = document.querySelector(`label[for="${escapedId}"]`);
+      return label ? label.textContent.trim() : null;
+    }
+
+    for (const label of document.querySelectorAll("label[for]")) {
+      if (label.getAttribute("for") === element.id) {
+        return label.textContent.trim();
+      }
+    }
+  } catch (_) {
+    return null;
+  }
+
+  return null;
+}
+
 function getLuxiElementDetails(element) {
   const identifier = {};
   if (element.id) {
     identifier.id = element.id;
-    const label = document.querySelector(`label[for="${element.id}"]`);
-    if (label) identifier.label = label.textContent.trim();
+    const labelText = getLummmenLabelText(element);
+    if (labelText) identifier.label = labelText;
   }
   if (element.className) identifier.className = cleanLummmenClassName(element.className);
   if (element.tagName) identifier.tagName = element.tagName.toLowerCase();
