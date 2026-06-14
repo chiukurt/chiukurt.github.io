@@ -280,8 +280,10 @@ function getLuxiElementDetails(element) {
   const identifier = {};
   if (element.id) {
     identifier.id = element.id;
-    const label = document.querySelector(`label[for="${element.id}"]`);
-    if (label) identifier.label = label.textContent.trim();
+    try {
+      const label = document.querySelector(`label[for="${element.id}"]`);
+      if (label) identifier.label = label.textContent.trim();
+    } catch (_) { }
   }
   if (element.className) identifier.className = cleanLummmenClassName(element.className);
   if (element.tagName) identifier.tagName = element.tagName.toLowerCase();
@@ -415,8 +417,9 @@ async function pushLummmenCtData(event) {
     LummmenAnalyticsBus.push(activity, payload);
   } else if (activity === "hesitation" && targetElement) {
     let elementId;
+    const elementDetails = getLuxiElementDetails(targetElement);
     try {
-      elementId = await hashLummmenElement(getLuxiElementDetails(targetElement), window.location.href);
+      elementId = await hashLummmenElement(elementDetails, window.location.href);
     } catch (_) {
       return;
     }
