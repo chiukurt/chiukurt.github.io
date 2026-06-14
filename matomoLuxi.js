@@ -276,42 +276,12 @@ function getLummmenInteractiveElement(element) {
   return checkElement(element);
 }
 
-const lummmenLabelForMap = new Map();
-
-function getLummmenLabelFromMap(id) {
-  if (lummmenLabelForMap.has(id)) {
-    return lummmenLabelForMap.get(id);
-  }
-
-  const escapedId = window.CSS && CSS.escape ? CSS.escape(id) : null;
-  const label = escapedId ? document.querySelector(`label[for="${escapedId}"]`) : null;
-  lummmenLabelForMap.set(id, label);
-  return label;
-}
-
-function getLummmenLabelText(element) {
-  if (!element.id) return null;
-
-  try {
-    if (element.labels && element.labels.length > 0) {
-      return element.labels[0].textContent.trim();
-    }
-
-    const label = getLummmenLabelFromMap(element.id);
-    return label ? label.textContent.trim() : null;
-  } catch (_) {
-    return null;
-  }
-
-  return null;
-}
-
 function getLuxiElementDetails(element) {
   const identifier = {};
   if (element.id) {
     identifier.id = element.id;
-    const labelText = getLummmenLabelText(element);
-    if (labelText) identifier.label = labelText;
+    const label = document.querySelector(`label[for="${element.id}"]`);
+    if (label) identifier.label = label.textContent.trim();
   }
   if (element.className) identifier.className = cleanLummmenClassName(element.className);
   if (element.tagName) identifier.tagName = element.tagName.toLowerCase();
