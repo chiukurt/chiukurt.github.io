@@ -276,33 +276,17 @@ function getLummmenInteractiveElement(element) {
   return checkElement(element);
 }
 
-let lummmenLabelForMap = null;
-
-function addLummmenLabelsToMap(labelMap) {
-  for (const label of document.querySelectorAll("label[for]")) {
-    const id = label.getAttribute("for");
-    if (id && !labelMap.has(id)) {
-      labelMap.set(id, label);
-    }
-  }
-}
-
-function getLummmenLabelForMap() {
-  if (!lummmenLabelForMap) {
-    lummmenLabelForMap = new Map();
-    addLummmenLabelsToMap(lummmenLabelForMap);
-  }
-  return lummmenLabelForMap;
-}
+const lummmenLabelForMap = new Map();
 
 function getLummmenLabelFromMap(id) {
-  const labelMap = getLummmenLabelForMap();
-  let label = labelMap.get(id);
-  if (!label) {
-    addLummmenLabelsToMap(labelMap);
-    label = labelMap.get(id);
+  if (lummmenLabelForMap.has(id)) {
+    return lummmenLabelForMap.get(id);
   }
-  return label || null;
+
+  const escapedId = window.CSS && CSS.escape ? CSS.escape(id) : null;
+  const label = escapedId ? document.querySelector(`label[for="${escapedId}"]`) : null;
+  lummmenLabelForMap.set(id, label);
+  return label;
 }
 
 function getLummmenLabelText(element) {
