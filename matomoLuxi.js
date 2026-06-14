@@ -309,6 +309,7 @@ const lummmenOmitParamRegex = new RegExp(
   "i",
 );
 const lummmenHashEncoder = new TextEncoder();
+const lummmenElementHashMapMaxSize = 500;
 const lummmenElementHashMap = new Map();
 
 function getLummmenHashUrl(url) {
@@ -357,6 +358,10 @@ async function hashLummmenElement(element, url) {
         throw error;
       }
     })();
+    if (lummmenElementHashMap.size >= lummmenElementHashMapMaxSize) {
+      const oldestPayload = lummmenElementHashMap.keys().next().value;
+      lummmenElementHashMap.delete(oldestPayload);
+    }
     lummmenElementHashMap.set(payload, hashPromise);
   }
   return hashPromise;
