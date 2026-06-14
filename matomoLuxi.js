@@ -126,7 +126,7 @@ var _paq = window._paq = window._paq || [];
     luxiSample = Math.floor(Math.random() * 100) + 1;
     setLuxiCookie("luxiSample", luxiSample);
   }
-  if (inSample(luxiSample)) { 
+  if (inSample(luxiSample)) {
     _paq.push(["setConsentGiven"]);
     _paq.push(["rememberConsentGiven"]);
     startTracking();
@@ -140,11 +140,20 @@ const LummmenAnalyticsBus = (() => {
   let flushing = false;
   let timer = null;
 
+  const send = () => { try { flush(); } catch {} };
   const MAX_BEACON_BYTES = 32 * 1024;
   const FLUSH_INTERVAL_MS = 5000; // TODO: revert me to 60000
   const PAYLOAD_ENDPOINT = "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
-
+  const isWebKit = (!!window.safari) || (/AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium/.test(navigator.userAgent));
+  const opts = { capture: true, once: true };
   const encoder = new TextEncoder();
+  const lummmenElementHashMapMaxSize = 500;
+  const lummmenElementHashMap = new Map();
+  const LUMMMEN_MAX_TEXT_LEN = 1000;
+  const lummmenOmitParamRegex = new RegExp(
+    "^(auth_token|token|oseid|pr_prod_strat|_ga|_gi|_gl|utm_.*|gcl.*|gad_.*|_gid|fbclid|msclkid|dclid|yclid|twclid|li_.*|srsltid|mc_.*|mkt_tok|pk_.*|vero_.*|oly_.*|gbraid|wbraid)$",
+    "i",
+  );
 
   function push(stream, evt) {
     let q = buffers.get(stream);
@@ -157,7 +166,7 @@ const LummmenAnalyticsBus = (() => {
     const headerStr = JSON.stringify(header);
     let bytes = encoder.encode(headerStr).byteLength + 9;
 
-    const out = {}; 
+    const out = {};
 
     for (const [stream, q] of buffers) {
       if (!out[stream]) out[stream] = [];
@@ -232,10 +241,6 @@ const LummmenAnalyticsBus = (() => {
     return n;
   }
 
-  const send = () => { try { flush(); } catch {} };
-  const isWebKit = (!!window.safari) || (/AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium/.test(navigator.userAgent));
-  const opts = { capture: true, once: true };
-
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') send();
   }, opts);
@@ -244,143 +249,133 @@ const LummmenAnalyticsBus = (() => {
   addEventListener('freeze', () => { send(); }, opts);
   if (isWebKit) addEventListener('beforeunload', () => { send(); }, opts);
 
-  return { push, flush, size };
+  function getLummmenInteractiveElement(element) {
+    if (!element) return null;
+
+    const interactiveRoles = new Set(["button", "link", "menuitem", "checkbox", "radio", "switch"]);
+    const interactiveTags = new Set(["button", "a", "input", "textarea", "select", "label", "option"]);
+
+    function checkElement(el) {
+      if (!el) return null;
+
+      const tagName = el.tagName?.toLowerCase();
+      const role = el.getAttribute?.("role");
+      const hasTabIndex = el.hasAttribute?.("tabindex") && parseInt(el.getAttribute("tabindex")) >= 0;
+
+      if (
+        interactiveTags.has(tagName) || interactiveRoles.has(role) ||
+        el.hasAttribute?.("onclick") || el.hasAttribute?.("onkeypress") ||
+        typeof el.onclick === 'function' || hasTabIndex
+      ) {
+        return el;
+      } else if (getComputedStyle(el).cursor === "pointer") {
+        return checkElement(el.parentElement);
+      }
+
+      return null;
+    }
+
+    return checkElement(element);
+  }
+
+  function truncateForLummmen(s, max = LUMMMEN_MAX_TEXT_LEN) {
+    if (typeof s !== 'string') return s;
+    return s.length > max ? s.substring(0, max) + '…' : s;
+  }
+
+  function getLuxiElementDetails(element) {
+    const identifier = {};
+    if (element.id) {
+      identifier.id = element.id;
+      try {
+        const label = document.querySelector(`label[for="${element.id}"]`);
+        if (label) identifier.label = label.textContent.trim();
+      } catch (_) { }
+    }
+    if (element.className) identifier.className = cleanLummmenClassName(element.className);
+    if (element.tagName) identifier.tagName = element.tagName.toLowerCase();
+    if (element.textContent?.trim()) identifier.textContent = truncateForLummmen(element.textContent.trim());
+    if (element.getAttribute("data-key")) identifier.dataKey = element.getAttribute("data-key");
+    if (element.getAttribute("aria-label")) identifier.ariaLabel = element.getAttribute("aria-label");
+    ["name", "role", "href", "onclick", "placeholder", "type"].forEach(attr => {
+      const val = element.getAttribute(attr);
+      if (val) identifier[attr] = val;
+    });
+    return identifier;
+  }
+
+  function cleanLummmenClassName(className) {
+    return String(className)
+      .replace(/\s+/g, " ")
+      .trim()
+      .split(" ")
+      .filter((word) => !["active", "show"].includes(word.toLowerCase()))
+      .join(" ");
+  }
+
+  function getLummmenHashUrl(url) {
+    const urlWithoutHash = String(url).replace(/#.*$/, "");
+
+    try {
+      const urlObj = new URL(urlWithoutHash, window.location.href);
+      for (const key of Array.from(urlObj.searchParams.keys())) {
+        if (lummmenOmitParamRegex.test(key)) {
+          urlObj.searchParams.delete(key);
+        }
+      }
+      return urlObj.toString();
+    } catch (_) {
+      return urlWithoutHash;
+    }
+  }
+
+  function orderLummmenAttributes(element) {
+    return Object.keys(element)
+      .sort()
+      .reduce((obj, key) => {
+        obj[key] = element[key];
+        return obj;
+      }, {});
+  }
+
+  async function hashLummmenElement(element, url) {
+    console.log(element); // TODO: Remove me
+    const payload = JSON.stringify({
+      url: getLummmenHashUrl(url),
+      orderedElement: orderLummmenAttributes(element),
+    });
+    let hashPromise = lummmenElementHashMap.get(payload);
+    if (!hashPromise) {
+      hashPromise = (async () => {
+        try {
+          const bytes = encoder.encode(payload);
+          const digest = await crypto.subtle.digest("SHA-256", bytes);
+          return Array.from(new Uint8Array(digest))
+            .map((byte) => byte.toString(16).padStart(2, "0"))
+            .join("")
+            .substring(0, 16);
+        } catch (error) {
+          lummmenElementHashMap.delete(payload);
+          throw error;
+        }
+      })();
+      if (lummmenElementHashMap.size >= lummmenElementHashMapMaxSize) {
+        const oldestPayload = lummmenElementHashMap.keys().next().value;
+        lummmenElementHashMap.delete(oldestPayload);
+      }
+      lummmenElementHashMap.set(payload, hashPromise);
+    }
+    return hashPromise;
+  }
+
+  return { push, flush, size, getLummmenInteractiveElement, getLuxiElementDetails, hashLummmenElement };
 })();
 
-function getLummmenInteractiveElement(element) {
-  if (!element) return null;
-
-  const interactiveRoles = new Set(["button", "link", "menuitem", "checkbox", "radio", "switch"]);
-  const interactiveTags = new Set(["button", "a", "input", "textarea", "select", "label", "option"]);
-
-  function checkElement(el) {
-    if (!el) return null;
-
-    const tagName = el.tagName?.toLowerCase();
-    const role = el.getAttribute?.("role");
-    const hasTabIndex = el.hasAttribute?.("tabindex") && parseInt(el.getAttribute("tabindex")) >= 0;
-
-    if (
-      interactiveTags.has(tagName) || interactiveRoles.has(role) ||
-      el.hasAttribute?.("onclick") || el.hasAttribute?.("onkeypress") ||
-      typeof el.onclick === 'function' || hasTabIndex
-    ) {
-      return el;
-    } else if (getComputedStyle(el).cursor === "pointer") {
-      return checkElement(el.parentElement);
-    }
-
-    return null;
-  }
-
-  return checkElement(element);
-}
-
-function truncateForLummmen(s, max = LUMMMEN_MAX_TEXT_LEN) {
-  if (typeof s !== 'string') return s;
-  return s.length > max ? s.substring(0, max) + '…' : s;
-}
-
-function getLuxiElementDetails(element) {
-  const identifier = {};
-  if (element.id) {
-    identifier.id = element.id;
-    try {
-      const label = document.querySelector(`label[for="${element.id}"]`);
-      if (label) identifier.label = label.textContent.trim();
-    } catch (_) { }
-  }
-  if (element.className) identifier.className = cleanLummmenClassName(element.className);
-  if (element.tagName) identifier.tagName = element.tagName.toLowerCase();
-  if (element.textContent?.trim()) identifier.textContent = truncateForLummmen(element.textContent.trim());
-  if (element.getAttribute("data-key")) identifier.dataKey = element.getAttribute("data-key");
-  if (element.getAttribute("aria-label")) identifier.ariaLabel = element.getAttribute("aria-label");
-  ["name", "role", "href", "onclick", "placeholder", "type"].forEach(attr => {
-    const val = element.getAttribute(attr);
-    if (val) identifier[attr] = val;
-  });
-  return identifier;
-}
-
-function cleanLummmenClassName(className) {
-  return String(className)
-    .replace(/\s+/g, " ")
-    .trim()
-    .split(" ")
-    .filter((word) => !["active", "show"].includes(word.toLowerCase()))
-    .join(" ");
-}
-
-const lummmenOmitParamRegex = new RegExp(
-  "^(auth_token|token|oseid|pr_prod_strat|_ga|_gi|_gl|utm_.*|gcl.*|gad_.*|_gid|fbclid|msclkid|dclid|yclid|twclid|li_.*|srsltid|mc_.*|mkt_tok|pk_.*|vero_.*|oly_.*|gbraid|wbraid)$",
-  "i",
-);
-const lummmenHashEncoder = new TextEncoder();
-const lummmenElementHashMapMaxSize = 500;
-const lummmenElementHashMap = new Map();
-const LUMMMEN_MAX_TEXT_LEN = 1000;
-
-function getLummmenHashUrl(url) {
-  const urlWithoutHash = String(url).replace(/#.*$/, "");
-
-  try {
-    const urlObj = new URL(urlWithoutHash, window.location.href);
-    for (const key of Array.from(urlObj.searchParams.keys())) {
-      if (lummmenOmitParamRegex.test(key)) {
-        urlObj.searchParams.delete(key);
-      }
-    }
-    return urlObj.toString();
-  } catch (_) {
-    return urlWithoutHash;
-  }
-}
-
-function orderLummmenAttributes(element) {
-  return Object.keys(element)
-    .sort()
-    .reduce((obj, key) => {
-      obj[key] = element[key];
-      return obj;
-    }, {});
-}
-
-async function hashLummmenElement(element, url) {
-  console.log(element); // TODO: Remove me
-  const payload = JSON.stringify({
-    url: getLummmenHashUrl(url),
-    orderedElement: orderLummmenAttributes(element),
-  });
-  let hashPromise = lummmenElementHashMap.get(payload);
-  if (!hashPromise) {
-    hashPromise = (async () => {
-      try {
-        const bytes = lummmenHashEncoder.encode(payload);
-        const digest = await crypto.subtle.digest("SHA-256", bytes);
-        return Array.from(new Uint8Array(digest))
-          .map((byte) => byte.toString(16).padStart(2, "0"))
-          .join("")
-          .substring(0, 16);
-      } catch (error) {
-        lummmenElementHashMap.delete(payload);
-        throw error;
-      }
-    })();
-    if (lummmenElementHashMap.size >= lummmenElementHashMapMaxSize) {
-      const oldestPayload = lummmenElementHashMap.keys().next().value;
-      lummmenElementHashMap.delete(oldestPayload);
-    }
-    lummmenElementHashMap.set(payload, hashPromise);
-  }
-  return hashPromise;
-}
-
 async function pushLummmenCtData(event) {
-
   if (typeof matomoLuxiSiteId === 'undefined') return;
-  const targetElement = event.target && event.target.nodeType === 1 ? event.target : null;
-  const el = getLummmenInteractiveElement(targetElement);
   if (!LummmenAnalyticsBus) return;
+  const targetElement = event.target && event.target.nodeType === 1 ? event.target : null;
+  const el = LummmenAnalyticsBus.getLummmenInteractiveElement(targetElement);
   const now = Date.now();
   const prevClickTime = LummmenCtData.lastClickTime || false;
   const hoverStart = LummmenCtData.hoverStart;
@@ -392,7 +387,8 @@ async function pushLummmenCtData(event) {
     : null;
   const hasDuration = hoverDuration !== null;
   const isShortHover = hasDuration && hoverDuration < 500;
-
+  const x = event.pageX;
+  const y = event.pageY;
   var activity = "click";
 
   if (event.type === "click") {
@@ -403,41 +399,20 @@ async function pushLummmenCtData(event) {
     if (trackedHoverElement && event.relatedTarget && trackedHoverElement.contains(event.relatedTarget)) return;
     LummmenCtData.lastHoverTime = now;
     activity = "hesitation";
-    if (didClickElement || isShortHover) return;
+    if (didClickElement || isShortHover || !hasDuration || hoverDuration < 0) return;
   } else return;
 
-  if (activity === "hesitation" && !hasDuration || hoverDuration < 0) return;
-
-  const x = event.pageX;
-  const y = event.pageY;
-  
   if (el) {
-    const payload = {
-      element: getLuxiElementDetails(el),
-      timestamp: now,
-      x,
-      y,
-    };
-
+    const payload = { element: LummmenAnalyticsBus.getLuxiElementDetails(el), timestamp: now, x, y };
     if (hasDuration) payload.duration = hoverDuration;
     LummmenAnalyticsBus.push(activity, payload);
   } else if (activity === "hesitation" && targetElement) {
     let elementId;
-    const elementDetails = getLuxiElementDetails(targetElement);
+    const elementDetails = LummmenAnalyticsBus.getLuxiElementDetails(targetElement);
     try {
-      elementId = await hashLummmenElement(elementDetails, window.location.href);
-    } catch (_) {
-      return;
-    }
-
-    const payload = {
-      elementId,
-      timestamp: now,
-      x,
-      y,
-      duration: hoverDuration,
-    };
-    LummmenAnalyticsBus.push(activity, payload);
+      elementId = await LummmenAnalyticsBus.hashLummmenElement(elementDetails, window.location.href);
+    } catch (_) { }
+    if (elementId) LummmenAnalyticsBus.push(activity, { elementId, timestamp: now, x, y, duration: hoverDuration});
   } else if (activity === "click") {
     LummmenAnalyticsBus.push("deadClick", [x,y]);
   }
@@ -456,7 +431,7 @@ let lummmenScrollFrame = null;
 
 function updateLummmenHoverStart(event){
   const targetElement = event.target && event.target.nodeType === 1 ? event.target : null;
-  const el = getLummmenInteractiveElement(targetElement);
+  const el = LummmenAnalyticsBus.getLummmenInteractiveElement(targetElement);
   const trackedHoverElement = el || targetElement;
   if (!trackedHoverElement || (event.relatedTarget && trackedHoverElement.contains(event.relatedTarget))) return;
 
@@ -474,7 +449,7 @@ function pushLummmenScrollData() {
   const percent = scrollableHeight > 0
     ? Math.min(100, Math.max(0, Math.round((scrollY / scrollableHeight) * 10) * 10))
     : 100;
-  
+
   if (lastLummmenScrollPercent !== null && Math.abs(percent - lastLummmenScrollPercent) < 10) return;
 
   LummmenAnalyticsBus.push("scrollTo", {
@@ -524,4 +499,4 @@ setInterval(() => {
     lastLummmenMove = [rx, ry];
   }
 }, 250);
-  
+
