@@ -276,6 +276,11 @@ function getLummmenInteractiveElement(element) {
   return checkElement(element);
 }
 
+function truncateForLummmen(s, max = LUMMMEN_MAX_TEXT_LEN) {
+  if (typeof s !== 'string') return s;
+  return s.length > max ? s.substring(0, max) + '…' : s;
+}
+
 function getLuxiElementDetails(element) {
   const identifier = {};
   if (element.id) {
@@ -287,7 +292,7 @@ function getLuxiElementDetails(element) {
   }
   if (element.className) identifier.className = cleanLummmenClassName(element.className);
   if (element.tagName) identifier.tagName = element.tagName.toLowerCase();
-  if (element.textContent?.trim()) identifier.textContent = element.textContent.trim();
+  if (element.textContent?.trim()) identifier.textContent = truncateForLummmen(element.textContent.trim());
   if (element.getAttribute("data-key")) identifier.dataKey = element.getAttribute("data-key");
   if (element.getAttribute("aria-label")) identifier.ariaLabel = element.getAttribute("aria-label");
   ["name", "role", "href", "onclick", "placeholder", "type"].forEach(attr => {
@@ -313,6 +318,7 @@ const lummmenOmitParamRegex = new RegExp(
 const lummmenHashEncoder = new TextEncoder();
 const lummmenElementHashMapMaxSize = 500;
 const lummmenElementHashMap = new Map();
+const LUMMMEN_MAX_TEXT_LEN = 1000;
 
 function getLummmenHashUrl(url) {
   const urlWithoutHash = String(url).replace(/#.*$/, "");
