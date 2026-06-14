@@ -140,11 +140,23 @@ const LummmenAnalyticsBus = (() => {
   let flushing = false;
   let timer = null;
 
+  const send = () => { try { flush(); } catch {} };
   const MAX_BEACON_BYTES = 32 * 1024;
   const FLUSH_INTERVAL_MS = 5000; // TODO: revert me to 60000
   const PAYLOAD_ENDPOINT = "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
-
+  const isWebKit = (!!window.safari) || (/AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium/.test(navigator.userAgent));
+  const opts = { capture: true, once: true };
+  const lummmenHashEncoder = new TextEncoder();
   const encoder = new TextEncoder();
+  const lummmenElementHashMapMaxSize = 500;
+  const lummmenElementHashMap = new Map();
+  const LUMMMEN_MAX_TEXT_LEN = 1000;
+  const lummmenOmitParamRegex = new RegExp(
+    "^(auth_token|token|oseid|pr_prod_strat|_ga|_gi|_gl|utm_.*|gcl.*|gad_.*|_gid|fbclid|msclkid|dclid|yclid|twclid|li_.*|srsltid|mc_.*|mkt_tok|pk_.*|vero_.*|oly_.*|gbraid|wbraid)$",
+    "i",
+  );
+
+  
 
   function push(stream, evt) {
     let q = buffers.get(stream);
@@ -232,10 +244,6 @@ const LummmenAnalyticsBus = (() => {
     return n;
   }
 
-  const send = () => { try { flush(); } catch {} };
-  const isWebKit = (!!window.safari) || (/AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium/.test(navigator.userAgent));
-  const opts = { capture: true, once: true };
-
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') send();
   }, opts);
@@ -308,15 +316,6 @@ const LummmenAnalyticsBus = (() => {
       .join(" ");
   }
 
-  const lummmenOmitParamRegex = new RegExp(
-    "^(auth_token|token|oseid|pr_prod_strat|_ga|_gi|_gl|utm_.*|gcl.*|gad_.*|_gid|fbclid|msclkid|dclid|yclid|twclid|li_.*|srsltid|mc_.*|mkt_tok|pk_.*|vero_.*|oly_.*|gbraid|wbraid)$",
-    "i",
-  );
-  const lummmenHashEncoder = new TextEncoder();
-  const lummmenElementHashMapMaxSize = 500;
-  const lummmenElementHashMap = new Map();
-  const LUMMMEN_MAX_TEXT_LEN = 1000;
-
   function getLummmenHashUrl(url) {
     const urlWithoutHash = String(url).replace(/#.*$/, "");
 
@@ -352,7 +351,7 @@ const LummmenAnalyticsBus = (() => {
     if (!hashPromise) {
       hashPromise = (async () => {
         try {
-          const bytes = lummmenHashEncoder.encode(payload);
+          const bytes = encoder.encode(payload);
           const digest = await crypto.subtle.digest("SHA-256", bytes);
           return Array.from(new Uint8Array(digest))
             .map((byte) => byte.toString(16).padStart(2, "0"))
@@ -372,23 +371,14 @@ const LummmenAnalyticsBus = (() => {
     return hashPromise;
   }
 
-
-  return {
-    push,
-    flush,
-    size,
-    getLummmenInteractiveElement,
-    getLuxiElementDetails,
-    hashLummmenElement,
-  };
+  return { push, flush, size, getLummmenInteractiveElement, getLuxiElementDetails, hashLummmenElement };
 })();
 
 async function pushLummmenCtData(event) {
-
   if (typeof matomoLuxiSiteId === 'undefined') return;
+  if (!LummmenAnalyticsBus) return;
   const targetElement = event.target && event.target.nodeType === 1 ? event.target : null;
   const el = LummmenAnalyticsBus.getLummmenInteractiveElement(targetElement);
-  if (!LummmenAnalyticsBus) return;
   const now = Date.now();
   const prevClickTime = LummmenCtData.lastClickTime || false;
   const hoverStart = LummmenCtData.hoverStart;
@@ -400,7 +390,8 @@ async function pushLummmenCtData(event) {
     : null;
   const hasDuration = hoverDuration !== null;
   const isShortHover = hasDuration && hoverDuration < 500;
-
+  const x = event.pageX;
+  const y = event.pageY;
   var activity = "click";
 
   if (event.type === "click") {
@@ -411,22 +402,11 @@ async function pushLummmenCtData(event) {
     if (trackedHoverElement && event.relatedTarget && trackedHoverElement.contains(event.relatedTarget)) return;
     LummmenCtData.lastHoverTime = now;
     activity = "hesitation";
-    if (didClickElement || isShortHover) return;
+    if (didClickElement || isShortHover || !hasDuration || hoverDuration < 0) return;
   } else return;
 
-  if (activity === "hesitation" && !hasDuration || hoverDuration < 0) return;
-
-  const x = event.pageX;
-  const y = event.pageY;
-
   if (el) {
-    const payload = {
-      element: LummmenAnalyticsBus.getLuxiElementDetails(el),
-      timestamp: now,
-      x,
-      y,
-    };
-
+    const payload = { element: LummmenAnalyticsBus.getLuxiElementDetails(el), timestamp: now, x, y };
     if (hasDuration) payload.duration = hoverDuration;
     LummmenAnalyticsBus.push(activity, payload);
   } else if (activity === "hesitation" && targetElement) {
@@ -434,18 +414,8 @@ async function pushLummmenCtData(event) {
     const elementDetails = LummmenAnalyticsBus.getLuxiElementDetails(targetElement);
     try {
       elementId = await LummmenAnalyticsBus.hashLummmenElement(elementDetails, window.location.href);
-    } catch (_) {
-      return;
-    }
-
-    const payload = {
-      elementId,
-      timestamp: now,
-      x,
-      y,
-      duration: hoverDuration,
-    };
-    LummmenAnalyticsBus.push(activity, payload);
+    } catch (_) { }
+    if (elementId) LummmenAnalyticsBus.push(activity, { elementId, timestamp: now, x, y, duration: hoverDuration});
   } else if (activity === "click") {
     LummmenAnalyticsBus.push("deadClick", [x,y]);
   }
