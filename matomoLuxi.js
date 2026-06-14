@@ -146,7 +146,6 @@ const LummmenAnalyticsBus = (() => {
   const PAYLOAD_ENDPOINT = "https://europe-west1-ux-pro.cloudfunctions.net/processLuxiferDataEU";
   const isWebKit = (!!window.safari) || (/AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium/.test(navigator.userAgent));
   const opts = { capture: true, once: true };
-  const lummmenHashEncoder = new TextEncoder();
   const encoder = new TextEncoder();
   const lummmenElementHashMapMaxSize = 500;
   const lummmenElementHashMap = new Map();
@@ -155,8 +154,6 @@ const LummmenAnalyticsBus = (() => {
     "^(auth_token|token|oseid|pr_prod_strat|_ga|_gi|_gl|utm_.*|gcl.*|gad_.*|_gid|fbclid|msclkid|dclid|yclid|twclid|li_.*|srsltid|mc_.*|mkt_tok|pk_.*|vero_.*|oly_.*|gbraid|wbraid)$",
     "i",
   );
-
-  
 
   function push(stream, evt) {
     let q = buffers.get(stream);
