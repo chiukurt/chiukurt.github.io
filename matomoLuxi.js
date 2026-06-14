@@ -276,38 +276,14 @@ function getLummmenInteractiveElement(element) {
   return checkElement(element);
 }
 
-function getLummmenLabelText(element) {
-  if (!element.id) return null;
-
-  try {
-    if (element.labels && element.labels.length > 0) {
-      return element.labels[0].textContent.trim();
-    }
-
-    const escapedId = window.CSS && CSS.escape ? CSS.escape(element.id) : null;
-    if (escapedId) {
-      const label = document.querySelector(`label[for="${escapedId}"]`);
-      return label ? label.textContent.trim() : null;
-    }
-
-    for (const label of document.querySelectorAll("label[for]")) {
-      if (label.getAttribute("for") === element.id) {
-        return label.textContent.trim();
-      }
-    }
-  } catch (_) {
-    return null;
-  }
-
-  return null;
-}
-
 function getLuxiElementDetails(element) {
   const identifier = {};
   if (element.id) {
     identifier.id = element.id;
-    const labelText = getLummmenLabelText(element);
-    if (labelText) identifier.label = labelText;
+    try {
+      const label = document.querySelector(`label[for="${element.id}"]`);
+      if (label) identifier.label = label.textContent.trim();
+    } catch (_) { }
   }
   if (element.className) identifier.className = cleanLummmenClassName(element.className);
   if (element.tagName) identifier.tagName = element.tagName.toLowerCase();
@@ -335,6 +311,8 @@ const lummmenOmitParamRegex = new RegExp(
   "i",
 );
 const lummmenHashEncoder = new TextEncoder();
+const lummmenElementHashMapMaxSize = 500;
+const lummmenElementHashMap = new Map();
 
 function getLummmenHashUrl(url) {
   const urlWithoutHash = String(url).replace(/#.*$/, "");
@@ -367,12 +345,28 @@ async function hashLummmenElement(element, url) {
     url: getLummmenHashUrl(url),
     orderedElement: orderLummmenAttributes(element),
   });
-  const bytes = lummmenHashEncoder.encode(payload);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(digest))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("")
-    .substring(0, 16);
+  let hashPromise = lummmenElementHashMap.get(payload);
+  if (!hashPromise) {
+    hashPromise = (async () => {
+      try {
+        const bytes = lummmenHashEncoder.encode(payload);
+        const digest = await crypto.subtle.digest("SHA-256", bytes);
+        return Array.from(new Uint8Array(digest))
+          .map((byte) => byte.toString(16).padStart(2, "0"))
+          .join("")
+          .substring(0, 16);
+      } catch (error) {
+        lummmenElementHashMap.delete(payload);
+        throw error;
+      }
+    })();
+    if (lummmenElementHashMap.size >= lummmenElementHashMapMaxSize) {
+      const oldestPayload = lummmenElementHashMap.keys().next().value;
+      lummmenElementHashMap.delete(oldestPayload);
+    }
+    lummmenElementHashMap.set(payload, hashPromise);
+  }
+  return hashPromise;
 }
 
 async function pushLummmenCtData(event) {
@@ -423,8 +417,9 @@ async function pushLummmenCtData(event) {
     LummmenAnalyticsBus.push(activity, payload);
   } else if (activity === "hesitation" && targetElement) {
     let elementId;
+    const elementDetails = getLuxiElementDetails(targetElement);
     try {
-      elementId = await hashLummmenElement(getLuxiElementDetails(targetElement), window.location.href);
+      elementId = await hashLummmenElement(elementDetails, window.location.href);
     } catch (_) {
       return;
     }
