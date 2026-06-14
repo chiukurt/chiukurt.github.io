@@ -276,6 +276,35 @@ function getLummmenInteractiveElement(element) {
   return checkElement(element);
 }
 
+let lummmenLabelForMap = null;
+
+function addLummmenLabelsToMap(labelMap) {
+  for (const label of document.querySelectorAll("label[for]")) {
+    const id = label.getAttribute("for");
+    if (id && !labelMap.has(id)) {
+      labelMap.set(id, label);
+    }
+  }
+}
+
+function getLummmenLabelForMap() {
+  if (!lummmenLabelForMap) {
+    lummmenLabelForMap = new Map();
+    addLummmenLabelsToMap(lummmenLabelForMap);
+  }
+  return lummmenLabelForMap;
+}
+
+function getLummmenLabelFromMap(id) {
+  const labelMap = getLummmenLabelForMap();
+  let label = labelMap.get(id);
+  if (!label) {
+    addLummmenLabelsToMap(labelMap);
+    label = labelMap.get(id);
+  }
+  return label || null;
+}
+
 function getLummmenLabelText(element) {
   if (!element.id) return null;
 
@@ -284,17 +313,8 @@ function getLummmenLabelText(element) {
       return element.labels[0].textContent.trim();
     }
 
-    const escapedId = window.CSS && CSS.escape ? CSS.escape(element.id) : null;
-    if (escapedId) {
-      const label = document.querySelector(`label[for="${escapedId}"]`);
-      return label ? label.textContent.trim() : null;
-    }
-
-    for (const label of document.querySelectorAll("label[for]")) {
-      if (label.getAttribute("for") === element.id) {
-        return label.textContent.trim();
-      }
-    }
+    const label = getLummmenLabelFromMap(element.id);
+    return label ? label.textContent.trim() : null;
   } catch (_) {
     return null;
   }
@@ -335,6 +355,7 @@ const lummmenOmitParamRegex = new RegExp(
   "i",
 );
 const lummmenHashEncoder = new TextEncoder();
+const lummmenElementHashMap = new Map();
 
 function getLummmenHashUrl(url) {
   const urlWithoutHash = String(url).replace(/#.*$/, "");
@@ -367,12 +388,24 @@ async function hashLummmenElement(element, url) {
     url: getLummmenHashUrl(url),
     orderedElement: orderLummmenAttributes(element),
   });
-  const bytes = lummmenHashEncoder.encode(payload);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(digest))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("")
-    .substring(0, 16);
+  let hashPromise = lummmenElementHashMap.get(payload);
+  if (!hashPromise) {
+    hashPromise = (async () => {
+      try {
+        const bytes = lummmenHashEncoder.encode(payload);
+        const digest = await crypto.subtle.digest("SHA-256", bytes);
+        return Array.from(new Uint8Array(digest))
+          .map((byte) => byte.toString(16).padStart(2, "0"))
+          .join("")
+          .substring(0, 16);
+      } catch (error) {
+        lummmenElementHashMap.delete(payload);
+        throw error;
+      }
+    })();
+    lummmenElementHashMap.set(payload, hashPromise);
+  }
+  return hashPromise;
 }
 
 async function pushLummmenCtData(event) {
