@@ -218,8 +218,7 @@ const LummmenAnalyticsBus = (() => {
         if (!p) return;
         if (!p.click && !p.move && !p.hesitation && !p.frustration && !p.deadClick && !p.scrollTo) return;
 
-        // navigator.sendBeacon(PAYLOAD_ENDPOINT, JSON.stringify(p));
-        console.log(p); // TODO: revert me to sendBeacon
+        navigator.sendBeacon(PAYLOAD_ENDPOINT, JSON.stringify(p));
       } catch (_) { } finally {
         flushing = false;
       }
@@ -339,7 +338,6 @@ const LummmenAnalyticsBus = (() => {
   }
 
   async function hashLummmenElement(element, url) {
-    console.log(element); // TODO: Remove me
     const payload = JSON.stringify({
       url: getLummmenHashUrl(url),
       orderedElement: orderLummmenAttributes(element),
