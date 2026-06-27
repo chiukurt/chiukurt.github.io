@@ -49,8 +49,8 @@ var _paq = window._paq = window._paq || [];
   setTimeout(lummmenShowPage, 400);
   (function() {
     var script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.5.00/abtest.min.js";
-    script.integrity = "sha384-Pyquw/Vr1WD9av9SxboAD5YfYIg9VQ+aYvtDHnRe1HDpnlYB8Ye9wlFRQsxnlwlw";
+    script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.5.02/abtest.min.js";
+    script.integrity = "sha384-RS8/b7ad/KEKqoA3Iu0Qc3LQwhi//IpVCiPa6I0Y9nd+jkiyjr0juT4MzK/B2POZ";
     script.crossOrigin = "anonymous";
     script.async = true;
     document.head.appendChild(script);
