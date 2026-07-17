@@ -49,9 +49,7 @@ var _paq = window._paq = window._paq || [];
   setTimeout(lummmenShowPage, 400);
   (function() {
     var script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/gh/chiukurt/LuxiferData@1.5.03/abtest.min.js";
-    script.integrity = "sha384-jX0xbbh0Ad1gTJMqHetTSWx548oKXYdOq1t+SabCwYFMtB4nw3CIJqGGvOTh456m";
-    script.crossOrigin = "anonymous";
+    script.src = "https://getlummmenanalytics-573194387152.europe-west1.run.app?version=abtest&cacheDuration=10";
     script.async = true;
     document.head.appendChild(script);
   })();
