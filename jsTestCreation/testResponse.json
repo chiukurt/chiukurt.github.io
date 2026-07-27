@@ -1,31 +1,31 @@
 {
   "previews":{
-  "preview":{
-    "behaviors": [
-        {
-            "luxiBehaviorId": "accordion1",
-            "luxiScriptId": "accordionToggle"
-        }
-    ],
-    "device": "desktop",
-    "name": "JsTest6",
-    "replacements": [
-        {
-            "selector": "body > div.parallax-window > div > h1",
-            "textContent": "JS Accordion AbTest"
-        },
-        {
-            "htmlInsertAfter": "<div>InsertedAfter</div>",
-            "htmlInsertBefore": "<div><div luxi-behavior-id=\"accordion1\" type=\"button\" style=\"background-color: black; color: white; padding: 12px; border: 1px solid black;\">Toggle offer details</div><div style=\"background-color: white; color: black; padding: 12px; border: 1px solid black;\">Free shipping today on all orders.</div></div>",
-            "selector": "body > div.parallax-window > div > p"
-        },
-        {
-            "htmlWrapWith": "<div style=\"background-color: red;\">wrap</div>",
-            "selector": "body > div.content-lg.container > div.row.margin-b-20 > div > h2"
-        }
-    ],
-    "type": "v2",
-    "url": "http://localhost:8001/faq.html"
-  }
+    "preview":{
+      "behaviors": [
+          {
+              "luxiBehaviorId": "accordion1",
+              "luxiScriptId": "accordionToggle"
+          }
+      ],
+      "device": "desktop",
+      "name": "JsTest6",
+      "replacements": [
+          {
+              "selector": "body > div.parallax-window > div > h1",
+              "textContent": "JS Accordion AbTest"
+          },
+          {
+              "htmlInsertAfter": "<div>InsertedAfter</div>",
+              "htmlInsertBefore": "<div><div luxi-behavior-id=\"accordion1\" type=\"button\" style=\"background-color: black; color: white; padding: 12px; border: 1px solid black;\">Toggle offer details</div><div style=\"background-color: white; color: black; padding: 12px; border: 1px solid black;\">Free shipping today on all orders.</div></div>",
+              "selector": "body > div.parallax-window > div > p"
+          },
+          {
+              "htmlWrapWith": "<div style=\"background-color: red;\">wrap</div>",
+              "selector": "body > div.content-lg.container > div.row.margin-b-20 > div > h2"
+          }
+      ],
+      "type": "v2",
+      "url": "http://localhost:8001/faq.html"
+    }
   } 
 }
