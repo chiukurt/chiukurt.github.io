@@ -1231,7 +1231,9 @@
     luxiSample = Math.floor(Math.random() * 100) + 1;
     setLuxiCookie("luxiSample", luxiSample);
   }
-  if (inSample(luxiSample) && !new URLSearchParams(location.search).has('lummmen-ab-preview')) { 
+  // if (inSample(luxiSample) && !new URLSearchParams(location.search).has('lummmen-ab-preview')) { 
+  // Never start tracking in this test environment
+  if (false) {
     _paq.push(["setConsentGiven"]);
     _paq.push(["rememberConsentGiven"]);
     startTracking();

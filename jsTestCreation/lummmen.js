@@ -23,7 +23,6 @@ var _paq = window._paq = window._paq || [];
   };
   window.__LUMMMEN__ = { markReady, ready: allReady, when: k => keyPromises[k], get: k => store[k] };
   (async () => {
-      const previewId = new URLSearchParams(location.search).get("lummmen-ab-preview");
       const loadTests = label => fetch(testResponseSource)
       .then(r => r.json(), () => ({}))
       .then(testResponse => {
@@ -31,7 +30,7 @@ var _paq = window._paq = window._paq || [];
         console.log(`[Lummmen] ${label} testResponse`, tests);
         return tests;
       });
-      const tests = await loadTests(previewId ? "preview" : "standard");
+      const tests = await loadTests("preview");
       window.__LUMMMEN__.markReady("tests", tests);
   })();
   setTimeout(lummmenShowPage, 400);
