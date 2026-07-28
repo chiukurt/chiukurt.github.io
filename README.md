@@ -9,7 +9,7 @@ https://chiukurt.github.io/
 3. Implement the function above the allowlist.
 4. Tailor the test in `jsTestCreation\testResponse.json` according to the new function.
 5. Update the URL of the test to be based on your environment, but with the path /faq.html (e.g., `http://localhost:8001/faq.html`) 
-6. Visit the URL to to test. This environment is set up so that only the faq page is affected as it loads a special version of the script.
+6. Visit the URL to test. This environment is set up so that only the faq page is affected as it loads a special version of the script.
 7. Feel free to modify the allowlist or script overall and Kurt will review.
 8. Also feel free to make a PR as it makes record keeping easier.
 9. Afterwards, Kurt will update the main scripts (what's fetched in `matomoLuxi.js`)
