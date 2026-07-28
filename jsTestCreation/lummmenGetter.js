@@ -36,7 +36,7 @@ var _paq = window._paq = window._paq || [];
   setTimeout(lummmenShowPage, 400);
   (function() {
     var script = document.createElement('script');
-    script.src = "jsTestCreation/lummmenScript.js";
+    script.src = "jsTestCreation/lummmmenMain.js";
     script.async = true;
     document.head.appendChild(script);
   })();
