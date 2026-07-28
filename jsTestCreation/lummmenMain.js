@@ -1224,18 +1224,20 @@
     }
   });
 
-  _paq.push(['requireConsent']);  
-  
-  var luxiSample = getLuxiCookie("luxiSample");
-  if (!luxiSample) {
-    luxiSample = Math.floor(Math.random() * 100) + 1;
-    setLuxiCookie("luxiSample", luxiSample);
-  }
+  // Test code
+  try { window.__LUMMMEN_AB__?.initReferrerSession?.(); } catch { }
+  // End test code
+
+  // Real tracking commented out
+  // _paq.push(['requireConsent']);  
+  // var luxiSample = getLuxiCookie("luxiSample");
+  // if (!luxiSample) {
+  //   luxiSample = Math.floor(Math.random() * 100) + 1;
+  //   setLuxiCookie("luxiSample", luxiSample);
+  // }
   // if (inSample(luxiSample) && !new URLSearchParams(location.search).has('lummmen-ab-preview')) { 
-  // Never start tracking in this test environment
-  if (false) {
-    _paq.push(["setConsentGiven"]);
-    _paq.push(["rememberConsentGiven"]);
-    startTracking();
-  }
+  //   _paq.push(["setConsentGiven"]);
+  //   _paq.push(["rememberConsentGiven"]);
+  //   startTracking();
+  // }
 })();
